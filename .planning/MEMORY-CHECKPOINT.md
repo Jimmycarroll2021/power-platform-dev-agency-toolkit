@@ -4,7 +4,7 @@
 **Location:** `C:\Users\j_car\.00xxAIProjectsxx00\Kimi_Agent_Power Platform Dev Toolkit\power-platform-dev-agency-toolkit`  
 **Last updated:** 2026-06-19  
 **Current branch:** `main`  
-**Latest commit:** `11f70ed` — Add GitHub deployment, release workflow, and deployment docs  
+**Latest commit:** `492066a` — Fix CI pipeline errors and make tests Node-version agnostic  
 **Status:** ✅ Production-readiness gate passed. Prod-ready MVP.
 
 ---
