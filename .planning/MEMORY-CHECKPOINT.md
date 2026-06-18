@@ -4,7 +4,7 @@
 **Location:** `C:\Users\j_car\.00xxAIProjectsxx00\Kimi_Agent_Power Platform Dev Toolkit\power-platform-dev-agency-toolkit`  
 **Last updated:** 2026-06-19  
 **Current branch:** `main`  
-**Latest commit:** `4006441` — Prod-ready MVP: real pac CLI ops, expanded tests, verified docs, clean audit  
+**Latest commit:** `11f70ed` — Add GitHub deployment, release workflow, and deployment docs  
 **Status:** ✅ Production-readiness gate passed. Prod-ready MVP.
 
 ---
@@ -15,6 +15,9 @@ A Power Platform Dev Agency Toolkit: a content + TypeScript CLI monorepo for Mic
 Power Platform consultancies. It scaffolds projects, generates PRDs/solution designs/
 checklists, validates project structure, and exposes real Power Platform CLI (`pac`)
 wrappers via `solution` and `env` commands.
+
+**Public repo:** https://github.com/Jimmycarroll2021/power-platform-dev-agency-toolkit
+**Published package:** `@power-platform-agency/cli` (auto-published on release)
 
 ---
 
