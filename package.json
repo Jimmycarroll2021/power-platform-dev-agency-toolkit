@@ -7,12 +7,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/power-platform-dev-agency-toolkit.git"
+    "url": "https://github.com/Jimmycarroll2021/power-platform-dev-agency-toolkit.git"
   },
   "bugs": {
-    "url": "https://github.com/your-org/power-platform-dev-agency-toolkit/issues"
+    "url": "https://github.com/Jimmycarroll2021/power-platform-dev-agency-toolkit/issues"
   },
-  "homepage": "https://github.com/your-org/power-platform-dev-agency-toolkit#readme",
+  "homepage": "https://github.com/Jimmycarroll2021/power-platform-dev-agency-toolkit#readme",
   "workspaces": [
     "packages/cli"
   ],

@@ -48,22 +48,49 @@ Everything is markdown-first: specifications, designs, and decisions live in ver
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-org/power-platform-dev-agency-toolkit.git
+git clone git@github.com:Jimmycarroll2021/power-platform-dev-agency-toolkit.git
 cd power-platform-dev-agency-toolkit
 
 # 2. Install dependencies and build the CLI (run from the repo root)
 npm install
 npm run build
 
-# 3. Run the CLI directly from the build output
+# 3. Run the full verification gate
+npm run verify
+
+# 4. Run the CLI directly from the build output
 node packages/cli/dist/index.js --help
 
-# 4. (Optional) Link it as a global `pp-agency` command
-cd packages/cli && npm link
+# 5. (Optional) Link it as a global `pp-agency` command
+npm link -w packages/cli
 pp-agency --help
 ```
 
 The build compiles the TypeScript CLI in [`packages/cli/`](packages/cli/README.md) to `packages/cli/dist/index.js`. You can run it either with `node packages/cli/dist/index.js <command>` or, after `npm link`, as `pp-agency <command>` from anywhere.
+
+---
+
+## Deploy
+
+Install the CLI globally from npm (published automatically on every release):
+
+```bash
+npm install -g @power-platform-agency/cli
+pp-agency --help
+```
+
+Or clone and run locally:
+
+```bash
+git clone git@github.com:Jimmycarroll2021/power-platform-dev-agency-toolkit.git
+cd power-platform-dev-agency-toolkit
+npm install
+npm run verify
+npm link -w packages/cli
+```
+
+See [`DEPLOYMENT.md`](DEPLOYMENT.md) for full release instructions, CI/CD
+pipelines, and npm publishing.
 
 ---
 

@@ -36,5 +36,14 @@
     "automation",
     "copilot"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Jimmycarroll2021/power-platform-dev-agency-toolkit.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/Jimmycarroll2021/power-platform-dev-agency-toolkit/issues"
+  },
+  "homepage": "https://github.com/Jimmycarroll2021/power-platform-dev-agency-toolkit#readme",
   "license": "MIT"
 }
