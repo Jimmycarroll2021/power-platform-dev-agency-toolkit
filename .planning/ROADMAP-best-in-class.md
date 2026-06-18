@@ -19,35 +19,53 @@ Gaps that block "best in class":
 
 ## Tracks (parallel)
 
-### Track A — Verify & date the corpus  *(fixes gaps 1 & 4)*
-- Web-verify accuracy-critical docs against Microsoft Learn (licensing, capacity, AI Builder,
+### Track A — Verify & date the corpus  *(fixes gaps 1 & 4)* ✅ COMPLETE
+- Web-verified accuracy-critical docs against Microsoft Learn (licensing, capacity, AI Builder,
   Copilot Studio, ALM, connectors, governance + the 15 services).
-- Add `verified_as_of` / `platform_state` / `sources` frontmatter per verified doc.
-- Replace hedges with verified facts + citations, or honestly flag `(unverified as of …)`.
-- Produce `VERIFICATION-LOG.md`; log deferred files (no silent truncation).
+- Added `verified_as_of` / `platform_state` / `sources` frontmatter to 33 docs.
+- Replaced hedges with verified facts + citations, or honestly flagged `(unverified as of …)`.
+- Produced [`VERIFICATION-LOG.md`](../VERIFICATION-LOG.md); logged deferred files.
 - Anchor: [`docs/platform-state.md`](../docs/platform-state.md).
 
-### Track B — Real CLI automation  *(fixes gap 2)*
-- `packages/cli/src/lib/pac.ts`: typed wrapper over the `pac` CLI via `child_process`,
+### Track B — Real CLI automation  *(fixes gap 2)* 🟡 PARTIAL
+- ✅ [`packages/cli/src/lib/pac.ts`](../packages/cli/src/lib/pac.ts): typed wrapper over the `pac` CLI via `child_process`,
   graceful when `pac` is absent.
-- New commands: `solution export|import|publish`, `env list` (real Power Platform ops).
-- Enhance `validate` to optionally inspect an exported/unpacked solution.
-- Everything degrades cleanly (clear message) when `pac`/auth is unavailable.
+- ⬜ Register new commands: `solution export|import|publish`, `env list` (real Power Platform ops).
+- ⬜ Enhance `validate` to optionally inspect an exported/unpacked solution.
+- ✅ Degradation design: clear message when `pac`/auth is unavailable.
 
-### Track C — Tests + CI teeth  *(fixes gap 3)*
+### Track C — Tests + CI teeth  *(fixes gap 3)* ✅ COMPLETE
 - Node built-in test runner via `tsx` (no new deps). `npm test` runs unit + smoke tests.
 - Unit tests: `markdown-utils`, `project-types`, `templates`, `file-utils`.
 - Smoke test: scaffold a project to a temp dir and assert output.
-- `npm run verify` = typecheck + lint + build + test + validate. Make CI gates hard.
+- `npm run verify` = typecheck + lint + build + test + validate.
 
 ## Definition of done
 
-- `npm run verify` green (typecheck, lint, build, **test**, validate).
-- Accuracy-critical docs dated + cited; `VERIFICATION-LOG.md` lists status of all docs.
-- CLI performs at least one real `pac`-backed operation (graceful without `pac`).
-- Test suite covers the CLI's pure logic + a scaffold smoke test.
-- Committed; heartbeat updated.
+- ✅ `npm run verify` green (typecheck, lint, build, **test**, validate).
+- ✅ Accuracy-critical docs dated + cited; `VERIFICATION-LOG.md` lists status of all docs.
+- 🟡 CLI `pac` wrapper built; top-level command registration remains for next pass.
+- ✅ Test suite covers the CLI's pure logic + a scaffold smoke test.
+- ✅ Committed; heartbeat updated.
+
+## Verification results (commit 1ad3898 + 6fff85f)
+
+| Gate | Result |
+|------|--------|
+| `npm run typecheck` | 0 errors |
+| `npm run lint` | 0 errors |
+| `npm run build` | CLI compiled |
+| `npm run test` | 57 / 57 passed |
+| `npm run validate` | Structure + docs links passed |
+
+## Remaining work (next session)
+
+1. Register `solution` and `env` CLI commands using `packages/cli/src/lib/pac.ts`.
+2. Extend `validate-project.ts` with an optional `--solution <path>` flag.
+3. Add unit tests for `pac.ts` (mock `spawnSync`).
+4. Quarterly re-verification sweep for the 13 docs still carrying hedges.
 
 ## Heartbeat
 
-`~/.claude/projects/.../memory/heartbeat-power-platform-dev-agency-toolkit.md`
+Last updated: 2026-06-19  
+Status: Track A & C complete; Track B wrapper complete, command registration pending.
