@@ -1,0 +1,107 @@
+# ============================================
+# Power Platform Dev Agency Toolkit
+# Docker Compose Configuration
+# ============================================
+
+version: "3.9"
+
+services:
+  # Main development container
+  dev:
+    image: node:20-slim
+    container_name: pp-agency-dev
+    hostname: pp-agency-dev
+
+    # Working directory inside the container
+    working_dir: /workspace
+
+    # Mount the repository into the container
+    volumes:
+      - .:/workspace:cached
+      - node_modules:/workspace/node_modules
+      - cli_node_modules:/workspace/packages/cli/node_modules
+
+    # Environment variables from .env file
+    env_file:
+      - .env
+
+    # Environment overrides
+    environment:
+      - NODE_ENV=development
+      - PP_AGENCY_VERBOSE=true
+
+    # Exposed ports
+    ports:
+      # CLI development server
+      - "3000:3000"
+      # Hot reload port
+      - "35729:35729"
+
+    # Keep container running
+    stdin_open: true
+    tty: true
+
+    # Override default command to keep container alive
+    command: /bin/bash -c "npm install && npm run build && tail -f /dev/null"
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "node", "--version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+
+    # Labels for identification
+    labels:
+      - "app=power-platform-dev-agency-toolkit"
+      - "service=dev"
+      - "environment=development"
+
+  # Documentation / repo validation runner (on-demand: `docker compose --profile docs run docs`)
+  docs:
+    image: node:20-slim
+    container_name: pp-agency-docs
+    hostname: pp-agency-docs
+
+    working_dir: /workspace
+
+    volumes:
+      - .:/workspace:cached
+      - node_modules:/workspace/node_modules
+
+    env_file:
+      - .env
+
+    environment:
+      - NODE_ENV=development
+
+    command: /bin/bash -c "npm install && npm run validate"
+
+    depends_on:
+      dev:
+        condition: service_healthy
+
+    profiles:
+      - docs
+
+# Named volumes for node_modules to improve performance
+volumes:
+  node_modules:
+    driver: local
+  cli_node_modules:
+    driver: local
+
+# Network configuration
+networks:
+  default:
+    name: pp-agency-network
+    driver: bridge

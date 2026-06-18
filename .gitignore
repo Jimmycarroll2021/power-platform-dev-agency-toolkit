@@ -1,0 +1,130 @@
+# ============================================
+# Power Platform Dev Agency Toolkit - Git Ignore
+# ============================================
+
+# --------------------------------------------
+# Node.js / TypeScript Build Artifacts
+# --------------------------------------------
+node_modules/
+dist/
+build/
+*.js.map
+*.d.ts.map
+.npm/
+.eslintcache
+.cache/
+coverage/
+*.tgz
+*.tar.gz
+
+# --------------------------------------------
+# Power Platform Solution Files
+# --------------------------------------------
+# Unmanaged solution exports (managed are kept)
+*.zip
+!**/template/*.zip
+# Power Apps temporary files
+*.msapp.tmp
+# PCF build outputs
+out/controls/
+generated/
+
+# --------------------------------------------
+# Environment Files with Secrets
+# --------------------------------------------
+.env
+.env.local
+.env.*.local
+.env.production
+.env.staging
+.secrets/
+*.pfx
+*.cer
+*.key
+*.pem
+
+# --------------------------------------------
+# OS Files
+# --------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# --------------------------------------------
+# IDE Files
+# --------------------------------------------
+# VS Code (keep recommended extensions, ignore local settings)
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+.idea/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+*.sublime-workspace
+*.sublime-project
+.atom/
+
+# --------------------------------------------
+# Temporary Files
+# --------------------------------------------
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+*.bak
+*.orig
+*.rej
+*.log
+logs/
+*.pid
+*.seed
+*.pid.lock
+
+# --------------------------------------------
+# Docker Volumes
+# --------------------------------------------
+volumes/
+data/
+docker-data/
+
+# --------------------------------------------
+# Package Manager
+# --------------------------------------------
+# package-lock.json IS committed — CI uses `npm ci`, which requires it.
+yarn.lock
+pnpm-lock.yaml
+
+# --------------------------------------------
+# Testing
+# --------------------------------------------
+.nyc_output/
+coverage/
+*.lcov
+
+# --------------------------------------------
+# Documentation Build
+# --------------------------------------------
+site/
+_book/
+public/
+
+# --------------------------------------------
+# Power Platform Specific
+# --------------------------------------------
+# pac CLI auth profiles
+pac-auth-profiles.json
+# Solution import logs
+solution-import-*.log
+# Canvas app unpack temp
+_unpacked_/

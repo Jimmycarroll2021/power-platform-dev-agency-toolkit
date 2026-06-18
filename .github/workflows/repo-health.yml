@@ -1,0 +1,104 @@
+name: Repository Health Check
+
+on:
+  schedule:
+    # Every Sunday at 02:00 UTC
+    - cron: "0 2 * * 0"
+  workflow_dispatch:
+
+jobs:
+  health-check:
+    name: Repository Health Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run repository structure check
+        run: npx tsx scripts/check-required-files.ts --verbose
+        id: structure
+        continue-on-error: true
+
+      - name: Run documentation validation
+        run: npx tsx scripts/validate-docs.ts
+        id: docs
+        continue-on-error: true
+
+      - name: Count files per directory
+        id: filecount
+        run: |
+          echo "### File Counts" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Directory | File Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|------------|" >> $GITHUB_STEP_SUMMARY
+          for dir in scripts .github/workflows .github/ISSUE_TEMPLATE power-platform mcp docs agents projects templates; do
+            if [ -d "$dir" ]; then
+              count=$(find "$dir" -type f | wc -l)
+              echo "| $dir | $count |" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "| $dir | *missing* |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+      - name: Check for stale files
+        id: stale
+        run: |
+          echo "### Files not updated in 90 days" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          stale_files=$(find . -type f -mtime +90 -not -path './node_modules/*' -not -path './.git/*' | head -20)
+          if [ -n "$stale_files" ]; then
+            echo "$stale_files" | while read f; do
+              echo "- $f" >> $GITHUB_STEP_SUMMARY
+            done
+          else
+            echo "No stale files found" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Determine overall status
+        id: status
+        run: |
+          if [ "${{ steps.structure.outcome }}" == "failure" ] || [ "${{ steps.docs.outcome }}" == "failure" ]; then
+            echo "overall=failure" >> $GITHUB_OUTPUT
+          else
+            echo "overall=success" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create issue on failure
+        if: steps.status.outputs.overall == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'repo-health',
+              state: 'open'
+            });
+            if (issues.data.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: '🚨 Repository health check failed',
+                body: `The weekly repository health check found issues.\n\n- Structure check: ${{ steps.structure.outcome }}\n- Documentation validation: ${{ steps.docs.outcome }}\n\nSee [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.`,
+                labels: ['repo-health', 'automated']
+              });
+            }
+
+      - name: Upload health report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repo-health-report
+          path: |
+            health-report.json
+          retention-days: 30

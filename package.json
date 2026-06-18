@@ -1,0 +1,66 @@
+{
+  "name": "power-platform-dev-agency-toolkit",
+  "version": "1.0.0",
+  "description": "A production-grade agentic delivery framework for Microsoft Power Platform consultancies and enterprise development teams. Includes 16 AI agents, 15 commercial service definitions, delivery playbooks, validation checklists, and a CLI tool.",
+  "private": true,
+  "author": "Power Platform Dev Agency",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/power-platform-dev-agency-toolkit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/power-platform-dev-agency-toolkit/issues"
+  },
+  "homepage": "https://github.com/your-org/power-platform-dev-agency-toolkit#readme",
+  "workspaces": [
+    "packages/cli"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "lint": "eslint . --ext .ts,.js --ignore-path .gitignore",
+    "lint:fix": "eslint . --ext .ts,.js --ignore-path .gitignore --fix",
+    "lint:md": "tsx scripts/validate-docs.ts",
+    "format": "prettier --write \"**/*.{ts,js,json,md,yaml,yml}\"",
+    "format:check": "prettier --check \"**/*.{ts,js,json,md,yaml,yml}\"",
+    "validate": "npm run validate:structure && npm run docs:check",
+    "validate:structure": "tsx scripts/check-required-files.ts",
+    "validate:project": "node packages/cli/dist/index.js validate --project",
+    "docs:check": "tsx scripts/validate-docs.ts",
+    "repo:health": "tsx scripts/check-required-files.ts --verbose",
+    "clean": "rm -rf packages/*/dist packages/*/node_modules",
+    "clean:all": "npm run clean && rm -rf node_modules",
+    "setup": "npm install && npm run build",
+    "test": "npm run typecheck && npm run validate",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "@types/node": "^20.10.0",
+    "ts-node": "^10.9.0",
+    "tsx": "^4.7.0",
+    "eslint": "^8.55.0",
+    "@typescript-eslint/eslint-plugin": "^6.14.0",
+    "@typescript-eslint/parser": "^6.14.0",
+    "prettier": "^3.1.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "keywords": [
+    "power-platform",
+    "power-apps",
+    "power-automate",
+    "copilot-studio",
+    "dataverse",
+    "dynamics-365",
+    "ai-agents",
+    "dev-agency",
+    "alm",
+    "cli",
+    "microsoft"
+  ]
+}
