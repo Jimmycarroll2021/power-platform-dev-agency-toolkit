@@ -87,6 +87,8 @@ $RECYCLE.BIN/
 *.rej
 *.log
 logs/
+# Ad-hoc command output captures
+*_output.txt
 *.pid
 *.seed
 *.pid.lock
