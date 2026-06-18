@@ -342,4 +342,4 @@ If validation fails:
 - Plan for model retraining as document formats evolve
 - Monitor human review rate; target < 20% of documents
 - Version control training data and model versions
-- **Needs verification against current Microsoft docs**: Verify AI Builder model types, credit pricing, and document processing capabilities against current Microsoft documentation.
+- **Cross-check against current Microsoft Learn**: Verify AI Builder model types, credit pricing, and document processing capabilities against current Microsoft documentation.

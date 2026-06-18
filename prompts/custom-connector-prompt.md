@@ -422,4 +422,4 @@ IF None (no pagination):
 - Test each operation with real API calls before sharing
 - Document API version dependencies
 - Plan for API deprecation (version pinning)
-- **Needs verification against current Microsoft docs**: Verify custom connector capabilities, authentication options, and policy support against current Microsoft documentation.
+- **Cross-check against current Microsoft Learn**: Verify custom connector capabilities, authentication options, and policy support against current Microsoft documentation.

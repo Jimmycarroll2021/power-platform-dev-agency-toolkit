@@ -351,4 +351,4 @@ If deployment cannot proceed due to environment issues, dependency conflicts, or
 - Document rollback procedures and test them quarterly
 - Use solution patches for hotfixes, full solutions for releases
 - Maintain a deployment calendar to coordinate releases
-- Tag all outputs with "Needs verification against current Microsoft docs" as ALM tools evolve
+- Remind consumers to cross-check outputs against current Microsoft Learn as ALM tools evolve

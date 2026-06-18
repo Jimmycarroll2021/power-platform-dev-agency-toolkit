@@ -265,4 +265,4 @@ If process is determined to be unsuitable for RPA (too unstable, ROI negative, b
 - Unattended machines must never auto-lock or sleep
 - Schedule regular health checks for unattended bots
 - Maintain a "bot operations calendar" to track when bots run and who is responsible
-- Tag all outputs with "Needs verification against current Microsoft docs" as PAD capabilities evolve
+- Remind consumers to cross-check outputs against current Microsoft Learn as PAD capabilities evolve

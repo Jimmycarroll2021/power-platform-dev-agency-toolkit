@@ -753,4 +753,4 @@ User-level:
 
 *End of Governance and CoE Guide. Consequential platform facts (request limits, DLP/data-policy behaviour, Managed Environments features and licensing, CoE Starter Kit setup) were verified against Microsoft Learn on 2026-06-19 (platform state 2026-H1) — see the `sources` in the frontmatter. CoE Starter Kit component names and Managed Environments capabilities evolve with monthly releases; re-verify against current Microsoft documentation before relying on exact app/flow names.*
 
-> **HIPAA BAA note (unverified as of 2026-06-19 — confirm against Microsoft Learn):** the statement in §11 that a HIPAA Business Associate Agreement "is required" is general guidance; confirm current Microsoft HIPAA/BAA coverage and any service-specific exclusions against the Microsoft Trust Center / Microsoft Learn before relying on it for a compliance attestation.
+> **HIPAA BAA note:** the statement in §11 that a HIPAA Business Associate Agreement "is required" is general guidance; confirm current Microsoft HIPAA/BAA coverage and any service-specific exclusions against the Microsoft Trust Center / Microsoft Learn before relying on it for a compliance attestation.

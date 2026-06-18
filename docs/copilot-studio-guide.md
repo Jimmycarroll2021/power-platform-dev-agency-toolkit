@@ -6,6 +6,7 @@ sources:
   - https://learn.microsoft.com/en-us/microsoft-copilot-studio/billing-licensing
   - https://www.microsoft.com/en-us/microsoft-365-copilot/pricing/copilot-studio
   - https://learn.microsoft.com/en-us/microsoft-copilot-studio/agent-extend-action-mcp
+  - https://learn.microsoft.com/en-us/microsoft-copilot-studio/mcp-add-existing-server-to-agent
   - https://learn.microsoft.com/en-us/microsoft-copilot-studio/guidance/channels
   - https://learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-add-file-upload
   - https://learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-add-sharepoint
@@ -568,7 +569,7 @@ channel and client).
 | **Direct Line API** | Custom | Any custom channel (REST + WebSocket) | High |
 | **Dynamics 365 Customer Service / engagement hub** | Dynamics 365 | Customer service center / live-agent handoff | High |
 
-> Channels verified against [Microsoft Learn — Publish agents to channels and clients](https://learn.microsoft.com/en-us/microsoft-copilot-studio/guidance/channels): Copilot Studio natively deploys to Teams, Microsoft 365 Copilot, SharePoint, Power Pages, and more, with custom apps/web via the Direct Line API. Email and Facebook/Facebook Messenger were Power Virtual Agents-era channels and are not listed in current Copilot Studio channel guidance (unverified as of 2026-06-19 — confirm availability against Microsoft Learn before promising them to clients).
+> Channels verified against [Microsoft Learn — Publish agents to channels and clients](https://learn.microsoft.com/en-us/microsoft-copilot-studio/guidance/channels): Copilot Studio natively deploys to Teams, Microsoft 365 Copilot, SharePoint, Power Pages, and more, with custom apps/web via the Direct Line API. Email and Facebook/Facebook Messenger were Power Virtual Agents-era channels and are not listed in current Copilot Studio channel guidance; confirm availability before promising them to clients.
 
 ### 10.2 Teams Deployment
 
@@ -780,8 +781,7 @@ Requirements and governance:
     [verified: learn.microsoft.com/en-us/microsoft-copilot-studio/mcp-add-existing-server-to-agent]
   - Transport: Copilot Studio supports the Streamable (HTTP) transport. SSE
     transport is deprecated and is no longer supported for MCP after
-    August 2025 (unverified as of 2026-06-19 — confirm exact transport
-    support against Microsoft Learn).
+    August 2025 ([Connect your agent to an existing MCP server](https://learn.microsoft.com/en-us/microsoft-copilot-studio/mcp-add-existing-server-to-agent)).
   - You can publish an MCP connector for cross-tenant reuse via connector
     certification.
 

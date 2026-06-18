@@ -2,6 +2,15 @@
 title: "Service 15 — Audit & Compliance"
 description: "Independent security audit and compliance review of a Power Platform tenant or solution, delivering an audit report, prioritised remediation plan, and an evidence pack."
 category: service
+verified_as_of: 2026-06-19
+platform_state: 2026-H1
+sources:
+  - https://learn.microsoft.com/en-us/power-platform/admin/dlp-connector-classification
+  - https://learn.microsoft.com/en-us/power-platform/admin/powerapps-licensing-faq
+  - https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq
+  - https://learn.microsoft.com/en-us/ai-builder/credit-management
+  - https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management
+  - https://learn.microsoft.com/en-us/power-platform/admin/capacity-storage
 related:
   - ../playbooks/governance-audit.md
   - ../checklists/dlp-and-governance.md
@@ -123,11 +132,11 @@ All figures are **indicative planning ranges — confirm current rates** with th
 
 An audit frequently surfaces licensing and capacity exposure. Flag these explicitly; verify every number against current Microsoft licensing docs before advising the client.
 
-- **Premium connectors** — connectors such as SQL Server, Azure-hosted services, HTTP, and custom connectors require **Power Apps / Power Automate premium** entitlements. Apps/flows running on seeded licences that use premium connectors are a compliance and licensing risk. (Needs verification against current Microsoft docs.)
-- **Power Apps Premium vs Per-App** — confirm whether makers/users are correctly licensed for the apps they run; per-app plans are scoped per app/environment. (Needs verification against current Microsoft docs.)
-- **AI Builder credits** — document processing, prediction, and GPT-prompt actions consume AI Builder credits drawn from a tenant capacity pool; audit whether consumption is metered and within purchased capacity. (Needs verification against current Microsoft docs.)
-- **Copilot Studio messages** — Copilot Studio agents consume a metered message/credit allowance; surface any agents and their consumption model during inventory. (Needs verification against current Microsoft docs.)
-- **Dataverse capacity** — database, file, and log storage are tenant-pooled and chargeable past entitlement; over-capacity is both a cost and a continuity risk. Check current usage vs entitlement. (Needs verification against current Microsoft docs.)
+- **Premium connectors** — connectors such as SQL Server, Azure-hosted services, HTTP, and custom connectors require **Power Apps / Power Automate premium** entitlements. Apps/flows running on seeded licences that use premium connectors are a compliance and licensing risk ([DLP connector classification](https://learn.microsoft.com/en-us/power-platform/admin/dlp-connector-classification), [Power Apps licensing FAQ](https://learn.microsoft.com/en-us/power-platform/admin/powerapps-licensing-faq)).
+- **Power Apps Premium vs Per-App** — confirm whether makers/users are correctly licensed for the apps they run; per-app plans are scoped per app/environment ([Power Apps licensing FAQ](https://learn.microsoft.com/en-us/power-platform/admin/powerapps-licensing-faq)).
+- **AI Builder credits** — document processing, prediction, and GPT-prompt actions consume AI Builder credits (or Copilot Credits when AI Builder credits are exhausted) drawn from a tenant capacity pool; audit whether consumption is metered and within purchased capacity ([AI Builder credit management](https://learn.microsoft.com/en-us/ai-builder/credit-management)).
+- **Copilot Studio messages** — Copilot Studio agents consume a metered Copilot Credit allowance (messages were replaced by Copilot Credits as the common currency from September 2025); surface any agents and their consumption model during inventory ([Copilot Studio billing rates and capacity](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management)).
+- **Dataverse capacity** — database, file, and log storage are tenant-pooled and chargeable past entitlement; over-capacity is both a cost and a continuity risk. Check current usage vs entitlement ([Dataverse capacity storage](https://learn.microsoft.com/en-us/power-platform/admin/capacity-storage)).
 - **Default environment** — typically has no DLP and is broadly accessible; production data here is a recurring finding.
 
 See [../docs/licensing-and-capacity.md](../docs/licensing-and-capacity.md) and the checklist [../checklists/licensing-and-capacity.md](../checklists/licensing-and-capacity.md) for the verification routine.
@@ -198,6 +207,6 @@ node packages/cli/dist/index.js validate -p ./audit-engagement
 
 - **Scope creep** — larger estate than expected at Discovery; mitigated by T&M-with-cap for L and a scope re-confirmation gate after Discovery.
 - **Access delays** — slow provisioning of audit access compresses the timeline; mitigated by front-loading access requests in Mobilise.
-- **Stale platform facts** — Microsoft licensing, capacity, and preview features change frequently; all such facts are marked "(Needs verification against current Microsoft docs)" and re-checked before report sign-off.
+- **Stale platform facts** — Microsoft licensing, capacity, and preview features change frequently; re-check any specific price, capacity number, or preview/GA status against current Microsoft Learn before report sign-off.
 - **Remediation expectation** — this engagement assesses and plans; the client may expect fixes. Set expectations early and route remediation to Service 08 — Governance & Security.
 - **Compliance interpretation** — technical control mapping is not a legal opinion; the client's compliance/legal function owns regulatory interpretation.

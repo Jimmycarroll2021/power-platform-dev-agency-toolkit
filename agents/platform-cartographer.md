@@ -95,7 +95,7 @@ site:releaseplans.microsoft.com Power Platform
 
 | Failure | Detection | Mitigation |
 |---------|-----------|------------|
-| Outdated documentation | Date check on docs page; discrepancy between multiple pages | Flag as "needs verification"; search for newer versions; check release notes |
+| Outdated documentation | Date check on docs page; discrepancy between multiple pages | Flag for verification; search for newer versions; check release notes |
 | Regional differences | Feature works in US but not client region | Always check geo-availability matrix; test in target region |
 | Preview feature status changes | Feature graduated or was cut | Track preview enrollment status weekly; have fallback architecture |
 | Licensing ambiguity | Conflicting info across pricing page, docs, admin center | Escalate to Microsoft support for clarification; document the ambiguity |
@@ -132,7 +132,7 @@ If platform capabilities are ambiguous or conflicting, flag as **ARCHITECTURE_RI
 - Run targeted scans on-demand when other agents request specific capability verification
 - Maintain version history of capability maps for audit trail
 - Cache Microsoft Learn pages locally for offline reference during build phases
-- Tag all outputs with "Needs verification against current Microsoft docs" to remind consumers to validate currency
+- Remind consumers to cross-check outputs against current Microsoft Learn to remind consumers to validate currency
 
 ## Platform Research Template
 

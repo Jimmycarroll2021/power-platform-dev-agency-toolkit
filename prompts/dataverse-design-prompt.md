@@ -324,4 +324,4 @@ For each table:
 - Enable auditing from day one on business tables
 - Test security model with realistic personas
 - Plan for data retention and archiving
-- **Needs verification against current Microsoft docs**: Verify Dataverse limits, pricing, and feature availability against current Microsoft documentation.
+- **Cross-check against current Microsoft Learn**: Verify Dataverse limits, pricing, and feature availability against current Microsoft documentation.

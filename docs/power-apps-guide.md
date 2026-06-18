@@ -440,7 +440,7 @@ pac pcf push --publisher-prefix mypref
   Source: https://learn.microsoft.com/en-us/power-apps/developer/component-framework/component-framework-for-canvas-apps
 - Must use pac CLI (no visual designer)
 - Security review required for AppSource publishing
-- External CDN / network resources have restrictions and should generally be bundled (unverified as of 2026-06-19 - confirm against Microsoft Learn)
+- External CDN / network resources have restrictions; canvas apps load out-of-the-box static content from the Azure CDN and admins can disable CDN at the environment level ([Manage behavior settings](https://learn.microsoft.com/en-us/power-platform/admin/settings-behavior)). For firewall/restricted-network scenarios, bundle static assets with the app rather than relying on external CDNs.
 - Must handle theming manually
 - Mobile performance needs testing
 - Power Apps component framework is not supported for on-premises environments

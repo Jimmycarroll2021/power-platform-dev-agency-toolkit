@@ -295,4 +295,4 @@ Replace these placeholders before use:
 - Take photos of whiteboards and process maps drawn during sessions
 - Identify the executive sponsor and their priorities
 - Find the "power user" who will champion the solution
-- **Needs verification against current Microsoft docs**: Verify all Power Platform capabilities and licensing referenced during discovery against current Microsoft documentation before including in proposals.
+- **Cross-check against current Microsoft Learn**: Verify all Power Platform capabilities and licensing referenced during discovery against current Microsoft documentation before including in proposals.

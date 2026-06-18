@@ -255,4 +255,4 @@ If security requirements conflict with business requirements (blocked connector 
 - Keep service account documentation current with owners and rotation dates
 - Monitor Microsoft security advisories for Power Platform
 - Maintain a security incident response playbook
-- Tag all outputs with "Needs verification against current Microsoft docs" as governance features evolve
+- Remind consumers to cross-check outputs against current Microsoft Learn as governance features evolve

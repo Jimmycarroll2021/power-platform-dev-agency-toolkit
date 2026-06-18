@@ -584,7 +584,7 @@ node packages/cli/dist/index.js validate --project ./projects/acme-portal
 Every agent output must meet these standards:
 
 1. **Completeness** — All required sections present
-2. **Accuracy** — Technical claims verified against Microsoft Learn (tag uncertain platform facts "Needs verification against current Microsoft docs")
+2. **Accuracy** — Technical claims verified against Microsoft Learn (tag uncertain platform facts as needing verification against current Microsoft Learn)
 3. **Consistency** — Follows repository conventions and uses repo-relative paths
 4. **Traceability** — Links to inputs and decisions
 5. **Validation** — Passes the relevant checklist in [`checklists/`](checklists/)

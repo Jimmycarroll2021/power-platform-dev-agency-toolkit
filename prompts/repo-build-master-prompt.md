@@ -15,41 +15,41 @@ Create the following directory structure:
 
 ```
 power-platform-dev-agency-toolkit/
-├── agents/
-│   ├── platform-cartographer.md
-│   ├── solution-architect.md
-│   ├── power-automate-agent.md
-│   ├── desktop-rpa-agent.md
-│   ├── power-apps-agent.md
-│   ├── dataverse-agent.md
-│   ├── ai-builder-agent.md
-│   ├── copilot-studio-agent.md
-│   ├── connector-integration-agent.md
-│   ├── security-governance-agent.md
-│   ├── alm-deployment-agent.md
-│   ├── qa-test-agent.md
-│   ├── licensing-capacity-agent.md
-│   ├── commercial-strategy-agent.md
-│   ├── support-runbook-agent.md
-│   └── swarm-orchestrator.md
-├── prompts/
-│   ├── repo-build-master-prompt.md
-│   ├── client-discovery-prompt.md
-│   ├── automation-prd-prompt.md
-│   ├── power-apps-prd-prompt.md
-│   ├── copilot-agent-prd-prompt.md
-│   ├── ai-builder-document-processing-prompt.md
-│   ├── custom-connector-prompt.md
-│   ├── dataverse-design-prompt.md
-│   ├── rpa-assessment-prompt.md
-│   ├── alm-deployment-prompt.md
-│   ├── governance-audit-prompt.md
-│   ├── licensing-estimate-prompt.md
-│   ├── code-review-prompt.md
-│   ├── qa-test-plan-prompt.md
-│   ├── support-runbook-prompt.md
-│   └── docs-watch-prompt.md
-└── README.md
+â”œâ”€â”€ agents/
+â”‚   â”œâ”€â”€ platform-cartographer.md
+â”‚   â”œâ”€â”€ solution-architect.md
+â”‚   â”œâ”€â”€ power-automate-agent.md
+â”‚   â”œâ”€â”€ desktop-rpa-agent.md
+â”‚   â”œâ”€â”€ power-apps-agent.md
+â”‚   â”œâ”€â”€ dataverse-agent.md
+â”‚   â”œâ”€â”€ ai-builder-agent.md
+â”‚   â”œâ”€â”€ copilot-studio-agent.md
+â”‚   â”œâ”€â”€ connector-integration-agent.md
+â”‚   â”œâ”€â”€ security-governance-agent.md
+â”‚   â”œâ”€â”€ alm-deployment-agent.md
+â”‚   â”œâ”€â”€ qa-test-agent.md
+â”‚   â”œâ”€â”€ licensing-capacity-agent.md
+â”‚   â”œâ”€â”€ commercial-strategy-agent.md
+â”‚   â”œâ”€â”€ support-runbook-agent.md
+â”‚   â””â”€â”€ swarm-orchestrator.md
+â”œâ”€â”€ prompts/
+â”‚   â”œâ”€â”€ repo-build-master-prompt.md
+â”‚   â”œâ”€â”€ client-discovery-prompt.md
+â”‚   â”œâ”€â”€ automation-prd-prompt.md
+â”‚   â”œâ”€â”€ power-apps-prd-prompt.md
+â”‚   â”œâ”€â”€ copilot-agent-prd-prompt.md
+â”‚   â”œâ”€â”€ ai-builder-document-processing-prompt.md
+â”‚   â”œâ”€â”€ custom-connector-prompt.md
+â”‚   â”œâ”€â”€ dataverse-design-prompt.md
+â”‚   â”œâ”€â”€ rpa-assessment-prompt.md
+â”‚   â”œâ”€â”€ alm-deployment-prompt.md
+â”‚   â”œâ”€â”€ governance-audit-prompt.md
+â”‚   â”œâ”€â”€ licensing-estimate-prompt.md
+â”‚   â”œâ”€â”€ code-review-prompt.md
+â”‚   â”œâ”€â”€ qa-test-plan-prompt.md
+â”‚   â”œâ”€â”€ support-runbook-prompt.md
+â”‚   â””â”€â”€ docs-watch-prompt.md
+â””â”€â”€ README.md
 ```
 
 ### 2. Agent Definition Format
@@ -81,7 +81,7 @@ Each prompt file must be:
 3. **Security-first**: Security and governance considerations in every design
 4. **Scalable**: Designs must work for small pilots and large enterprise deployments
 5. **Documented**: Every decision must have documented rationale
-6. **Verifiable**: Include "Needs verification against current Microsoft docs" warnings where platform capabilities change frequently
+6. **Verifiable**: Include reminders to cross-check against current Microsoft Learn where platform capabilities change frequently
 
 ### 5. Agent Handoff Sequence
 
@@ -147,4 +147,4 @@ When using this prompt, replace these variables:
 - The swarm orchestrator coordinates the full end-to-end process
 - Prompts are designed to be copy-pasted directly into Claude, Kimi, Cursor, Codex, or Gemini
 - All content should be treated as living documents that evolve with the Power Platform
-- **Needs verification against current Microsoft docs**: Platform capabilities change frequently. Verify all licensing, connector availability, and feature status against current Microsoft documentation before use.
+- **Cross-check against current Microsoft Learn**: Platform capabilities change frequently. Verify all licensing, connector availability, and feature status against current Microsoft documentation before use.

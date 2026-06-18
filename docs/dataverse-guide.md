@@ -691,9 +691,8 @@ at the tenant level (not per-environment). What counts toward each is confirmed 
 > capacity-based model, per-user accruals **vary by license SKU** (e.g. Team Member
 > licenses grant no per-user storage at all) and the authoritative figures live in the
 > [Power Platform Licensing Guide](https://go.microsoft.com/fwlink/p/?linkid=2085130). Exact
-> per-SKU MB/GB accruals are not published on a single Microsoft Learn conceptual page and so
-> are left here as **(unverified as of 2026-06-19 — confirm against the Power Platform
-> Licensing Guide)**.
+> per-SKU MB/GB accruals are not published on a single Microsoft Learn conceptual page; confirm
+> current values in the Power Platform Licensing Guide before quoting them.
 
 ```
 Confirmed baselines (Microsoft Learn, capacity-storage):

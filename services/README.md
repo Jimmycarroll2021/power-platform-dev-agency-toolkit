@@ -2,6 +2,15 @@
 title: "Service Catalogue"
 description: "Index of the 15 commercial Power Platform service offerings an agency can scope, sell, and deliver with this toolkit."
 category: service-index
+verified_as_of: 2026-06-19
+platform_state: 2026-H1
+sources:
+  - https://learn.microsoft.com/en-us/power-platform/admin/dlp-connector-classification
+  - https://learn.microsoft.com/en-us/power-platform/admin/powerapps-licensing-faq
+  - https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq
+  - https://learn.microsoft.com/en-us/ai-builder/credit-management
+  - https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management
+  - https://learn.microsoft.com/en-us/power-platform/admin/capacity-storage
 related:
   - ../docs/commercial-offers.md
   - ../docs/delivery-model.md
@@ -92,14 +101,14 @@ Always run `pp-agency validate` before sending anything to a client, and confirm
 
 ## Licensing Warning (applies to every service)
 
-Licensing is the single most common source of go-live surprises. Flag every premium dependency during design, never at deployment. All specific figures in this catalogue are marked **(Needs verification against current Microsoft docs)** and must be re-confirmed per engagement:
+Licensing is the single most common source of go-live surprises. Flag every premium dependency during design, never at deployment. All specific licensing figures and entitlement claims below are verified against Microsoft Learn as of 2026-06-19 (platform state 2026-H1) and must be re-confirmed per engagement:
 
 - **Premium connectors** (SQL Server, custom connectors, HTTP, and others) require **Power Apps Premium per-user** or **per-app** plans — seeded Microsoft 365 licensing will not cover them.
-- **Power Apps Per-App vs Per-User** — per-app suits narrow rollouts; per-user suits power users. Model both before recommending (**Needs verification against current Microsoft docs**).
-- **AI Builder credits** — every AI Builder model (form processing, prediction, GPT prompts) consumes a metered credit pool. Budget separately (**Needs verification against current Microsoft docs**).
-- **Copilot Studio messages** — agent conversations consume a separate metered message capacity (**Needs verification against current Microsoft docs**).
-- **Dataverse capacity** — database, file, and log storage are metered against tenant entitlements; large tables, attachments, and audit logging can exceed them (**Needs verification against current Microsoft docs**).
-- **Power Pages capacity** — external portals are billed per authenticated/anonymous user or capacity pack (**Needs verification against current Microsoft docs**).
+- **Power Apps Per-App vs Per-User** — per-app suits narrow rollouts; per-user suits power users. Model both before recommending ([Power Apps licensing FAQ](https://learn.microsoft.com/en-us/power-platform/admin/powerapps-licensing-faq)).
+- **AI Builder credits** — every AI Builder model (form processing, prediction, GPT prompts) consumes a metered credit pool; new customers purchase Copilot Credits instead of AI Builder add-ons after 2025-11-01, and seeded credits are removed after 2026-11-01. Budget separately ([AI Builder credit management](https://learn.microsoft.com/en-us/ai-builder/credit-management)).
+- **Copilot Studio messages** — agent conversations consume a metered Copilot Credit capacity (messages were replaced by Copilot Credits as the common currency from September 2025) ([Copilot Studio billing rates and capacity](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management)).
+- **Dataverse capacity** — database, file, and log storage are metered against tenant entitlements; large tables, attachments, and audit logging can exceed them ([Dataverse capacity storage](https://learn.microsoft.com/en-us/power-platform/admin/capacity-storage)).
+- **Power Pages capacity** — external portals are billed per authenticated/anonymous user or capacity pack ([Power Platform licensing FAQ](https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq)).
 
 See [../checklists/licensing-and-capacity.md](../checklists/licensing-and-capacity.md) and [../checklists/connectors-and-premium.md](../checklists/connectors-and-premium.md) for the validation gates, and [../docs/licensing-and-capacity.md](../docs/licensing-and-capacity.md) for the extended reference.
 

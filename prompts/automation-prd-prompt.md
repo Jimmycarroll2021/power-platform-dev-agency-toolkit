@@ -316,4 +316,4 @@ Replace these before using the prompt:
 - Document expressions in plain English, not just Power Automate syntax
 - Include performance considerations for high-volume flows
 - Specify concurrency settings for triggers that handle bulk data
-- **Needs verification against current Microsoft docs**: Verify connector availability, action capabilities, and licensing requirements against current Microsoft documentation.
+- **Cross-check against current Microsoft Learn**: Verify connector availability, action capabilities, and licensing requirements against current Microsoft documentation.

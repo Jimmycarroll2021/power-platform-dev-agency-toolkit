@@ -313,4 +313,4 @@ site:techcommunity.microsoft.com "Power Platform" "update"
 - Subscribe to relevant RSS feeds where available
 - Join Power Platform community forums for early signals
 - Document all findings; institutional knowledge is critical
-- **Needs verification against current Microsoft docs**: This meta-prompt itself should be reviewed quarterly to ensure all tracked sources are still current and relevant.
+- **Cross-check against current Microsoft Learn**: This meta-prompt itself should be reviewed quarterly to ensure all tracked sources are still current and relevant.

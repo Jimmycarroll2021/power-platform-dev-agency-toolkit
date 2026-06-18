@@ -1,8 +1,8 @@
 # Integration Patterns Guide
 
-> **Version**: 1.0 | **Last updated**: 2025-01-15
+> **Version**: 1.0 | **Last updated**: 2026-06-19
 > **Purpose**: Common integration patterns for Power Platform connecting to external systems.
-> **Needs verification against current Microsoft docs**: API versions, connector capabilities, and service limits change frequently.
+> **Note**: API versions, connector capabilities, and service limits change frequently — verify against current Microsoft Learn before implementation.
 
 ---
 

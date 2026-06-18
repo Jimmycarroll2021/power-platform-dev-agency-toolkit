@@ -195,4 +195,4 @@ Validate the project directory with `node packages/cli/dist/index.js validate -p
 - Source-system data cleansing, if needed, is a separate workstream unless explicitly included.
 - A stabilisation/hypercare window precedes legacy decommissioning sign-off.
 
-> All Microsoft platform facts above marked "(Needs verification ...)" must be checked against current Microsoft documentation at proposal time. Pricing figures are indicative planning ranges, not quotes.
+> All Microsoft platform facts and licensing/capacity numbers above must be checked against current Microsoft documentation at proposal time. Pricing figures are indicative planning ranges, not quotes.

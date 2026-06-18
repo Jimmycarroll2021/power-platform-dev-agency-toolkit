@@ -1,8 +1,8 @@
 # Power BI Integration Handoff Guide
 
-> **Version**: 1.0 | **Last updated**: 2025-01-15
+> **Version**: 1.0 | **Last updated**: 2026-06-19
 > **Purpose**: Guide for integrating Power Platform projects with Power BI, and handoff procedures between Power Platform dev team and BI team.
-> **Needs verification against current Microsoft docs**: Power BI licensing and feature availability change frequently.
+> **Note**: Power BI licensing and feature availability change frequently — verify against current Microsoft Learn before implementation.
 
 ---
 

@@ -265,4 +265,4 @@ If critical defects are found that prevent UAT completion, escalate to **Solutio
 - Conduct exploratory testing sessions beyond scripted tests
 - Keep test environments as close to production as possible
 - Maintain a test case library for reuse across projects
-- Tag all outputs with "Needs verification against current Microsoft docs" as testing tools evolve
+- Remind consumers to cross-check outputs against current Microsoft Learn as testing tools evolve

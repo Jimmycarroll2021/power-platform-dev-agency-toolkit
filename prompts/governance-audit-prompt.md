@@ -254,4 +254,4 @@ Current State:
 - Run the audit quarterly for mature organizations
 - Prioritize findings by business impact, not technical severity
 - Include business stakeholders in remediation planning
-- **Needs verification against current Microsoft docs**: Verify Power Platform governance features, DLP policy capabilities, and compliance tools against current Microsoft documentation.
+- **Cross-check against current Microsoft Learn**: Verify Power Platform governance features, DLP policy capabilities, and compliance tools against current Microsoft documentation.

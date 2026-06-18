@@ -35,9 +35,14 @@ jobs:
       - name: Build scripts
         run: npm run build
 
+      - name: Run full validation (structure + docs)
+        run: npm run validate
+        id: validate
+        continue-on-error: false
+
       - name: Run documentation validation
         run: npm run docs:check
-        id: validate
+        id: validate-docs
         continue-on-error: false
 
       - name: Run tests

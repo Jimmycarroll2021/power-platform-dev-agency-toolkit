@@ -1,8 +1,7 @@
 # Power Platform Complete Landscape Map
 
-> **Version**: 1.0 | **Last updated**: 2025-01-15
-> **Status**: Living document - verify all URLs and licensing details against current Microsoft docs before quoting to clients.
-> **Needs verification against current Microsoft docs**: Licensing details, preview status, and URLs change frequently.
+> **Version**: 1.0 | **Last updated**: 2026-06-19
+> **Status**: Living document — verify all URLs, licensing details, and preview status against current Microsoft Learn before quoting to clients.
 
 ---
 
@@ -65,7 +64,7 @@
 | **Current status** | Stable |
 | **Microsoft Docs URL** | https://learn.microsoft.com/en-us/power-automate/desktop-flows/ |
 
-**Needs verification against current Microsoft docs**: Unattended RPA licensing pricing and bot pricing model changed in 2023/2024. Verify current pricing.
+> Unattended RPA licensing and bot pricing changed in 2023/2024; verify current pricing and entitlements against [Power Automate licensing](https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/types) before quoting.
 
 ---
 
@@ -157,7 +156,7 @@
 | **Current status** | Stable |
 | **Microsoft Docs URL** | https://learn.microsoft.com/en-us/ai-builder/ |
 
-**Needs verification against current Microsoft docs**: AI Builder credit allocation changed with licensing updates in 2024. Verify current included credits per license type.
+> AI Builder credit allocation changed with licensing updates in 2024/2025 and is transitioning to Copilot Credits; verify current included credits and rates against [AI Builder credit management](https://learn.microsoft.com/en-us/ai-builder/credit-management) before quoting.
 
 ---
 
@@ -177,7 +176,7 @@
 | **Current status** | Stable (evolving rapidly) |
 | **Microsoft Docs URL** | https://learn.microsoft.com/en-us/microsoft-copilot-studio/ |
 
-**Needs verification against current Microsoft docs**: Copilot Studio was rebranded from Power Virtual Agents. Message-based pricing and the shift to "agents" architecture is evolving. Verify current naming and pricing.
+> Copilot Studio was rebranded from Power Virtual Agents and message-based pricing has shifted to Copilot Credits as of September 2025; verify current naming and pricing against [Copilot Studio billing](https://learn.microsoft.com/en-us/microsoft-copilot-studio/billing-licensing) before quoting.
 
 ---
 
@@ -347,7 +346,7 @@ pac pcf push --publisher-prefix mypref
 | **Current status** | Stable |
 | **Microsoft Docs URL** | https://learn.microsoft.com/en-us/power-platform/admin/managed-environment-overview |
 
-**Needs verification against current Microsoft docs**: Managed Environment pricing model changed. Verify current pricing structure (per environment vs tenant-wide).
+> Managed Environments pricing and licensing entitlements have changed over time; verify current structure against [Managed Environments licensing](https://learn.microsoft.com/en-us/power-platform/admin/managed-environment-licensing) before quoting.
 
 ---
 

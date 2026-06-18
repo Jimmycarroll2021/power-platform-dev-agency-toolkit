@@ -291,4 +291,4 @@ flowchart TD
 - Test selectors on the actual target machine
 - Plan for application updates breaking selectors
 - Always include a fallback to human processing
-- **Needs verification against current Microsoft docs**: Verify Power Automate Desktop capabilities, licensing, and unattended RPA requirements against current Microsoft documentation.
+- **Cross-check against current Microsoft Learn**: Verify Power Automate Desktop capabilities, licensing, and unattended RPA requirements against current Microsoft documentation.

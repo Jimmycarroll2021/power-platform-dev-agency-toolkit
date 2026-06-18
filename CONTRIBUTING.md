@@ -304,31 +304,29 @@ When you author or update any content that mentions cost, capacity, or
 entitlement, follow these rules:
 
 - **Always mark uncertain platform facts.** Any specific price, capacity number,
-  rate, or preview/GA status must be tagged
-  `(Needs verification against current Microsoft docs)` unless you have just
-  confirmed it against current official Microsoft documentation. Microsoft
-  changes pricing, capacity allowances, and feature availability frequently.
+  rate, or preview/GA status must be tagged as needing verification against
+  current Microsoft Learn unless you have just confirmed it against current
+  official Microsoft documentation. Microsoft changes pricing, capacity
+  allowances, and feature availability frequently.
 - **Treat all figures as indicative planning ranges, not quotes.** Never write a
   number as a committed client price. Estimates are for internal planning and
   must be re-validated per engagement.
 - **Call out premium licensing explicitly** whenever a feature requires it:
   - **Premium connectors** (and HTTP/custom connectors) require Power Apps
     Premium / Power Automate Premium entitlements — standard seeded licenses do
-    not cover them.
-    _(Needs verification against current Microsoft docs.)_
+    not cover them. See [Power Automate licensing types](https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/types) and [Power Apps licensing overview](https://learn.microsoft.com/en-us/power-platform/admin/pricing-billing-skus).
   - **Power Apps Premium (per-user) and Per-App** plans have different cost and
     coverage models; state which one an app assumes and flag the per-user impact.
-    _(Needs verification against current Microsoft docs.)_
+    See [Power Apps per-app plans](https://learn.microsoft.com/en-us/power-platform/admin/about-powerapps-perapp).
   - **AI Builder** consumes a credit pool; usage beyond the entitlement requires
-    purchased AI Builder credit add-ons. State expected consumption as a range.
-    _(Needs verification against current Microsoft docs.)_
+    purchased AI Builder credit add-ons (transitioning to Copilot Credits for new
+    purchases after 2026-11-01). State expected consumption as a range. See
+    [AI Builder credit management](https://learn.microsoft.com/en-us/ai-builder/credit-management).
   - **Copilot Studio** is metered by messages/sessions against a capacity pack;
-    flag message-volume assumptions and overage risk.
-    _(Needs verification against current Microsoft docs.)_
+    flag message-volume assumptions and overage risk. See [Copilot Studio billing and licensing](https://learn.microsoft.com/en-us/microsoft-copilot-studio/billing-licensing).
   - **Dataverse capacity** (database, file, and log storage) is a paid,
     consumable resource with a default tenant allotment plus per-license accrual;
-    flag any design that will grow storage materially.
-    _(Needs verification against current Microsoft docs.)_
+    flag any design that will grow storage materially. See [Dataverse capacity storage](https://learn.microsoft.com/en-us/power-platform/admin/capacity-storage).
 
 When in doubt, under-promise on entitlement coverage and surface the licensing
 risk early — a hidden premium dependency discovered at go-live is the most common

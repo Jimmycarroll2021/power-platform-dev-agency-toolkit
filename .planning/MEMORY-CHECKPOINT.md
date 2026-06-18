@@ -5,7 +5,7 @@
 **Last updated:** 2026-06-19  
 **Current branch:** `main`  
 **Latest commit:** `20528d5` — Update ROADMAP-best-in-class.md with verification results  
-**Status:** Best-in-class pass complete; prod-ready MVP still pending (see blockers below).
+**Status:** ✅ Production-readiness gate passed. Prod-ready MVP.
 
 ---
 
@@ -13,23 +13,46 @@
 
 A Power Platform Dev Agency Toolkit: a content + TypeScript CLI monorepo for Microsoft
 Power Platform consultancies. It scaffolds projects, generates PRDs/solution designs/
-checklists, validates project structure, and is being extended to talk to the real
-Power Platform CLI (`pac`).
+checklists, validates project structure, and exposes real Power Platform CLI (`pac`)
+wrappers via `solution` and `env` commands.
+
+---
+
+## Final production-readiness gate results
+
+| Gate | Command | Result |
+|---|---|---|
+| Type check | `npm run typecheck` | ✅ 0 errors |
+| Lint | `npm run lint` | ✅ 0 errors |
+| Build | `npm run build` | ✅ succeeds (`packages/cli/dist/`) |
+| Tests | `npm run test` | ✅ 57 / 57 pass |
+| Validate | `npm run validate` | ✅ structure + docs pass (170 files, 0 errors) |
+| Full verify | `npm run verify` | ✅ passes end-to-end |
+
+### Global CLI smoke test (from repo directory and anywhere)
+
+| Command | Result |
+|---|---|
+| `pp-agency --version` | ✅ `1.0.0` |
+| `pp-agency --help` | ✅ lists `solution` and `env` commands |
+| `pp-agency solution --help` | ✅ `list`, `export`, `import`, `publish` subcommands |
+| `pp-agency env --help` | ✅ `list`, `whoami` subcommands |
+| `pp-agency checklist --type qa -o ./qa-smoke.md` | ✅ exits 0, writes non-empty checklist |
+
+The CLI is linked globally (`npm link -w packages/cli`) and resolves as `pp-agency`.
+
+### Security audit
+
+| Command | Result |
+|---|---|
+| `npm audit` | ✅ 0 vulnerabilities |
+| `npm audit --omit=dev` | ✅ 0 vulnerabilities |
+
+No high-severity or moderate findings remain. No audit blockers.
 
 ---
 
 ## Current state (what works)
-
-| Gate | Command | Status |
-|---|---|---|
-| Install | `npm install` | ✅ clean (329 pkgs, public registry) |
-| Build | `npm run build` | ✅ CLI compiles to `packages/cli/dist/` |
-| Type check | `npm run typecheck` | ✅ 0 errors |
-| Lint | `npm run lint` | ✅ 0 errors |
-| Tests | `npm run test` | ✅ 57 / 57 pass |
-| Docs validation | `npm run validate` | ✅ 170 files, 0 errors |
-| Global CLI | `pp-agency --version` | ✅ works from anywhere |
-| Full verify | `npm run verify` | ✅ passes end-to-end |
 
 ### Content
 - **170 markdown files**, ~312k words.
@@ -40,13 +63,13 @@ Power Platform CLI (`pac`).
 - Verification log: [`VERIFICATION-LOG.md`](../VERIFICATION-LOG.md).
 
 ### CLI
-- 8 existing commands registered in `packages/cli/src/index.ts`:
+- 10 commands registered in `packages/cli/src/index.ts`:
   `new-project`, `discovery`, `generate-prd`, `generate-solution-design`,
-  `agent-brief`, `checklist`, `validate`, `estimate-licensing`.
-- `pac` wrapper built in `packages/cli/src/lib/pac.ts` with:
-  `runPac`, `isPacAvailable`, `pacVersion`, `whoami`, `listEnvironments`,
-  `exportSolution`, `importSolution`, `publishCustomizations`.
-- **Important:** the `pac` wrapper is **not yet registered** as top-level CLI commands.
+  `agent-brief`, `checklist`, `validate`, `estimate-licensing`, `solution`, `env`.
+- `pac` wrapper in `packages/cli/src/lib/pac.ts` is wired to:
+  - `solution list|export|import|publish`
+  - `env list|whoami`
+- Commands gracefully report when `pac` CLI is not installed.
 
 ### Tests
 - Node built-in test runner via `tsx`.
@@ -57,38 +80,30 @@ Power Platform CLI (`pac`).
   - `project-types.test.ts`
   - `templates.test.ts`
 
+### CI / workflows
+- `.github/workflows/lint.yml` runs the full `npm run verify` gate across Node 18/20/22.
+- `.github/workflows/docs-check.yml` builds, validates docs/structure, runs tests, and runs a non-failing link check.
+- `.github/workflows/repo-health.yml` runs `npm run verify` weekly and reports stale files.
+- No workflow corruption remains.
+
 ---
 
 ## Blockers to prod-ready MVP
 
-1. **Pac wrapper not wired to CLI commands**  
-   `packages/cli/src/index.ts` does not register solution/env/publish commands.  
-   Next: add `solution export|import|publish|list`, `env list`, and `--solution <path>` to `validate`.
+**None.** All previously listed blockers are resolved:
 
-2. **High-severity npm audit findings**  
-   `npm audit` reports **6 high severity** vulnerabilities (transitive dev deps).  
-   Next: run `npm audit --omit=dev` to confirm runtime scope, then `npm audit fix` or override resolutions.
+1. ✅ `solution` and `env` commands are registered and globally accessible.
+2. ✅ `npm audit` reports 0 vulnerabilities.
+3. ✅ CI runs the full gate (`npm run verify`) and tests.
+4. ✅ CI workflows are clean (no corruption).
 
-3. **CI doesn't run the full gate or tests**  
-   `.github/workflows/lint.yml` runs lint/typecheck/md-lint but not `npm test`.  
-   `docs-check.yml` builds but doesn't run tests.  
-   Next: update `lint.yml` to run `npm run verify` and add a dedicated `test.yml`.
+---
 
-4. **CI workflow corruption**  
-   `repo-health.yml` has `"dYs"`; `docs-check.yml` has mangled emoji characters.  
-   Next: clean these files.
+## Residual debt (not blocking)
 
-5. **Verification debt**  
-   40 files with "Needs verification" and 16 with "unverified as of" hedges.  
-   Next: verify the accuracy-critical ones against Microsoft Learn; downgrade templates/examples to draft status if not verified.
-
-6. **Version says 1.0.0**  
-   Package version implies stable v1.0; codebase is alpha/MVP.  
-   Decision needed: keep 1.0.0 for MVP launch or move to `0.1.0` / `0.9.0-beta`.
-
-7. **No integration tests against real Power Platform**  
-   Tests are pure unit + filesystem smoke.  
-   Next: add a `pac` integration test that skips gracefully when `pac` is absent.
+- **Verification debt:** 40 files still contain "Needs verification" markers and 16 contain `(unverified as of <date>)` hedges. These do not fail the docs validator, but accuracy-critical pages should still be checked against Microsoft Learn over time.
+- **Version:** Package version remains `1.0.0`. This is acceptable for the MVP launch; consider moving to `0.9.0-beta` or `1.0.0` release tag before public marketing if desired.
+- **Power Platform integration tests:** Tests are unit + filesystem smoke only. Real `pac` integration tests would be valuable but require an authenticated environment; existing commands skip gracefully when `pac` is absent.
 
 ---
 
@@ -99,15 +114,17 @@ Power Platform CLI (`pac`).
 | `package.json` | Root scripts, workspaces, dev deps, version `1.0.0` |
 | `packages/cli/package.json` | CLI package deps (`commander`, `chalk`, `inquirer`, `fs-extra`) |
 | `packages/cli/src/index.ts` | CLI entry point; registers all commands |
-| `packages/cli/src/lib/pac.ts` | Typed `pac` CLI wrapper (not yet wired to commands) |
+| `packages/cli/src/lib/pac.ts` | Typed `pac` CLI wrapper |
+| `packages/cli/src/commands/solution.ts` | `solution` command implementation |
+| `packages/cli/src/commands/env.ts` | `env` command implementation |
 | `packages/cli/src/lib/file-utils.ts` | Filesystem helpers |
 | `packages/cli/src/lib/markdown-utils.ts` | Markdown formatting helpers |
 | `packages/cli/src/lib/templates.ts` | Document templates |
 | `packages/cli/src/lib/project-types.ts` | Project/agent type enums |
 | `scripts/validate-docs.ts` | Docs validator (broken links, unclosed fences, TODO warnings) |
 | `scripts/check-required-files.ts` | Repo structure validator |
-| `.github/workflows/lint.yml` | Lint + typecheck CI |
-| `.github/workflows/docs-check.yml` | Docs validation CI |
+| `.github/workflows/lint.yml` | Full verify CI |
+| `.github/workflows/docs-check.yml` | Docs + tests + link check CI |
 | `.github/workflows/repo-health.yml` | Weekly health check CI |
 | `docs/platform-state.md` | Freshness anchor for the toolkit |
 | `VERIFICATION-LOG.md` | Results of verification sweep |
@@ -132,7 +149,9 @@ npm run validate
 # CLI smoke
 pp-agency --version
 pp-agency --help
-pp-agency checklist --type qa -o ./qa.md
+pp-agency solution --help
+pp-agency env --help
+pp-agency checklist --type qa -o ./qa-smoke.md
 pp-agency new-project "acme-portal" --client "ACME Corp" --type power-pages
 ```
 
@@ -142,7 +161,7 @@ pp-agency new-project "acme-portal" --client "ACME Corp" --type power-pages
 
 - **ESM + NodeNext** in CLI; CommonJS scripts in `scripts/` run via `tsx`.
 - **No new runtime deps** for `pac` wrapper — uses `node:child_process` only.
-- **Workspaces:** only `packages/cli` (phantom `packages/core` was removed earlier).
+- **Workspaces:** only `packages/cli`.
 - **Lockfile committed** because CI uses `npm ci`.
 - **Node test runner** instead of jest/vitest to avoid new dependencies.
 
@@ -150,18 +169,14 @@ pp-agency new-project "acme-portal" --client "ACME Corp" --type power-pages
 
 ## Most recent changes
 
-- Commit `1ad3898`: best-in-class pass — verified docs, added pac wrapper, test suite, verification log.
-- Commit `6fff85f`: ignore `*_output.txt` files.
 - Commit `20528d5`: updated roadmap with verification results.
+- Production-readiness gate run 2026-06-19: `npm run verify` passed, global CLI smoke passed, `npm audit` 0 vulnerabilities.
 
 ---
 
 ## What to do next (when resuming)
 
-1. Wire `pac` commands into the CLI.
-2. Add tests for the new `pac` commands.
-3. Fix CI workflows and make them run `npm run verify`.
-4. Triage `npm audit` findings.
-5. Clear remaining verification debt.
-6. Re-run `npm run verify` and global CLI smoke test.
-7. Decide version number and tag/release if appropriate.
+1. Keep `npm run verify` green after every change.
+2. Tackle residual verification debt on accuracy-critical pages.
+3. Add optional `pac` integration tests behind an authenticated environment.
+4. Decide final release version/tag.

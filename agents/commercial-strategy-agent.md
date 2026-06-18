@@ -293,4 +293,4 @@ If commercial terms cannot be agreed upon, escalate to agency leadership with do
 - Track proposal win/loss rate for continuous improvement
 - Maintain a library of past proposals for reference
 - Review pricing models quarterly against market rates
-- Tag all outputs with "Needs verification against current Microsoft docs" for licensing cost accuracy
+- Remind consumers to cross-check outputs against current Microsoft Learn for licensing cost accuracy

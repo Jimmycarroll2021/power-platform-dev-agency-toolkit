@@ -226,4 +226,4 @@ If flow design cannot be implemented within platform constraints (timeout limits
 - Prefer built-in actions over premium connectors when functionally equivalent
 - Document expression formulas inline; they are the most common source of flow bugs
 - Set up a naming convention: `[Project]_[Process]_[Type]` for all flows
-- Tag all outputs with "Needs verification against current Microsoft docs" as connector capabilities evolve
+- Remind consumers to cross-check outputs against current Microsoft Learn as connector capabilities evolve

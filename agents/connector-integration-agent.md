@@ -281,4 +281,4 @@ If API integration exceeds custom connector capabilities (complex SOAP, non-REST
 - Document all custom connector operations in a shared knowledge base
 - Monitor custom connector usage analytics for optimization opportunities
 - Plan for API deprecation by monitoring vendor communications
-- Tag all outputs with "Needs verification against current Microsoft docs" as connector platform evolves
+- Remind consumers to cross-check outputs against current Microsoft Learn as connector platform evolves

@@ -95,22 +95,22 @@ flowchart LR
 
 ```
 [PUBLISHER_PREFIX]_[SolutionName]
-  ├── Apps/
-  │   ├── Canvas Apps/
-  │   └── Model-driven Apps/
-  ├── Flows/
-  │   ├── Cloud Flows/
-  │   └── Desktop Flows/
-  ├── Tables/
-  │   ├── Custom Tables/
-  │   └── Table Components/
-  ├── Security/
-  │   ├── Security Roles/
-  │   └── Field Security/
-  ├── Other/
-  │   ├── Connection References/
-  │   ├── Environment Variables/
-  │   └── Business Rules/
+  â”œâ”€â”€ Apps/
+  â”‚   â”œâ”€â”€ Canvas Apps/
+  â”‚   â””â”€â”€ Model-driven Apps/
+  â”œâ”€â”€ Flows/
+  â”‚   â”œâ”€â”€ Cloud Flows/
+  â”‚   â””â”€â”€ Desktop Flows/
+  â”œâ”€â”€ Tables/
+  â”‚   â”œâ”€â”€ Custom Tables/
+  â”‚   â””â”€â”€ Table Components/
+  â”œâ”€â”€ Security/
+  â”‚   â”œâ”€â”€ Security Roles/
+  â”‚   â””â”€â”€ Field Security/
+  â”œâ”€â”€ Other/
+  â”‚   â”œâ”€â”€ Connection References/
+  â”‚   â”œâ”€â”€ Environment Variables/
+  â”‚   â””â”€â”€ Business Rules/
 ```
 
 ### Versioning Strategy
@@ -154,26 +154,26 @@ flowchart LR
 ### Repository Structure
 
 ```
-├── src/
-│   ├── solutions/
-│   │   ├── [Prefix]_Core/
-│   │   └── [Prefix]_[Feature]/
-│   ├── apps/
-│   ├── flows/
-│   └── plugins/
-├── config/
-│   ├── dev/
-│   ├── uat/
-│   └── prod/
-├── pipelines/
-│   ├── build.yml
-│   ├── deploy.yml
-│   └── pr-validation.yml
-├── scripts/
-│   ├── export-solution.ps1
-│   └── import-solution.ps1
-├── docs/
-└── README.md
+â”œâ”€â”€ src/
+â”‚   â”œâ”€â”€ solutions/
+â”‚   â”‚   â”œâ”€â”€ [Prefix]_Core/
+â”‚   â”‚   â””â”€â”€ [Prefix]_[Feature]/
+â”‚   â”œâ”€â”€ apps/
+â”‚   â”œâ”€â”€ flows/
+â”‚   â””â”€â”€ plugins/
+â”œâ”€â”€ config/
+â”‚   â”œâ”€â”€ dev/
+â”‚   â”œâ”€â”€ uat/
+â”‚   â””â”€â”€ prod/
+â”œâ”€â”€ pipelines/
+â”‚   â”œâ”€â”€ build.yml
+â”‚   â”œâ”€â”€ deploy.yml
+â”‚   â””â”€â”€ pr-validation.yml
+â”œâ”€â”€ scripts/
+â”‚   â”œâ”€â”€ export-solution.ps1
+â”‚   â””â”€â”€ import-solution.ps1
+â”œâ”€â”€ docs/
+â””â”€â”€ README.md
 ```
 ```
 
@@ -380,4 +380,4 @@ pac application install --environment [url] --application-name [app]
 - Never deploy directly to production without UAT
 - Test rollback procedures before they are needed
 - Keep solution sizes manageable (split if too large)
-- **Needs verification against current Microsoft docs**: Verify pac CLI commands, pipeline tasks, and ALM features against current Microsoft documentation.
+- **Cross-check against current Microsoft Learn**: Verify pac CLI commands, pipeline tasks, and ALM features against current Microsoft documentation.

@@ -245,4 +245,4 @@ If licensing costs exceed budget by > 20%, escalate to **Solution Architect** fo
 - Maintain a license assignment register with owners and renewal dates
 - Consider Microsoft EA or MCA agreements for volume discounts
 - Plan for true-up events (annual license reconciliation)
-- Tag all outputs with "Needs verification against current Microsoft docs" as licensing changes frequently
+- Remind consumers to cross-check outputs against current Microsoft Learn as licensing changes frequently

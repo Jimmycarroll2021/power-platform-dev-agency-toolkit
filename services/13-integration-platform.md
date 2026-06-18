@@ -115,7 +115,7 @@ Phased delivery. Effort is indicative and depends on the number of systems, auth
 
 > Planning ranges only — **indicative, confirm current rates** at proposal time. Not a quote and not a client commitment.
 
-- **Day-rate band:** specialist integration engineering typically falls in a **mid-to-senior consulting day-rate band**; confirm the current agency rate card before quoting. (unverified as of 2026-06-19 — confirm against Microsoft Learn) — note: this is an internal agency rate, not a Microsoft-published figure, so it can only be confirmed against the live rate card.
+- **Day-rate band:** specialist integration engineering typically falls in a **mid-to-senior consulting day-rate band**; confirm the current agency rate card before quoting. This is an internal agency rate, not a Microsoft-published figure, so it can only be confirmed against the live rate card.
 - **S (3–6 days):** small fixed-price package suits a single, well-understood connector.
 - **M (7–15 days):** fixed-price if the API contract and auth model are confirmed in discovery; otherwise **T&M** with a capped estimate.
 - **L (16–35+ days):** **T&M recommended** — middleware, on-prem gateway, and cert/secret rotation carry discovery risk that fixed-price tends to over-price or under-deliver.

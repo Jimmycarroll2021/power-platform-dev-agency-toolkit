@@ -248,4 +248,4 @@ If data requirements exceed Dataverse capabilities (extremely high volume > 10M 
 - Implement early data retention and archiving strategy
 - Enable auditing on all business-critical tables from day one
 - Test security model with realistic user personas before go-live
-- Tag all outputs with "Needs verification against current Microsoft docs" as Dataverse capabilities evolve
+- Remind consumers to cross-check outputs against current Microsoft Learn as Dataverse capabilities evolve

@@ -275,4 +275,4 @@ New -> Triaged -> Assigned -> In Progress -> Ready for Test -> Verified -> Close
 - Test with realistic data volumes
 - Document all test evidence
 - Maintain traceability to requirements
-- **Needs verification against current Microsoft docs**: Verify testing tool capabilities and platform limits against current Microsoft documentation.
+- **Cross-check against current Microsoft Learn**: Verify testing tool capabilities and platform limits against current Microsoft documentation.

@@ -235,4 +235,4 @@ If architecture cannot satisfy requirements within constraints, escalate to **Co
 - Document assumptions explicitly; they become risks if invalidated
 - Maintain a "decision log" that can be presented to stakeholders
 - Review architecture with Security/Governance Agent before any build handoff
-- Tag all outputs with "Needs verification against current Microsoft docs" as platform capabilities change
+- Remind consumers to cross-check outputs against current Microsoft Learn as platform capabilities change

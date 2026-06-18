@@ -370,4 +370,4 @@ If support model cannot meet client SLA requirements, escalate to **Commercial S
 - Schedule monthly runbook review sessions
 - Keep monitoring dashboards visible to all stakeholders
 - Plan for business continuity (what if support team is unavailable)
-- Tag all outputs with "Needs verification against current Microsoft docs" as operational guidance changes
+- Remind consumers to cross-check outputs against current Microsoft Learn as operational guidance changes

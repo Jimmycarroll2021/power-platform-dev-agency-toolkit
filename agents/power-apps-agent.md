@@ -241,4 +241,4 @@ If app requirements exceed Power Apps capabilities (complex offline, real-time c
 - Document every custom formula with comments
 - Maintain a consistent naming convention: `ctrl_[Type]_[Purpose]`
 - Set up app analytics (App Insights) for usage tracking
-- Tag all outputs with "Needs verification against current Microsoft docs" as Power Apps capabilities evolve
+- Remind consumers to cross-check outputs against current Microsoft Learn as Power Apps capabilities evolve

@@ -253,4 +253,4 @@ If AI Builder cannot meet accuracy requirements or credit budget, escalate to **
 - Set realistic accuracy expectations (90%+ is excellent; 80%+ may be acceptable with human review)
 - Monitor credit consumption weekly during initial deployment
 - Plan for model retraining quarterly or when accuracy drops
-- Tag all outputs with "Needs verification against current Microsoft docs" as AI Builder capabilities evolve
+- Remind consumers to cross-check outputs against current Microsoft Learn as AI Builder capabilities evolve

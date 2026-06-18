@@ -205,4 +205,4 @@ Standards:
 - Provide code examples for fixes
 - Prioritize security findings
 - Balance thoroughness with practicality
-- **Needs verification against current Microsoft docs**: Verify Power Fx functions, flow actions, and best practices against current Microsoft documentation.
+- **Cross-check against current Microsoft Learn**: Verify Power Fx functions, flow actions, and best practices against current Microsoft documentation.

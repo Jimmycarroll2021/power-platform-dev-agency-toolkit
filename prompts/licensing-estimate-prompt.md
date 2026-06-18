@@ -222,4 +222,4 @@ Budget:
 - Consider EA/MCA discounts for large volumes
 - Build in 20% buffer for growth
 - Review estimates quarterly
-- **Needs verification against current Microsoft docs**: Verify all pricing, license entitlements, and capacity limits against current Microsoft documentation. Pricing in this prompt is illustrative and will vary by region and agreement type.
+- **Cross-check against current Microsoft Learn**: Verify all pricing, license entitlements, and capacity limits against current Microsoft documentation. Pricing in this prompt is illustrative and will vary by region and agreement type.

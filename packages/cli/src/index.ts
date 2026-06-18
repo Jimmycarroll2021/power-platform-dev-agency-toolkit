@@ -53,6 +53,8 @@ import { registerGenerateAgentBriefCommand } from './commands/generate-agent-bri
 import { registerChecklistCommand } from './commands/checklist.js';
 import { registerValidateCommand } from './commands/validate-project.js';
 import { registerEstimateLicensingCommand } from './commands/estimate-licensing.js';
+import { registerSolutionCommand } from './commands/solution.js';
+import { registerEnvCommand } from './commands/env.js';
 
 // ---------------------------------------------------------------------------
 // Build CLI
@@ -77,6 +79,8 @@ registerGenerateAgentBriefCommand(program);
 registerChecklistCommand(program);
 registerValidateCommand(program);
 registerEstimateLicensingCommand(program);
+registerSolutionCommand(program);
+registerEnvCommand(program);
 
 // ---------------------------------------------------------------------------
 // Global error handling

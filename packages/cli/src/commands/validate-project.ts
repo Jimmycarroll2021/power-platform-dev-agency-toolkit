@@ -9,6 +9,7 @@ import { Command } from 'commander';
 import { type ValidationResult } from '../lib/project-types.js';
 import { fileExists, readFile, listFiles, logInfo, logError } from '../lib/file-utils.js';
 import { hasFrontmatter, extractFrontmatter, printValidation } from '../lib/markdown-utils.js';
+import { isPacAvailable, runPac, PacNotAvailableError } from '../lib/pac.js';
 
 // ---------------------------------------------------------------------------
 // Chalk safe-import
@@ -26,11 +27,21 @@ const _green = (s: string): string => (chalk ? chalk.green(s) : s);
 const _red = (s: string): string => (chalk ? chalk.red(s) : s);
 const _yellow = (s: string): string => (chalk ? chalk.yellow(s) : s);
 
+function printResult(result: { ok: boolean; code: number; stdout: string; stderr: string }): void {
+  if (result.stdout) {
+    console.log(result.stdout);
+  }
+  if (result.stderr && !result.ok) {
+    console.error(_red(result.stderr));
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Options interface
 // ---------------------------------------------------------------------------
 interface ValidateOptions {
   project?: string;
+  solution?: string;
   verbose?: boolean;
 }
 
@@ -169,10 +180,42 @@ function checkDirectoryStructure(projectDir: string): ValidationResult {
 export function registerValidateCommand(program: Command): void {
   program
     .command('validate')
-    .description('Validate a project directory for completeness and consistency')
-    .requiredOption('-p, --project <path>', 'Path to the project directory')
+    .description('Validate a project directory or an unpacked solution for completeness')
+    .option('-p, --project <path>', 'Path to the project directory')
+    .option('-s, --solution <path>', 'Path to an unpacked solution folder to validate with pac')
     .action(async (options: ValidateOptions) => {
       try {
+        // Solution validation path
+        if (options.solution) {
+          const solutionPath = path.resolve(options.solution);
+          console.log(_cyan(`\nValidating unpacked solution: ${solutionPath}\n`));
+
+          if (!fileExists(solutionPath)) {
+            logError(`Solution directory does not exist: ${solutionPath}`);
+            process.exit(1);
+          }
+
+          if (!isPacAvailable()) {
+            console.error(
+              _red(
+                '\nThe Microsoft Power Platform CLI (pac) is required to validate solutions.\n' +
+                  'Install it from https://learn.microsoft.com/power-platform/developer/cli/intro\n'
+              )
+            );
+            throw new PacNotAvailableError();
+          }
+
+          const result = runPac(['solution', 'check', '--path', solutionPath], { cwd: solutionPath });
+          printResult(result);
+          console.log(
+            result.ok
+              ? _green('\nSolution validation PASSED')
+              : _red('\nSolution validation FAILED')
+          );
+          process.exit(result.ok ? 0 : 1);
+        }
+
+        // Project validation path
         const projectPath = path.resolve(options.project ?? '.');
 
         console.log(_cyan(`\nValidating project: ${projectPath}\n`));

@@ -377,4 +377,4 @@ Data passed to human agent:
 - Always provide a clear escalation path
 - Test in each target channel (Teams vs web rendering differs)
 - Monitor "unmatched" utterances to identify new topics
-- **Needs verification against current Microsoft docs**: Verify Copilot Studio capabilities, message credit pricing, and channel-specific features against current Microsoft documentation.
+- **Cross-check against current Microsoft Learn**: Verify Copilot Studio capabilities, message credit pricing, and channel-specific features against current Microsoft documentation.

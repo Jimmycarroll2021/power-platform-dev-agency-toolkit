@@ -254,4 +254,4 @@ If Copilot Studio cannot meet requirements (complex multi-agent orchestration, a
 - Test in each target channel; Teams and web rendering differ significantly
 - Version control topic exports for rollback capability
 - Plan for conversation analytics review cycle (weekly during launch, monthly steady state)
-- Tag all outputs with "Needs verification against current Microsoft docs" as Copilot Studio capabilities evolve
+- Remind consumers to cross-check outputs against current Microsoft Learn as Copilot Studio capabilities evolve

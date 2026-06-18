@@ -216,7 +216,7 @@ Detect -> Triage -> Respond -> Resolve -> Post-Incident Review
 
 | From | To | Trigger | Method | Information Required |
 |------|-----|---------|--------|---------------------|
-| L1 | L2 | L1 SLA breached or超出能力 | Ticket escalation | Full ticket history, attempted fixes |
+| L1 | L2 | L1 SLA breached orè¶…å‡ºèƒ½åŠ› | Ticket escalation | Full ticket history, attempted fixes |
 | L2 | L3 | Platform bug or architecture issue | Direct escalation | Technical details, reproduction steps |
 | L3 | Microsoft | Confirmed platform issue | Premier support ticket | Tenant ID, correlation IDs |
 | Any | Emergency | Data breach or outage | Emergency contact | Immediate notification |
@@ -355,4 +355,4 @@ Next Steps Required:
 - Test recovery procedures quarterly
 - Review and update contact information monthly
 - Train support team on all procedures before go-live
-- **Needs verification against current Microsoft docs**: Verify monitoring capabilities, service health information, and admin procedures against current Microsoft documentation.
+- **Cross-check against current Microsoft Learn**: Verify monitoring capabilities, service health information, and admin procedures against current Microsoft documentation.

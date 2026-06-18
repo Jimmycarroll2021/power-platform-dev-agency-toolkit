@@ -44,7 +44,7 @@ sources:
   Teams, OneDrive              Third-party SaaS           Custom service
 ```
 
-\* Microsoft does not publish a fixed total; the catalog grows continuously. The authoritative live list (and exact current count) is the [Connector reference overview](https://learn.microsoft.com/en-us/connectors/connector-reference/), with separate [Standard](https://learn.microsoft.com/en-us/connectors/connector-reference/connector-reference-standard-connectors) and [Premium](https://learn.microsoft.com/en-us/connectors/connector-reference/connector-reference-premium-connectors) tier lists. The "1,400+" figure is approximate (unverified as of 2026-06-19 — confirm the current count against Microsoft Learn).
+\* Microsoft does not publish a fixed total; the catalog grows continuously. The authoritative live list (and exact current count) is the [Connector reference overview](https://learn.microsoft.com/en-us/connectors/connector-reference/), with separate [Standard](https://learn.microsoft.com/en-us/connectors/connector-reference/connector-reference-standard-connectors) and [Premium](https://learn.microsoft.com/en-us/connectors/connector-reference/connector-reference-premium-connectors) tier lists. The "1,400+" figure is approximate; confirm the current count against the live connector reference.
 
 ---
 
@@ -471,7 +471,7 @@ For processing many items efficiently:
 | Dataverse | 6,000 requests / 5 min per user (sliding 300s window); also a 1,200s combined-execution-time limit and a concurrent-request limit, all per user/app/web-server ([api-limits](https://learn.microsoft.com/en-us/power-apps/developer/data-platform/api-limits)) | Batch operations (up to 5,000 ops/batch), caching |
 | SharePoint | 600 calls / 60 sec **per connection** ([SharePoint connector](https://learn.microsoft.com/en-us/connectors/sharepoint/)) | Reduce frequency, use webhooks, filter/Top |
 | SQL Server | CRUD: 100 calls / 10 sec per connection; Native (stored proc / query): 500 calls / 10 sec per connection ([SQL connector](https://learn.microsoft.com/en-us/connectors/sql/)) | Connection pooling, stored procs |
-| HTTP (generic action) | No published per-connection connector throttle — HTTP actions count against your 5-min burst (100,000 req/5min) and 24-hour Power Platform request entitlement instead (unverified as of 2026-06-19 — confirm against Microsoft Learn; there is no managed-connector throttle table for the generic HTTP action) | Implement retry/backoff; respect PPR limits |
+| HTTP (generic action) | No published per-connection connector throttle — HTTP actions count against the platform's 5-minute burst (100,000 req/5min) and 24-hour Power Platform request entitlement ([Requests limits and allocations](https://learn.microsoft.com/en-us/power-platform/admin/api-request-limits-allocations)). There is no managed-connector throttle table for the generic HTTP action. | Implement retry/backoff; respect PPR limits |
 | Office 365 Outlook | 300 calls / 60 sec per connection; recipient quota 10,000 / day per connection; 2 connections per user ([Office 365 Outlook connector](https://learn.microsoft.com/en-us/connectors/office365/)) | Monitor volume, batch recipients |
 | Teams | 100 calls / 60 sec **per connection** (Flow-bot non-GET ops further limited to 25 / 300 sec) ([Teams connector](https://learn.microsoft.com/en-us/connectors/teams/)) | Batch messages, slow polling |
 

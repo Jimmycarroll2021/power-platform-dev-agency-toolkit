@@ -234,7 +234,7 @@ Prerequisites:
 - Data must live in Microsoft Dataverse (Read privilege required)
   # Verified: https://learn.microsoft.com/en-us/ai-builder/prediction-prereq
 - Binary outcome field (Yes/No) or numerical target
-- At least 5 potential influencing fields (unverified as of 2026-06-19 — confirm against Microsoft Learn; the prediction prerequisites page specifies row/class minimums but does not state a minimum number of input columns)
+- At least 5 potential influencing fields (rule of thumb; the prediction prerequisites page specifies row/class minimums but does not state a minimum number of input columns)
 
 Example: Predict customer churn
 - Historical: 1000 customer records with churn outcome
@@ -344,7 +344,7 @@ rates; the figures below are illustrative of the model, not a price list.
 | AI Builder capacity add-on (T1/T2/T3) | 1,000,000 AI Builder credits per add-on |
 | Power Automate Premium seeded credits | 5,000 (removed 2026-11-01) |
 | Power Apps Premium seeded credits | 500 (removed 2026-11-01) |
-| Document processing throughput | up to 360 documents per environment per 60 seconds (unverified as of 2026-06-19 — confirm against Microsoft Learn) |
+| Document processing throughput | up to 360 documents per environment per 60 seconds ([Train and publish your document processing model](https://learn.microsoft.com/en-us/ai-builder/form-processing-train)) |
 | Per-capability credit/USD rate card | See AI Builder capability rate table + Power Platform Licensing Guide (PDF) |
 
 Verified: https://learn.microsoft.com/en-us/ai-builder/credit-management ,

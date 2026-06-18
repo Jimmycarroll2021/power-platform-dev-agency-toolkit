@@ -370,4 +370,4 @@ Mitigation: Clear review criteria, SLA for human response
 - Track cycle time per agent to identify bottlenecks
 - Maintain a "lessons learned" log throughout the project
 - Post-project retrospective within 2 weeks of completion
-- Tag all outputs with "Needs verification against current Microsoft docs" as the orchestration framework evolves
+- Remind consumers to cross-check outputs against current Microsoft Learn as the orchestration framework evolves

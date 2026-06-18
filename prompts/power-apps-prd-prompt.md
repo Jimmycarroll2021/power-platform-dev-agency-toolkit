@@ -408,4 +408,4 @@ If(Parent.Width < 640, 1, Parent.Width < 1200, 2, 3)
 - Document all Power Fx formulas; they are the most common source of bugs
 - Test delegation warnings early; redesign if needed
 - Plan for error states on every screen
-- **Needs verification against current Microsoft docs**: Verify Power Apps capabilities, connector availability, and licensing against current Microsoft documentation.
+- **Cross-check against current Microsoft Learn**: Verify Power Apps capabilities, connector availability, and licensing against current Microsoft documentation.

@@ -91,7 +91,7 @@ export function runPac(args: string[], opts?: { cwd?: string }): PacResult {
   // When the process cannot be spawned at all, spawnSync sets `error` and leaves
   // status null. Surface that as code -1 with the system error message.
   if (result.error) {
-    const stderr = result.stderr ?? result.error.message ?? '';
+    const stderr = result.stderr || result.error.message || '';
     logError(`pac invocation failed: ${result.error.message}`);
     return { ok: false, code: -1, stdout: result.stdout ?? '', stderr };
   }
