@@ -4,7 +4,7 @@
 **Location:** `C:\Users\j_car\.00xxAIProjectsxx00\Kimi_Agent_Power Platform Dev Toolkit\power-platform-dev-agency-toolkit`  
 **Last updated:** 2026-06-19  
 **Current branch:** `main`  
-**Latest commit:** `20528d5` — Update ROADMAP-best-in-class.md with verification results  
+**Latest commit:** `4006441` — Prod-ready MVP: real pac CLI ops, expanded tests, verified docs, clean audit  
 **Status:** ✅ Production-readiness gate passed. Prod-ready MVP.
 
 ---
@@ -25,7 +25,7 @@ wrappers via `solution` and `env` commands.
 | Type check | `npm run typecheck` | ✅ 0 errors |
 | Lint | `npm run lint` | ✅ 0 errors |
 | Build | `npm run build` | ✅ succeeds (`packages/cli/dist/`) |
-| Tests | `npm run test` | ✅ 57 / 57 pass |
+| Tests | `npm run test` | ✅ 72 / 72 pass |
 | Validate | `npm run validate` | ✅ structure + docs pass (170 files, 0 errors) |
 | Full verify | `npm run verify` | ✅ passes end-to-end |
 
