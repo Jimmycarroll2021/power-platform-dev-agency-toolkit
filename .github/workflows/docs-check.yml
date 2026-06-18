@@ -6,11 +6,13 @@ on:
     paths:
       - "**.md"
       - "scripts/validate-docs.ts"
+      - "packages/cli/test/**"
   pull_request:
     branches: [main, develop]
     paths:
       - "**.md"
       - "scripts/validate-docs.ts"
+      - "packages/cli/test/**"
 
 jobs:
   validate-docs:
@@ -34,9 +36,13 @@ jobs:
         run: npm run build
 
       - name: Run documentation validation
-        run: npx tsx scripts/validate-docs.ts
+        run: npm run docs:check
         id: validate
-        continue-on-error: true
+        continue-on-error: false
+
+      - name: Run tests
+        run: npm run test
+        continue-on-error: false
 
       - name: Check for broken links
         uses: lycheeverse/lychee-action@v1
@@ -51,14 +57,14 @@ jobs:
           echo "## Documentation Validation Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           if [ "${{ steps.validate.outcome }}" == "success" ]; then
-            echo "✅ Documentation validation passed" >> $GITHUB_STEP_SUMMARY
+            echo "[PASS] Documentation validation passed" >> $GITHUB_STEP_SUMMARY
           else
-            echo "❌ Documentation validation failed" >> $GITHUB_STEP_SUMMARY
+            echo "[FAIL] Documentation validation failed" >> $GITHUB_STEP_SUMMARY
           fi
           if [ "${{ steps.lychee.outcome }}" == "success" ]; then
-            echo "✅ Link check passed" >> $GITHUB_STEP_SUMMARY
+            echo "[PASS] Link check passed" >> $GITHUB_STEP_SUMMARY
           else
-            echo "⚠️ Link check completed with issues" >> $GITHUB_STEP_SUMMARY
+            echo "[WARN] Link check completed with issues" >> $GITHUB_STEP_SUMMARY
           fi
 
       - name: Upload validation report

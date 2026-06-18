@@ -692,3 +692,14 @@ Agent Issue -> Peer Agent -> Solution Architect -> Swarm Orchestrator -> Commerc
 ---
 
 > **Swarm Principle**: The whole is greater than the sum of its parts. Agents succeed through coordination, validation, and clear handoffs. No agent works in isolation — the Swarm Orchestrator keeps the loop honest.
+
+
+---
+
+## Agent Memory / Session Continuity
+
+When resuming work on this project, read `.planning/MEMORY-CHECKPOINT.md` first.
+It contains the current state, latest commits, open blockers, key files, and the
+exact next steps needed to reach a prod-ready MVP.
+
+Last checkpoint: 2026-06-19 · commit `20528d5`.
