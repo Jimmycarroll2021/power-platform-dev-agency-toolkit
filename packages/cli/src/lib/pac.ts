@@ -16,7 +16,7 @@
  * This module introduces no new npm dependencies — only `node:child_process`.
  */
 
-import { spawnSync } from 'node:child_process';
+import { spawnSync, type SpawnSyncOptionsWithStringEncoding } from 'node:child_process';
 import { logInfo, logError, logWarn } from './file-utils.js';
 
 // ---------------------------------------------------------------------------
@@ -53,6 +53,21 @@ export interface PacResult {
 }
 
 /**
+ * Shape of the spawn function used internally. Exposed so tests can inject a
+ * deterministic runner without experimental module mocking.
+ */
+export type PacRunner = (
+  command: string,
+  args: string[],
+  options: SpawnSyncOptionsWithStringEncoding
+) => {
+  status: number | null;
+  stdout?: string | null;
+  stderr?: string | null;
+  error?: Error | null;
+};
+
+/**
  * Thrown when the Power Platform CLI (`pac`) is not installed or not resolvable
  * on the current PATH. Most functions here return a {@link PacResult} instead of
  * throwing; this error exists for callers that prefer fail-fast semantics.
@@ -62,6 +77,28 @@ export class PacNotAvailableError extends Error {
     super(message);
     this.name = 'PacNotAvailableError';
   }
+}
+
+// ---------------------------------------------------------------------------
+// Internal runner (can be swapped in tests)
+// ---------------------------------------------------------------------------
+
+let _spawnSync: PacRunner = spawnSync;
+
+/**
+ * Replace the internal spawn function used by `runPac`. Intended for tests only.
+ *
+ * @param runner - A function matching {@link PacRunner}.
+ */
+export function setPacRunner(runner: PacRunner): void {
+  _spawnSync = runner;
+}
+
+/**
+ * Restore the real `node:child_process.spawnSync` runner. Intended for tests.
+ */
+export function resetPacRunner(): void {
+  _spawnSync = spawnSync;
 }
 
 // ---------------------------------------------------------------------------
@@ -82,7 +119,7 @@ export class PacNotAvailableError extends Error {
  */
 export function runPac(args: string[], opts?: { cwd?: string }): PacResult {
   logInfo(_cyan(`pac ${args.join(' ')}`));
-  const result = spawnSync('pac', args, {
+  const result = _spawnSync('pac', args, {
     cwd: opts?.cwd,
     encoding: 'utf8',
     shell: true,

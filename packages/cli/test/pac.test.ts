@@ -1,238 +1,229 @@
 /**
- * Unit tests for the Power Platform CLI (`pac`) wrapper.
+ * Tests for the typed `pac` CLI wrapper.
  *
- * `node:child_process.spawnSync` is mocked via Node's experimental ESM module
- * mocking so these tests never invoke the real `pac` executable.
+ * These tests inject a deterministic {@link PacRunner} so the real Microsoft
+ * Power Platform CLI is never invoked. The runner is reset after each test to
+ * avoid leakage.
  */
 
-import { test, before, after, mock } from 'node:test';
-import assert from 'node:assert/strict';
-import type * as cp from 'node:child_process';
-import * as os from 'node:os';
-import * as path from 'node:path';
+import { describe, it, beforeEach, afterEach } from 'node:test';
+import assert from 'node:assert';
+import type { SpawnSyncOptionsWithStringEncoding } from 'node:child_process';
+import {
+  runPac,
+  isPacAvailable,
+  pacVersion,
+  exportSolution,
+  importSolution,
+  publishCustomizations,
+  setPacRunner,
+  resetPacRunner,
+  type PacResult,
+  type PacRunner,
+} from '../src/lib/pac.js';
 
 // ---------------------------------------------------------------------------
-// Console noise suppression
+// Test helpers
 // ---------------------------------------------------------------------------
-const originalLog = console.log;
-const originalError = console.error;
 
-before(() => {
-  console.log = (): void => {};
-  console.error = (): void => {};
-});
-
-after(() => {
-  console.log = originalLog;
-  console.error = originalError;
-});
-
-// ---------------------------------------------------------------------------
-// Configurable mock implementation for spawnSync
-// ---------------------------------------------------------------------------
-let spawnSyncImpl: (
-  cmd: string,
-  args: readonly string[],
-  opts: object,
-) => cp.SpawnSyncReturns<string> = () => ({
-  status: 0,
-  stdout: '',
-  stderr: '',
-  output: [null, '', ''],
-  pid: 0,
-  signal: null,
-});
-
-const spawnSyncMock = mock.fn((...args: unknown[]) =>
-  spawnSyncImpl(args[0] as string, args[1] as readonly string[], args[2] as object),
-);
-
-// ---------------------------------------------------------------------------
-// Mock node:child_process before importing the pac wrapper
-// ---------------------------------------------------------------------------
-const pacModuleContext = mock.module('node:child_process', {
-  namedExports: { spawnSync: spawnSyncMock },
-});
-
-let pac: typeof import('../src/lib/pac.js');
-
-before(async () => {
-  pac = await import('../src/lib/pac.js');
-});
-
-after(() => {
-  pacModuleContext.restore();
-});
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-function lastCallArgs(): unknown[] {
-  const calls = spawnSyncMock.mock.calls;
-  assert.ok(calls.length > 0, 'expected at least one spawnSync call');
-  return calls[calls.length - 1].arguments;
-}
-
-function fakeSuccess(stdout = '', stderr = ''): cp.SpawnSyncReturns<string> {
-  return {
-    status: 0,
-    stdout,
-    stderr,
-    output: [null, stdout, stderr],
-    pid: 1,
-    signal: null,
-  };
-}
-
-function fakeFailure(code: number, stderr = ''): cp.SpawnSyncReturns<string> {
-  return {
-    status: code,
-    stdout: '',
-    stderr,
-    output: [null, '', stderr],
-    pid: 1,
-    signal: null,
+function makeRunner(
+  responses: Record<
+    string,
+    { status?: number | null; stdout?: string; stderr?: string; error?: Error | null }
+  >
+): PacRunner {
+  return (
+    command: string,
+    args: string[],
+    _options: SpawnSyncOptionsWithStringEncoding
+  ): {
+    status: number | null;
+    stdout?: string | null;
+    stderr?: string | null;
+    error?: Error | null;
+  } => {
+    const key = `${command} ${args.join(' ')}`;
+    const response = responses[key] ?? { status: 1, stdout: '', stderr: 'unknown command' };
+    return {
+      status: response.status ?? null,
+      stdout: response.stdout ?? null,
+      stderr: response.stderr ?? null,
+      error: response.error ?? null,
+    };
   };
 }
 
 // ---------------------------------------------------------------------------
-// runPac
+// Tests
 // ---------------------------------------------------------------------------
 
-test('runPac returns ok=true on exit 0', () => {
-  spawnSyncImpl = () => fakeSuccess('ok-output');
+describe('pac wrapper', () => {
+  beforeEach(() => {
+    resetPacRunner();
+  });
 
-  const result = pac.runPac(['solution', 'list']);
+  afterEach(() => {
+    resetPacRunner();
+  });
 
-  assert.equal(result.ok, true);
-  assert.equal(result.code, 0);
-  assert.equal(result.stdout, 'ok-output');
-  assert.equal(result.stderr, '');
+  it('runPac returns ok=true on exit 0', () => {
+    setPacRunner(
+      makeRunner({
+        'pac solution list': { status: 0, stdout: 'solution1\nsolution2', stderr: '' },
+      })
+    );
 
-  const args = lastCallArgs();
-  assert.equal(args[0], 'pac');
-  assert.deepEqual(args[1], ['solution', 'list']);
-});
+    const result: PacResult = runPac(['solution', 'list']);
+    assert.strictEqual(result.ok, true);
+    assert.strictEqual(result.code, 0);
+    assert.strictEqual(result.stdout, 'solution1\nsolution2');
+  });
 
-test('runPac returns ok=false on non-zero exit', () => {
-  spawnSyncImpl = () => fakeFailure(7, 'pac error');
+  it('runPac returns ok=false on non-zero exit', () => {
+    setPacRunner(
+      makeRunner({
+        'pac solution list': { status: 1, stdout: '', stderr: 'not authenticated' },
+      })
+    );
 
-  const result = pac.runPac(['solution', 'export', '--name', 'x']);
+    const result: PacResult = runPac(['solution', 'list']);
+    assert.strictEqual(result.ok, false);
+    assert.strictEqual(result.code, 1);
+    assert.strictEqual(result.stderr, 'not authenticated');
+  });
 
-  assert.equal(result.ok, false);
-  assert.equal(result.code, 7);
-  assert.equal(result.stdout, '');
-  assert.equal(result.stderr, 'pac error');
-});
+  it('runPac handles spawn errors (pac not found)', () => {
+    setPacRunner(
+      makeRunner({
+        'pac solution list': {
+          status: null,
+          stdout: '',
+          stderr: '',
+          error: new Error('spawn pac ENOENT'),
+        },
+      })
+    );
 
-test('runPac handles spawn errors (pac not found)', () => {
-  // Use a plain error-shaped object rather than an Error instance to avoid
-  // expensive serialization inside the mock call history on failure.
-  spawnSyncImpl = () =>
-    ({
-      error: { message: 'spawn pac ENOENT' },
-      status: null,
-      stdout: '',
-      stderr: '',
-      output: [null, '', ''],
-      pid: 0,
-      signal: null,
-    } as unknown as cp.SpawnSyncReturns<string>);
+    const result: PacResult = runPac(['solution', 'list']);
+    assert.strictEqual(result.ok, false);
+    assert.strictEqual(result.code, -1);
+    assert.strictEqual(result.stderr, 'spawn pac ENOENT');
+  });
 
-  const result = pac.runPac(['--version']);
+  it('isPacAvailable returns true when pac --version exits 0', () => {
+    setPacRunner(
+      makeRunner({
+        'pac --version': { status: 0, stdout: '1.2.3', stderr: '' },
+      })
+    );
 
-  assert.equal(result.ok, false);
-  assert.equal(result.code, -1);
-  assert.ok(result.stderr.includes('ENOENT'));
-});
+    assert.strictEqual(isPacAvailable(), true);
+  });
 
-// ---------------------------------------------------------------------------
-// isPacAvailable
-// ---------------------------------------------------------------------------
+  it('isPacAvailable returns false when pac --version fails', () => {
+    setPacRunner(
+      makeRunner({
+        'pac --version': { status: 1, stdout: '', stderr: 'not found' },
+      })
+    );
 
-test('isPacAvailable returns true when pac --version exits 0', () => {
-  spawnSyncImpl = () => fakeSuccess('1.0.0');
+    assert.strictEqual(isPacAvailable(), false);
+  });
 
-  assert.equal(pac.isPacAvailable(), true);
+  it('pacVersion returns the trimmed version string', () => {
+    setPacRunner(
+      makeRunner({
+        'pac --version': { status: 0, stdout: '  1.2.3  \n', stderr: '' },
+      })
+    );
 
-  const args = lastCallArgs();
-  assert.deepEqual(args[1], ['--version']);
-});
+    assert.strictEqual(pacVersion(), '1.2.3');
+  });
 
-test('isPacAvailable returns false when pac --version fails', () => {
-  spawnSyncImpl = () => fakeFailure(1, 'error');
+  it('exportSolution builds correct args for unmanaged export', () => {
+    let capturedArgs: string[] = [];
+    setPacRunner((command, args) => {
+      capturedArgs = [command, ...args];
+      return { status: 0, stdout: '', stderr: '' };
+    });
 
-  assert.equal(pac.isPacAvailable(), false);
-});
+    exportSolution({ name: 'MySolution', outFile: '/tmp/out.zip' });
+    assert.deepStrictEqual(capturedArgs, [
+      'pac',
+      'solution',
+      'export',
+      '--name',
+      'MySolution',
+      '--path',
+      '/tmp/out.zip',
+    ]);
+  });
 
-// ---------------------------------------------------------------------------
-// Solution lifecycle helpers
-// ---------------------------------------------------------------------------
+  it('exportSolution includes --managed true when requested', () => {
+    let capturedArgs: string[] = [];
+    setPacRunner((command, args) => {
+      capturedArgs = [command, ...args];
+      return { status: 0, stdout: '', stderr: '' };
+    });
 
-test('exportSolution builds correct args for unmanaged export', () => {
-  spawnSyncImpl = () => fakeSuccess();
+    exportSolution({ name: 'MySolution', outFile: '/tmp/out.zip', managed: true });
+    assert.deepStrictEqual(capturedArgs, [
+      'pac',
+      'solution',
+      'export',
+      '--name',
+      'MySolution',
+      '--path',
+      '/tmp/out.zip',
+      '--managed',
+      'true',
+    ]);
+  });
 
-  pac.exportSolution({ name: 'MySolution', outFile: './out.zip' });
+  it('importSolution builds correct args', () => {
+    let capturedArgs: string[] = [];
+    setPacRunner((command, args) => {
+      capturedArgs = [command, ...args];
+      return { status: 0, stdout: '', stderr: '' };
+    });
 
-  const args = lastCallArgs();
-  assert.equal(args[0], 'pac');
-  assert.deepEqual(args[1], ['solution', 'export', '--name', 'MySolution', '--path', './out.zip']);
-});
+    importSolution({ path: '/tmp/in.zip' });
+    assert.deepStrictEqual(capturedArgs, [
+      'pac',
+      'solution',
+      'import',
+      '--path',
+      '/tmp/in.zip',
+      '--publish-changes',
+      'true',
+    ]);
+  });
 
-test('exportSolution includes --managed true when requested', () => {
-  spawnSyncImpl = () => fakeSuccess();
+  it('publishCustomizations builds correct args', () => {
+    let capturedArgs: string[] = [];
+    setPacRunner((command, args) => {
+      capturedArgs = [command, ...args];
+      return { status: 0, stdout: '', stderr: '' };
+    });
 
-  pac.exportSolution({ name: 'MySolution', outFile: './out.zip', managed: true });
+    publishCustomizations();
+    assert.deepStrictEqual(capturedArgs, [
+      'pac',
+      'solution',
+      'import',
+      '--publish-changes',
+      'true',
+    ]);
+  });
 
-  const args = lastCallArgs();
-  assert.deepEqual(args[1], [
-    'solution',
-    'export',
-    '--name',
-    'MySolution',
-    '--path',
-    './out.zip',
-    '--managed',
-    'true',
-  ]);
-});
+  it('runPac passes cwd through to the runner', () => {
+    let capturedOptions: SpawnSyncOptionsWithStringEncoding | undefined;
+    setPacRunner((command, args, options) => {
+      capturedOptions = options;
+      return { status: 0, stdout: '', stderr: '' };
+    });
 
-test('importSolution builds correct args', () => {
-  spawnSyncImpl = () => fakeSuccess();
-
-  pac.importSolution({ path: './solution.zip' });
-
-  const args = lastCallArgs();
-  assert.deepEqual(args[1], [
-    'solution',
-    'import',
-    '--path',
-    './solution.zip',
-    '--publish-changes',
-    'true',
-  ]);
-});
-
-test('publishCustomizations builds correct args', () => {
-  spawnSyncImpl = () => fakeSuccess();
-
-  pac.publishCustomizations();
-
-  const args = lastCallArgs();
-  assert.deepEqual(args[1], ['solution', 'import', '--publish-changes', 'true']);
-});
-
-// ---------------------------------------------------------------------------
-// cwd plumbing
-// ---------------------------------------------------------------------------
-
-test('runPac passes cwd through to spawnSync', () => {
-  spawnSyncImpl = () => fakeSuccess();
-  const cwd = path.join(os.tmpdir(), 'pp-pac-cwd-test');
-
-  pac.runPac(['solution', 'list'], { cwd });
-
-  const args = lastCallArgs();
-  const opts = args[2] as { cwd?: string };
-  assert.equal(opts.cwd, cwd);
+    runPac(['solution', 'list'], { cwd: '/tmp/workspace' });
+    assert.strictEqual(capturedOptions?.cwd, '/tmp/workspace');
+  });
 });
