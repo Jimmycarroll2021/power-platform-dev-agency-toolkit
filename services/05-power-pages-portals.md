@@ -2,6 +2,18 @@
 title: "Service 05 — Power Pages Portals"
 description: "External-facing portal development on Power Pages — site configuration, Liquid templates, web roles, and Dataverse-backed authenticated experiences."
 category: service
+verified_as_of: 2026-06-19
+platform_state: 2026-H1
+sources:
+  - https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq
+  - https://learn.microsoft.com/en-us/power-pages/admin/capacity-management
+  - https://learn.microsoft.com/en-us/power-pages/go-live/assign-licensing
+  - https://learn.microsoft.com/en-us/power-platform/admin/capacity-storage
+  - https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/types
+  - https://learn.microsoft.com/en-us/ai-builder/credit-management
+  - https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management
+  - https://learn.microsoft.com/en-us/entra/external-id/external-identities-pricing
+  - https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/pages
 related:
   - ../playbooks/power-pages-site.md
   - ../power-platform/power-pages-patterns.md
@@ -61,7 +73,7 @@ Concrete artifacts delivered in a typical engagement:
 - **Authentication configuration** for the chosen identity provider(s), including registration/invite flow.
 - **Site settings, content snippets, and environment-specific configuration** captured as code/configuration, not click-ops.
 - **Theme and responsive styling** verified across breakpoints and major browsers.
-- **Deployment package** — site exported and moved through environments via the Power Pages deployment tooling / pipeline.
+- **Deployment package** — site configuration exported and moved through environments via the Power Platform CLI (`pac pages download` / `pac pages upload`, formerly `pac powerpages` / `pac paportal`) with deployment profiles, or packaged inside a managed solution. ([pac pages command reference](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/pages))
 - **Documentation:** solution design (see ../templates/solution-design-template.md), runbook, and handover notes.
 
 ## Out of Scope
@@ -120,15 +132,15 @@ Run `pp-agency estimate-licensing` and produce a client proposal from ../templat
 
 ## Licensing & Capacity Considerations
 
-Power Pages licensing is distinct from Power Apps and changes regularly — **verify everything below against current Microsoft licensing docs before quoting.**
+Power Pages licensing is distinct from Power Apps and changes regularly — **verify everything below against current Microsoft licensing docs before quoting.** (Verified 2026-06-19 against Microsoft Learn; platform state 2026-H1.)
 
-- **Power Pages is licensed by usage, not by maker seat.** Current model is **capacity packs** based on **authenticated logins per site per month** and **anonymous page views per site per month**, with separate pack sizes. *(Needs verification against current Microsoft docs — pack sizes, view/login thresholds, and overage behaviour change.)*
-- **Authenticated vs anonymous** capacity is metered separately — sizing depends on your real persona mix. Over-provisioning wastes spend; under-provisioning throttles users.
-- **Dataverse capacity:** every portal record write/read consumes Dataverse database, file, and log storage from the tenant capacity entitlement. External-facing portals can grow storage fast — size and monitor. *(Needs verification against current Dataverse capacity entitlements.)*
-- **Premium connectors / Power Automate:** any flow triggered by portal activity that touches a premium connector requires appropriate Power Automate / premium licensing on the *flow owner* or via per-flow plans. Portal end users do **not** carry Power Apps Premium / Per-App licences, but the back-office automation might. *(Needs verification against current connector licensing.)*
-- **AI Builder:** if the portal triggers AI Builder (e.g. form/document processing on submitted files), that consumes **AI Builder credits** from the tenant pool — budget and monitor separately.
-- **Copilot Studio:** if a Copilot Studio agent is embedded in the portal, **message consumption** is billed per the Copilot Studio metering model — separate from Power Pages capacity. *(Needs verification against current Copilot Studio message pricing.)*
-- **Identity provider costs:** Azure AD B2C (or Entra External ID) has its own pricing tier and MAU billing outside Power Platform. *(Needs verification against current Entra External ID pricing.)*
+- **Power Pages is licensed by usage, not by maker seat.** The current model is **per-website capacity** metered as **authenticated MAU (monthly active users) per site/month** and **anonymous MAU per site/month** — i.e. unique users, *not* logins or page views (the old logins/page-views metric is the now-retired **legacy** model and is no longer available for purchase). Authenticated capacity is sold in packs of **100 users**; anonymous capacity in packs of **500 users**. A pay-as-you-go (Azure-metered) option also exists, but you cannot mix subscription and pay-as-you-go in the same environment. ([Power Platform licensing FAQs — Power Pages](https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq#power-pages), [Manage and monitor capacity](https://learn.microsoft.com/en-us/power-pages/admin/capacity-management))
+- **Authenticated vs anonymous** capacity is metered separately and managed/assigned at the environment level — sizing depends on your real persona mix. Over-provisioning wastes spend; under-provisioning leads to overage. Note: if an anonymous user signs in within the same UTC day they are counted only as authenticated (not double-counted), and bot/crawler hits on anonymous pages aren't counted. ([Power Platform licensing FAQs — Power Pages](https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq#power-pages))
+- **Dataverse capacity:** every portal record write/read consumes Dataverse **database, file, and log** storage from the tenant capacity entitlement (database and file are pooled at tenant level; log is tracked separately). External-facing portals can grow storage fast — size and monitor. Power Pages capacity packs *do* include some Dataverse allowance accrued to the tenant (per Microsoft's licensing FAQ, each authenticated-user pack and each anonymous-user pack carries an included Dataverse database/file allotment), so check the FAQ before buying standalone Dataverse add-ons. ([Dataverse capacity-based storage details](https://learn.microsoft.com/en-us/power-platform/admin/capacity-storage), [Power Platform licensing FAQs — Power Pages](https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq#power-pages))
+- **Premium connectors / Power Automate:** any flow triggered by portal activity that touches a premium connector requires appropriate Power Automate licensing. For automated/scheduled flows the **flow owner's** license context applies (Power Automate Premium per-user), or the flow can carry a **Process / per-flow** license that lets anyone use it regardless of their own licence. Portal end users do **not** carry Power Apps Premium / Per-App licences, but the back-office automation must be licensed. ([Types of Power Automate licenses](https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/types))
+- **AI Builder:** if the portal triggers AI Builder (e.g. form/document processing on submitted files), that consumes capacity from the tenant pool. As of the November 2025 transition, AI Builder in Power Apps / cloud flows consumes **AI Builder credits first, then Copilot Credits** when AI Builder credits are absent or exhausted (in a Copilot Studio agent context it always consumes Copilot Credits). Credits don't roll over month to month — budget and monitor separately. ([Licensing and AI Builder credits](https://learn.microsoft.com/en-us/ai-builder/credit-management))
+- **Copilot Studio:** if a Copilot Studio agent is embedded in the portal, consumption is billed in **Copilot Credits** — as of 1 September 2025 the common currency changed from "messages" to Copilot Credits, available via prepaid capacity packs or pay-as-you-go Azure meters, separate from Power Pages capacity and not rolled over month to month. ([Billing rates and management — Copilot Studio](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management))
+- **Identity provider costs:** the current CIAM provider is **Microsoft Entra External ID** (Azure AD B2C is the legacy predecessor and is being superseded). Entra External ID is billed by **monthly active users (MAU)** outside Power Platform, with the first **50,000 MAU free** and additional MAU charged per user; premium add-ons (e.g. SMS authentication) are charged separately. Confirm the current per-MAU rate on the official pricing page before quoting. ([Microsoft Entra External ID pricing](https://learn.microsoft.com/en-us/entra/external-id/external-identities-pricing))
 
 Always run `pp-agency estimate-licensing` and walk the client through ../checklists/licensing-and-capacity.md and ../checklists/connectors-and-premium.md before commitment.
 
@@ -195,7 +207,7 @@ Generate gate checklists on demand: `pp-agency checklist -t qa`, `pp-agency chec
 - **Permission model leakage** — misconfigured table permissions are the top external-portal security risk. Mandatory peer review and explicit anonymous-access testing.
 - **Capacity surprise** — anonymous page views and authenticated logins can spike; unmonitored capacity packs cause throttling or overage cost. Set up monitoring (../power-platform/monitoring-and-telemetry.md).
 - **Identity provider complexity** — B2C / Entra External ID configuration, custom policies, and invite flows are common schedule risks; spike early.
-- **Licensing model drift** — Power Pages capacity pricing has changed multiple times; any quote must be re-verified against current Microsoft docs (see verification caveats above).
+- **Licensing model drift** — Power Pages capacity pricing has changed multiple times (the old logins/page-views metric was retired in favour of authenticated/anonymous MAU, and AI Builder + Copilot Studio moved to Copilot Credits during 2025); any quote must be re-verified against current Microsoft docs (see the cited Licensing & Capacity section above). The figures above were verified against Microsoft Learn on 2026-06-19.
 - **Accessibility / compliance** — public-sector portals may carry WCAG obligations not covered by default themes; confirm requirements in discovery.
 - **Branding scope creep** — pixel-perfect custom design can exceed low-code effort; agree fidelity up front.
 

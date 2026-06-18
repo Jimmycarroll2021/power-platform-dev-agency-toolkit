@@ -2,6 +2,22 @@
 title: "Service 09 — Migration & Upgrade"
 description: "Legacy system migration to Power Platform: migration plan, data mapping, and cutover runbook delivered with low downtime and verified data integrity."
 category: service
+verified_as_of: 2026-06-19
+platform_state: 2026-H1
+sources:
+  - https://learn.microsoft.com/en-us/troubleshoot/sharepoint/lists-and-libraries/items-exceeds-list-view-threshold
+  - https://learn.microsoft.com/en-us/microsoft-365/community/large-lists-large-libraries-in-sharepoint
+  - https://learn.microsoft.com/en-us/power-apps/maker/data-platform/data-platform-entity-licenses
+  - https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq
+  - https://learn.microsoft.com/en-us/power-platform/admin/about-powerapps-perapp
+  - https://learn.microsoft.com/en-us/power-platform/admin/capacity-storage
+  - https://learn.microsoft.com/en-us/power-platform/admin/add-storage
+  - https://learn.microsoft.com/en-us/power-platform/admin/api-request-limits-allocations
+  - https://learn.microsoft.com/en-us/power-apps/developer/data-platform/api-limits
+  - https://learn.microsoft.com/en-us/ai-builder/credit-management
+  - https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management
+  - https://learn.microsoft.com/en-us/power-platform/admin/managed-environment-licensing
+  - https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/data
 related:
   - "../playbooks/sharepoint-to-dataverse-migration.md"
   - "../checklists/scope-validation.md"
@@ -34,7 +50,7 @@ Measurable outcomes:
 
 Who buys this:
 
-- Organisations on **SharePoint lists hitting the 5,000-item view threshold**, 30M-item list limits, or needing relational integrity SharePoint cannot provide.
+- Organisations on **SharePoint lists hitting the 5,000-item list view threshold** ([SharePoint Online enforces a 5,000-item view threshold that cannot be raised; mitigate with column indexing and filtered views](https://learn.microsoft.com/en-us/troubleshoot/sharepoint/lists-and-libraries/items-exceeds-list-view-threshold)), approaching the [~30-million-item list/library ceiling](https://learn.microsoft.com/en-us/microsoft-365/community/large-lists-large-libraries-in-sharepoint), or needing relational integrity SharePoint cannot provide.
 - Teams running **Access / Excel "shadow IT"** apps that have outgrown the desktop and need governed, multi-user, web-based replacements.
 - Clients on **end-of-life or unsupported platforms** (classic SharePoint workflows being retired, InfoPath, legacy on-prem LOB apps).
 - Existing Power Platform tenants doing an **upgrade / consolidation** — merging environments, modernising canvas to model-driven, or moving from a Default-environment sprawl to a governed ALM landscape.
@@ -105,7 +121,7 @@ Team roles (link to agent briefs):
 
 Planning ranges only — **indicative; confirm current rates** at proposal time. Not a quote and not a client commitment.
 
-- **Day-rate band:** senior Power Platform consulting typically falls in an indicative band of roughly **AUD 1,200–2,200 / day** depending on seniority and role mix. (Needs verification against current commercial rate card.)
+- **Day-rate band:** senior Power Platform consulting typically falls in an indicative band of roughly **AUD 1,200–2,200 / day** depending on seniority and role mix. (Commercial rate card — not a Microsoft-published figure; unverified as of 2026-06-19 — confirm against current commercial rate card.)
 - **Indicative engagement totals** (derive from T-shirt size × blended day rate):
   - S: low single-digit-thousands to ~AUD 15k.
   - M: ~AUD 25k–60k.
@@ -117,13 +133,13 @@ Planning ranges only — **indicative; confirm current rates** at proposal time.
 
 Verify all of the following with the client and against current Microsoft documentation **before build**. Run the [licensing & capacity checklist](../checklists/licensing-and-capacity.md) and [connectors & premium checklist](../checklists/connectors-and-premium.md).
 
-- **Dataverse premium entitlement** — building model-driven apps and standard Dataverse tables on the target requires a **Power Apps Premium** (or qualifying Dynamics 365) license per user, or a **Power Apps Per App** plan scoped to the app. SharePoint-only solutions may have run on Seeded/standard entitlements; migrating *into* Dataverse changes the licensing footprint. (Needs verification against current Microsoft licensing docs.)
-- **Dataverse capacity (storage)** — migrated data consumes **Database**, **File**, and **Log** capacity. Large migrations can exceed the default tenant allocation; estimate target storage from source row counts and attachment volumes, and budget for additional capacity add-ons if required. (Capacity entitlements and add-on pricing — Needs verification against current Microsoft docs.) Use `estimate-licensing` to produce an indicative cost sheet.
-- **Premium connectors** — extracting from legacy SQL, on-prem sources (via the on-premises data gateway), or third-party systems typically requires **premium connectors**, which require a premium Power Platform license. Confirm before designing the extract path.
-- **API request limits / service protection** — bulk migration loads are subject to Dataverse service-protection limits and per-license **daily API request entitlements**. High-volume loads may need throttling, batching, or staged windows. (Specific request limits — Needs verification against current Microsoft docs.)
-- **AI Builder credits** — if the migration includes document/data extraction via AI Builder (e.g., OCR of legacy attachments), this consumes **AI Builder credits**, sold separately. (Needs verification against current Microsoft docs.)
-- **Copilot Studio messages** — out of scope for pure migration; flag only if a conversational front-end is added. Copilot Studio is billed by **message capacity packs**. (Needs verification against current Microsoft docs.)
-- **Environment & ALM** — production migrations should target a dedicated, governed environment (not the Default environment). Confirm available environments and any Managed Environments premium requirement.
+- **Dataverse premium entitlement** — building model-driven apps and creating/using standard Dataverse tables on the target requires a **Power Apps Premium** (per-user) or qualifying Dynamics 365 license, or a **Power Apps Per App** plan scoped to the app/environment. Creating and using custom tables in a standard (non-default, non-Teams) Dataverse environment is a premium feature ([License requirements for tables](https://learn.microsoft.com/en-us/power-apps/maker/data-platform/data-platform-entity-licenses); [Power Apps Per App plans](https://learn.microsoft.com/en-us/power-platform/admin/about-powerapps-perapp)). SharePoint-only solutions may have run on Microsoft 365 seeded entitlements; migrating *into* Dataverse changes the licensing footprint and adds premium cost.
+- **Dataverse capacity (storage)** — Dataverse uses a capacity-based model with three separately tracked storage types: **Database**, **File**, and **Log** ([Dataverse capacity-based storage details](https://learn.microsoft.com/en-us/power-platform/admin/capacity-storage)). Migrated rows, attachments, and audit data consume these respectively. Large migrations can exceed the per-tenant default/seeded allocation; estimate target storage from source row counts and attachment volumes, and budget for capacity add-ons (purchasable in 1-GB increments as Database/File/Log add-ons) if required ([Add more Dataverse capacity](https://learn.microsoft.com/en-us/power-platform/admin/add-storage)). Use `estimate-licensing` to produce an indicative cost sheet (treat its figures as planning estimates only).
+- **Premium connectors** — extracting from legacy SQL, on-prem sources (via the on-premises data gateway), or third-party systems typically requires **premium connectors**, which require a standalone (premium) Power Apps or Power Automate license; Microsoft 365 seeded licenses do not cover premium/on-prem/custom connectors, and the on-premises data gateway is itself a premium capability ([Power Platform licensing FAQs](https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq)). Confirm before designing the extract path.
+- **API request limits / service protection** — bulk migration loads are subject to two distinct controls: short-window **service-protection API limits** (evaluated per user; exceeding them returns HTTP 429 / `TooManyRequests`) ([Service protection API limits](https://learn.microsoft.com/en-us/power-apps/developer/data-platform/api-limits)) and per-license **daily (24-hour) API request entitlements** that vary by license type and stack across multiple paid licenses ([Requests limits and allocations](https://learn.microsoft.com/en-us/power-platform/admin/api-request-limits-allocations)). High-volume loads may need throttling, batching, or staged windows. Confirm the specific per-license daily figures against the Requests limits and allocations page at proposal time, as Microsoft updates these tables.
+- **AI Builder capacity** — if the migration includes document/data extraction via AI Builder (e.g., OCR of legacy attachments), this consumes **AI Builder credits**. Note the model has shifted: **new customers can no longer buy the AI Builder capacity add-on and must purchase Copilot Credits instead**; existing customers may renew/true-up AI Builder add-ons only up to **1 November 2026**, and seeded AI Builder credits in premium licenses are removed on that date ([Licensing and AI Builder credits](https://learn.microsoft.com/en-us/ai-builder/credit-management)). Budget AI features as Copilot Credits for any new engagement.
+- **Copilot Studio / Copilot Credits** — out of scope for pure migration; flag only if a conversational front-end is added. As of **1 September 2025** the billing currency moved from "messages" to **Copilot Credits**, obtained via prepaid **capacity packs** (each Copilot Studio capacity pack = 25,000 Copilot Credits/month, tenant-wide) or **pay-as-you-go** Azure meters ([Copilot Studio billing rates and management](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management)).
+- **Environment & ALM** — production migrations should target a dedicated, governed environment (not the Default environment). Confirm available environments and the **Managed Environments** premium requirement: when an environment is managed, every active user (makers and consumers, not just admins) must hold a qualifying premium license such as Power Apps Premium, Power Automate Premium, or an equivalent Dynamics 365 license ([Managed Environments licensing](https://learn.microsoft.com/en-us/power-platform/admin/managed-environment-licensing)).
 
 > Estimate command: `node packages/cli/dist/index.js estimate-licensing --currency aud` (or `pp-agency estimate-licensing` after `npm link`). Treat all output as indicative planning figures requiring verification.
 

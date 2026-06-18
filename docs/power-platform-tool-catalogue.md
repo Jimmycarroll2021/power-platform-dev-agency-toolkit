@@ -1,8 +1,26 @@
+---
+verified_as_of: 2026-06-19
+platform_state: 2026-H1
+sources:
+  - https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq
+  - https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/types
+  - https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management
+  - https://learn.microsoft.com/en-us/ai-builder/credit-management
+  - https://learn.microsoft.com/en-us/ai-builder/endofaibcredits
+  - https://learn.microsoft.com/en-us/power-platform/admin/capacity-storage
+  - https://learn.microsoft.com/en-us/power-apps/maker/canvas-apps/delegation-overview
+  - https://learn.microsoft.com/en-us/power-apps/developer/data-platform/analyze-performance
+  - https://learn.microsoft.com/en-us/power-automate/business-process-flows-overview
+  - https://learn.microsoft.com/en-us/ai-builder/prediction-prereq
+  - https://learn.microsoft.com/en-us/ai-builder/create-form-processing-model
+  - https://www.microsoft.com/en-us/power-platform/products/power-pages/pricing
+---
+
 # Power Platform Tool Catalogue
 
-> **Version**: 1.0 | **Last updated**: 2025-01-15
+> **Version**: 1.1 | **Last updated**: 2026-06-19 | **Platform state**: 2026-H1
 > **Purpose**: Comprehensive catalogue of every tool, surface, and component in the Microsoft Power Platform ecosystem.
-> **Needs verification against current Microsoft docs**: Licensing and preview status change frequently. Verify before quoting.
+> **Licensing/preview status change frequently** — facts below are cited inline to Microsoft Learn and were verified as of 2026-06-19. Re-verify list prices against the current Microsoft pricing pages before quoting to a client; Microsoft notes published prices are indicative only.
 
 ---
 
@@ -34,10 +52,10 @@
 | **Description** | Flows that start automatically when a trigger event occurs (new email, new row, webhook, etc.) |
 | **Main use cases** | Real-time data sync, notification systems, event-driven automation, approval routing |
 | **Best-fit project types** | Integration projects, approval workflows, notification systems |
-| **Required license** | Power Automate Per User ($15/user/mo) or Per Flow ($500/flow/mo) or seeded for standard only |
-| **Premium/non-premium** | Premium connectors require premium license |
+| **Required license** | Power Automate Premium ($15/user/mo — the offer formerly "per user") or Power Automate Process (a capacity license allocated to a cloud flow, formerly "per flow"); standard connectors are seeded with M365. ([license types](https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/types), [licensing FAQ](https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq)) |
+| **Premium/non-premium** | Premium connectors require Power Automate Premium or a Process license on the flow ([license types](https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/types)) |
 | **Authentication/security model** | User-based OAuth connections; for ALM use connection references |
-| **Key limitations and quotas** | 50MB file size (1GB with chunking), 120-day run history, 30-day timeout, 100k actions per run |
+| **Key limitations and quotas** | 100MB message size limit (use chunking for larger), 28-day default run-history retention, 30-day flow timeout. Action throughput is governed by Power Platform request limits / action limits rather than a fixed "100k actions per run" cap (unverified as of 2026-06-19 — confirm against Microsoft Learn) — see [limits and config](https://learn.microsoft.com/en-us/power-automate/limits-and-config) and [Power Platform request limits](https://learn.microsoft.com/en-us/power-platform/admin/api-request-limits-allocations) |
 | **Common mistakes** | Not using trigger conditions (causes infinite loops), hardcoding emails, no error handling |
 | **Current status** | Stable |
 | **Microsoft Docs URL** | https://learn.microsoft.com/en-us/power-automate/triggers-introduction |
@@ -73,7 +91,7 @@
 | **Required license** | Same as automated flows |
 | **Premium/non-premium** | Premium connectors require premium license |
 | **Authentication/security model** | Uses flow owner's connections |
-| **Key limitations and quotas** | Min frequency: 1 minute (premium), 15 minutes (standard). Max: configurable. Runs for 30 days max. |
+| **Key limitations and quotas** | Recurrence can be configured down to a 1-minute interval; effective minimum trigger frequency is governed by your plan's Power Platform request limits (per-plan minute-level frequency tiers unverified as of 2026-06-19 — confirm against Microsoft Learn). 30-day flow timeout. See [limits and config](https://learn.microsoft.com/en-us/power-automate/limits-and-config) |
 | **Common mistakes** | Running too frequently, not checking for existing data (duplicate processing), no concurrency control |
 | **Current status** | Stable |
 | **Microsoft Docs URL** | https://learn.microsoft.com/en-us/power-automate/triggers-introduction |
@@ -88,8 +106,8 @@
 | **Description** | UI automation that runs on a user's desktop while they watch/interact |
 | **Main use cases** | Assisted data entry, guided workflows, repetitive UI tasks |
 | **Best-fit project types** | Legacy system automation, data migration, repetitive data entry |
-| **Required license** | Included in Power Automate Premium |
-| **Premium/non-premium** | Included in premium |
+| **Required license** | Included in Power Automate Premium (each Premium user license carries one attended bot) ([license types](https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/types)) |
+| **Premium/non-premium** | Included in Power Automate Premium ([license types](https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/types)) |
 | **Authentication/security model** | Windows user account |
 | **Key limitations and quotas** | Requires logged-in user session, screen must be unlocked, Windows only |
 | **Common mistakes** | Building selectors that break on UI changes, not handling unexpected popups |
@@ -106,10 +124,10 @@
 | **Description** | UI automation that runs on a dedicated machine without human supervision |
 | **Main use cases** | Overnight batch processing, 24/7 automation, server-based RPA |
 | **Best-fit project types** | High-volume legacy automation, unattended data processing |
-| **Required license** | Unattended RPA add-on ($150/bot/mo) |
-| **Premium/non-premium** | Premium add-on |
+| **Required license** | Power Automate Process license allocated to the machine (each Process license = one unattended bot; this is the model the former "Unattended RPA add-on" was aligned onto). Pay-as-you-go is also available at $3 per unattended desktop-flow run. ([license types](https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/types), [licensing FAQ](https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq)) |
+| **Premium/non-premium** | Premium capacity license (the machine must first be registered by a Power Automate Premium user) ([license types](https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/types)) |
 | **Authentication/security model** | Dedicated service account |
-| **Key limitations and quotas** | One bot license = one concurrent unattended session, machine dependency |
+| **Key limitations and quotas** | One Process license / unattended bot runs one desktop flow at a time per machine; for parallel runs allocate one Process license per concurrent run. Machine dependency. ([license types](https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/types)) |
 | **Common mistakes** | Not buying enough bot licenses, flows failing due to UI changes |
 | **Current status** | Stable |
 | **Microsoft Docs URL** | https://learn.microsoft.com/en-us/power-automate/desktop-flows/ |
@@ -127,7 +145,7 @@
 | **Required license** | Included in Power Apps license |
 | **Premium/non-premium** | Included |
 | **Authentication/security model** | Dataverse security roles |
-| **Key limitations and quotas** | Max 10 stages per BPF, limited branching logic, model-driven only |
+| **Key limitations and quotas** | Max 30 stages per process and 30 steps per stage; up to 10 activated BPF processes per table; multi-table processes span at most 5 tables; model-driven only ([BPF overview](https://learn.microsoft.com/en-us/power-automate/business-process-flows-overview), [BPF dev limits](https://learn.microsoft.com/en-us/power-automate/developer/business-process-flows-code)) |
 | **Common mistakes** | Trying to replace cloud flows with BPFs, over-complicating stages |
 | **Current status** | Stable |
 | **Microsoft Docs URL** | https://learn.microsoft.com/en-us/power-automate/business-process-flows-overview |
@@ -146,10 +164,10 @@
 | **Description** | Pixel-perfect, formula-driven apps with drag-and-drop design and Excel-like Power Fx language |
 | **Main use cases** | Mobile apps, custom forms, calculators, inspection tools, event apps |
 | **Best-fit project types** | Field service, mobile-first, quick internal tools, custom UX projects |
-| **Required license** | Power Apps Per App ($5) or Per User ($20/mo) |
+| **Required license** | Power Apps Premium $20/user/mo ($12/user/mo at 2,000+ licences) — the offer formerly named "Power Apps per user". Power Apps per app ($5/user/app/mo) still exists but went end-of-sale for new MPSA customers on 2 Jan 2026 (CSP unaffected). ([licensing FAQ](https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq), [per-app end of sale](https://www.microsoft.com/en-us/licensing/news/power-app-per-app-end-of-sale)) |
 | **Premium/non-premium** | Premium |
-| **Authentication/security model** | Azure AD, implicit user context |
-| **Key limitations and quotas** | 2000 non-delegable rows, 500 local collection items, 2MB app size |
+| **Authentication/security model** | Microsoft Entra ID, implicit user context |
+| **Key limitations and quotas** | Delegation row limit defaults to 500 and is configurable up to 2,000; non-delegable queries return only that many rows. App size and local collection limits apply. ([delegation overview](https://learn.microsoft.com/en-us/power-apps/maker/canvas-apps/delegation-overview)) |
 | **Common mistakes** | Not delegating queries, using ClearCollect on large data, hardcoding IDs |
 | **Current status** | Stable |
 | **Microsoft Docs URL** | https://learn.microsoft.com/en-us/power-apps/maker/canvas-apps/ |
@@ -164,9 +182,9 @@
 | **Description** | Auto-generated UI from Dataverse metadata: forms, views, charts, dashboards |
 | **Main use cases** | CRM, case management, service desk, compliance tracking, data-heavy apps |
 | **Best-fit project types** | Enterprise business apps, security-heavy apps, complex data relationships |
-| **Required license** | Power Apps Per App or Per User |
+| **Required license** | Power Apps Premium (per user) or Power Apps per app ([licensing FAQ](https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq)) |
 | **Premium/non-premium** | Premium |
-| **Authentication/security model** | Azure AD + Dataverse security roles + BU hierarchy |
+| **Authentication/security model** | Microsoft Entra ID + Dataverse security roles + BU hierarchy |
 | **Key limitations and quotas** | Dataverse-only, less UI control, requires security model design |
 | **Common mistakes** | Over-complicating forms, not designing BU structure, too many form columns |
 | **Current status** | Stable |
@@ -243,7 +261,7 @@
 | **Required license** | Included with Power Apps/Automate premium |
 | **Premium/non-premium** | Included |
 | **Authentication/security model** | Dataverse security roles |
-| **Key limitations and quotas** | API limits per user/environment, storage capacity limits |
+| **Key limitations and quotas** | Service-protection API limits per user/server; tenant-pooled Dataverse capacity (database/file/log) shared across environments, bought in 1-GB increments, with a one-time default tenant grant on first qualifying licence plus per-licence grants. ([capacity storage](https://learn.microsoft.com/en-us/power-platform/admin/capacity-storage), [API limits](https://learn.microsoft.com/en-us/power-apps/developer/data-platform/api-limits)) |
 | **Common mistakes** | Not using solutions for ALM, not indexing lookup columns |
 | **Current status** | Stable |
 | **Microsoft Docs URL** | https://learn.microsoft.com/en-us/power-apps/maker/data-platform/ |
@@ -297,7 +315,7 @@
 | **Required license** | Included |
 | **Premium/non-premium** | Included (developer skill required) |
 | **Authentication/security model** | Runs in system context or calling user context |
-| **Key limitations and quotas** | 2-minute timeout, sandbox isolation, must be registered via Plugin Registration Tool |
+| **Key limitations and quotas** | Hard 2-minute time limit for the message operation incl. all synchronous plug-ins (TimeoutException + rollback if exceeded); runs in the isolated sandbox service with CPU/memory limits; register via Plugin Registration Tool or pac CLI ([analyze plug-in performance](https://learn.microsoft.com/en-us/power-apps/developer/data-platform/analyze-performance)) |
 | **Common mistakes** | Not handling exceptions, infinite loops with recursive triggers, no tracing |
 | **Current status** | Stable |
 | **Microsoft Docs URL** | https://learn.microsoft.com/en-us/power-apps/developer/data-platform/plug-ins |
@@ -370,10 +388,10 @@
 | **Description** | Extract structured data from PDFs and images using prebuilt or custom models |
 | **Main use cases** | Invoice processing, form extraction, contract parsing, receipt processing |
 | **Best-fit project types** | Document-heavy workflows, AP automation, compliance |
-| **Required license** | AI Builder credits |
+| **Required license** | AI Builder credits, or Copilot Credits (in apps/flows AI Builder credits are consumed first, then Copilot Credits when exhausted). Seeded AI Builder credits and the standalone AI Builder capacity add-on are being retired — seeded credits are removed on 1 Nov 2026 and new customers must purchase Copilot Credits. ([credit management](https://learn.microsoft.com/en-us/ai-builder/credit-management), [end of AI Builder credits](https://learn.microsoft.com/en-us/ai-builder/endofaibcredits)) |
 | **Premium/non-premium** | Premium |
 | **Authentication/security model** | Environment-scoped models |
-| **Key limitations and quotas** | Credit consumption varies by model type, training requires 5+ sample documents |
+| **Key limitations and quotas** | Credit consumption varies by model type; a custom (fixed-template) model needs at least 5 sample documents per collection sharing the same layout (5–20 per collection); ≤20 MB per document ([create document processing model](https://learn.microsoft.com/en-us/ai-builder/create-form-processing-model), [document processing requirements](https://learn.microsoft.com/en-us/ai-builder/form-processing-model-requirements)) |
 | **Common mistakes** | Not training with enough variety, not implementing human review |
 | **Current status** | Stable |
 | **Microsoft Docs URL** | https://learn.microsoft.com/en-us/ai-builder/form-processing-model |
@@ -388,9 +406,9 @@
 | **Description** | Create and use GPT-based prompts in Power Automate and Power Apps |
 | **Main use cases** | Text generation, summarization, classification, JSON extraction, translation |
 | **Best-fit project types** | Content generation, intelligent automation, text processing |
-| **Required license** | AI Builder credits (GPT actions consume credits) |
+| **Required license** | AI Builder credits / Copilot Credits (GPT prompt actions consume credits; AI Builder credits first, then Copilot Credits) ([credit management](https://learn.microsoft.com/en-us/ai-builder/credit-management)) |
 | **Premium/non-premium** | Premium |
-| **Authentication/security model** | Azure AD |
+| **Authentication/security model** | Microsoft Entra ID |
 | **Key limitations and quotas** | Token limits per prompt, credit consumption per call, region availability |
 | **Common mistakes** | Not handling hallucinations, not validating outputs, prompt injection risk |
 | **Current status** | Stable |
@@ -406,10 +424,10 @@
 | **Description** | Train models to predict outcomes based on historical Dataverse data |
 | **Main use cases** | Churn prediction, lead scoring, delay prediction, risk assessment |
 | **Best-fit project types** | CRM optimization, proactive service, risk management |
-| **Required license** | AI Builder credits |
+| **Required license** | AI Builder credits / Copilot Credits ([credit management](https://learn.microsoft.com/en-us/ai-builder/credit-management)) |
 | **Premium/non-premium** | Premium |
 | **Authentication/security model** | Dataverse security |
-| **Key limitations and quotas** | Requires minimum 300 historical records with outcomes, Dataverse only |
+| **Key limitations and quotas** | Minimum 50 rows of historical outcomes to train (≥10 rows per label class); 1,000+ rows recommended for accuracy; Dataverse only ([prediction prerequisites](https://learn.microsoft.com/en-us/ai-builder/prediction-prereq)) |
 | **Common mistakes** | Insufficient training data, not refreshing model regularly |
 | **Current status** | Stable |
 | **Microsoft Docs URL** | https://learn.microsoft.com/en-us/ai-builder/prediction-model |
@@ -423,15 +441,15 @@
 
 | Field | Detail |
 |-------|--------|
-| **Name** | Copilot Studio Agent (formerly PVA Bot) |
+| **Name** | Copilot Studio Agent (Power Virtual Agents was renamed Microsoft Copilot Studio in Nov 2023) |
 | **Category** | Conversational AI |
-| **Description** | Build AI agents with topic-based authoring, generative answers, and tool integration |
+| **Description** | Build AI agents with topic-based authoring, generative answers, and tool integration ([Copilot Studio docs](https://learn.microsoft.com/en-us/microsoft-copilot-studio/)) |
 | **Main use cases** | IT helpdesk, HR self-service, customer support, FAQ, knowledge base queries |
 | **Best-fit project types** | Service desk automation, employee self-service, customer-facing chat |
-| **Required license** | Copilot Studio ($200/mo for 25k messages) |
+| **Required license** | Copilot Studio capacity pack: $200/tenant/mo for 25,000 Copilot Credits (the common currency since 1 Sep 2025 — formerly "messages"); or pay-as-you-go at $0.01 per message via Azure. Copilot Studio capability is also seeded in the Microsoft 365 Copilot ($30/user/mo) licence. ([billing rates & management](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management), [billing & licensing](https://learn.microsoft.com/en-us/microsoft-copilot-studio/billing-licensing)) |
 | **Premium/non-premium** | Premium |
-| **Authentication/security model** | Azure AD SSO, custom auth via Power Automate |
-| **Key limitations and quotas** | Message caps, knowledge source size limits, some connector restrictions |
+| **Authentication/security model** | Microsoft Entra ID SSO, custom auth via Power Automate |
+| **Key limitations and quotas** | Credit capacity caps (unused credits don't roll over month to month; enforcement disables custom agents at 125% of prepaid capacity), knowledge-source size limits, some connector restrictions ([billing rates & management](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management)) |
 | **Common mistakes** | Not planning escalation, over-relying on generative answers, no testing |
 | **Current status** | Stable |
 | **Microsoft Docs URL** | https://learn.microsoft.com/en-us/microsoft-copilot-studio/ |
@@ -468,9 +486,9 @@
 | **Description** | Secure, data-driven external-facing website integrated with Dataverse |
 | **Main use cases** | Customer portals, partner portals, registration sites, self-service |
 | **Best-fit project types** | External-facing Dataverse apps, B2B/B2C portals |
-| **Required license** | Power Pages ($200/mo per 100 daily authenticated users) |
+| **Required license** | Power Pages authenticated-user and anonymous-user capacity packs, priced per website and assigned at environment level (authenticated packs of 100 users; anonymous packs of 500 users); pay-as-you-go also available. The older "$200/mo per 100 daily authenticated users" model is superseded — confirm current per-pack list price on the pricing page. ([Power Pages pricing](https://www.microsoft.com/en-us/power-platform/products/power-pages/pricing), [licensing FAQ](https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq)) |
 | **Premium/non-premium** | Premium |
-| **Authentication/security model** | Azure AD B2C, OAuth, SAML, OpenID Connect, local |
+| **Authentication/security model** | Microsoft Entra External ID (formerly Azure AD B2C), OAuth, SAML, OpenID Connect, local |
 | **Key limitations and quotas** | Dataverse as primary data source, Liquid template learning curve |
 | **Common mistakes** | Using for marketing sites, not planning auth model, exposing too much data |
 | **Current status** | Stable |
@@ -510,8 +528,8 @@
 | **Best-fit project types** | Apps needing integrated analytics |
 | **Required license** | Power BI Pro at minimum; Premium for large datasets |
 | **Premium/non-premium** | Premium |
-| **Authentication/security model** | Azure AD, row-level security |
-| **Key limitations and quotas** | Pro: 1GB dataset, PPU: 100GB |
+| **Authentication/security model** | Microsoft Entra ID, row-level security |
+| **Key limitations and quotas** | Pro: 1 GB model (semantic model) size limit; PPU: up to 100 GB ([Power BI Pro publish limit](https://learn.microsoft.com/en-us/power-bi/create-reports/desktop-troubleshoot-publish), [PPU FAQ](https://learn.microsoft.com/en-us/fabric/enterprise/powerbi/service-premium-per-user-faq)) |
 | **Common mistakes** | Not aligning RLS with app security, embedding without Pro license |
 | **Current status** | Stable |
 | **Microsoft Docs URL** | https://learn.microsoft.com/en-us/power-bi/developer/embedded/ |
@@ -545,10 +563,10 @@
 |-------|--------|
 | **Name** | Certified Connector (Premium) |
 | **Category** | Integration - Premium |
-| **Description** | Connectors requiring premium license: Dataverse, SQL Server, Salesforce, HTTP, Azure services |
+| **Description** | Connectors requiring a premium entitlement: Dataverse, SQL Server, Salesforce, HTTP, Azure services |
 | **Main use cases** | Business system integration, database access, custom API calls |
 | **Best-fit project types** | Enterprise integration projects |
-| **Required license** | Power Automate Premium or Per User |
+| **Required license** | Power Automate Premium / a Process license on the flow, or Power Apps Premium (per user) / per app for app scenarios ([license types](https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/types)) |
 | **Premium/non-premium** | Premium |
 | **Authentication/security model** | OAuth, connection references, service principal |
 | **Key limitations and quotas** | 1000 req/min per connection, some have additional service limits |
@@ -566,10 +584,10 @@
 | **Description** | Build your own connector from an OpenAPI definition for any REST API |
 | **Main use cases** | Internal APIs, third-party services without certified connectors |
 | **Best-fit project types** | Custom API integration |
-| **Required license** | Premium license required to USE |
+| **Required license** | Premium entitlement required to USE (Power Apps/Automate Premium, per app, or a Process license) ([custom connectors overview](https://learn.microsoft.com/en-us/connectors/custom-connectors/)) |
 | **Premium/non-premium** | Premium to use; free to build |
-| **Authentication/security model** | API Key, OAuth 2.0, Basic, Windows |
-| **Key limitations and quotas** | OpenAPI 2.0 only, 15MB response, 1000 req/min |
+| **Authentication/security model** | API Key, OAuth 2.0, Basic, Microsoft Entra ID |
+| **Key limitations and quotas** | Definition is stored as OpenAPI 2.0 (Swagger); OpenAPI v3 specs can now be imported and are converted to 2.0 behind the scenes; definition file must be <1 MB ([define from OpenAPI](https://learn.microsoft.com/en-us/connectors/custom-connectors/define-openapi-definition), [OpenAPI v3 support](https://learn.microsoft.com/en-us/power-platform/release-plan/2025wave2/microsoft-copilot-studio/build-power-platform-connectors-openapi-v3)) |
 | **Common mistakes** | Not versioning, hardcoded URLs, no error handling |
 | **Current status** | Stable |
 | **Microsoft Docs URL** | https://learn.microsoft.com/en-us/connectors/custom-connectors/ |
@@ -621,12 +639,12 @@
 |-------|--------|
 | **Name** | Power Platform CLI |
 | **Category** | Developer Tooling |
-| **Description** | Command-line interface for ALM, solution management, PCF development |
-| **Main use cases** | CI/CD, solution packaging, environment management, PCF build |
+| **Description** | Microsoft Power Platform CLI (`pac`) — command-line interface for ALM, solution management, PCF development. Available as a .NET tool, Windows MSI, and the Power Platform Tools VS Code extension. ([pac CLI introduction](https://learn.microsoft.com/en-us/power-platform/developer/cli/introduction)) |
+| **Main use cases** | CI/CD, solution packaging (`pac solution`), environment/auth management (`pac auth`, `pac org`), PCF build (`pac pcf`) ([pac CLI command groups](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference)) |
 | **Best-fit project types** | All ALM-enabled projects |
-| **Required license** | Free |
+| **Required license** | Free ([pac CLI introduction](https://learn.microsoft.com/en-us/power-platform/developer/cli/introduction)) |
 | **Premium/non-premium** | Free |
-| **Authentication/security model** | Interactive, service principal |
+| **Authentication/security model** | Interactive (`pac auth create`), service principal / client secret for CI/CD ([pac CLI introduction](https://learn.microsoft.com/en-us/power-platform/developer/cli/introduction)) |
 | **Key limitations and quotas** | Learning curve, admin privileges needed for some operations |
 | **Common mistakes** | Using interactive auth in CI/CD, not pinning versions |
 | **Current status** | Stable |
@@ -645,7 +663,7 @@
 | **Required license** | Requires app/flow license for API access |
 | **Premium/non-premium** | Included |
 | **Authentication/security model** | OAuth 2.0, Azure AD, client credentials |
-| **Key limitations and quotas** | API limits apply, 5000 records per page |
+| **Key limitations and quotas** | Service-protection API limits apply; max page size 5,000 rows for standard tables (500 for elastic), set via `Prefer: odata.maxpagesize`; `$skip` is not supported ([page results](https://learn.microsoft.com/en-us/power-apps/developer/data-platform/webapi/query/page-results)) |
 | **Common mistakes** | Not handling pagination, not using $select for performance |
 | **Current status** | Stable |
 | **Microsoft Docs URL** | https://learn.microsoft.com/en-us/power-apps/developer/data-platform/webapi/ |
@@ -682,10 +700,10 @@
 | **Description** | Low-code deployment pipelines for promoting solutions between environments |
 | **Main use cases** | Citizen developer ALM, simple dev-test-prod deployment |
 | **Best-fit project types** | Teams without Azure DevOps expertise |
-| **Required license** | Requires Managed Environment |
-| **Premium/non-premium** | Premium |
+| **Required license** | Target environments must be Managed Environments (the dev/source environment and the pipelines host don't have to be; all pipeline environments need a Dataverse database) ([pipelines overview](https://learn.microsoft.com/en-us/power-platform/alm/pipelines)) |
+| **Premium/non-premium** | Premium (Managed Environments require premium licensing) |
 | **Authentication/security model** | Environment admin |
-| **Key limitations and quotas** | Less flexible than Azure DevOps, requires Managed Environment |
+| **Key limitations and quotas** | Less flexible than Azure DevOps; all target environments must be Managed Environments with a Dataverse database ([pipelines overview](https://learn.microsoft.com/en-us/power-platform/alm/pipelines)) |
 | **Common mistakes** | Using for complex scenarios, not setting up environments first |
 | **Current status** | Stable |
 | **Microsoft Docs URL** | https://learn.microsoft.com/en-us/power-platform/alm/pipelines |
@@ -756,12 +774,12 @@
 | **Name** | Managed Environment |
 | **Category** | Governance - Premium Feature |
 | **Description** | Premium environment type with built-in governance controls |
-| **Main use cases** | Production governance, sharing limits, IP restrictions, insights |
+| **Main use cases** | Production governance, sharing limits, IP firewall, weekly usage insights, data policies, solution checker enforcement, pipelines ([Managed Environments overview](https://learn.microsoft.com/en-us/power-platform/admin/managed-environment-overview)) |
 | **Best-fit project types** | Production environments |
-| **Required license** | Premium (pricing model varies) |
+| **Required license** | Requires every user of the environment to have a standalone Power Platform premium licence (Power Apps Premium/per app, Power Automate Premium, Copilot Studio, etc.); not a separately priced SKU ([Managed Environments overview](https://learn.microsoft.com/en-us/power-platform/admin/managed-environment-overview)) |
 | **Premium/non-premium** | Premium |
-| **Authentication/security model** | Tenant admin |
-| **Key limitations and quotas** | Additional cost, some features require maker premium licenses |
+| **Authentication/security model** | Tenant / environment admin |
+| **Key limitations and quotas** | All users in the environment need qualifying premium licences; enables governance features once turned on ([Managed Environments overview](https://learn.microsoft.com/en-us/power-platform/admin/managed-environment-overview)) |
 | **Common mistakes** | Not enabling on production, not configuring limits |
 | **Current status** | Stable |
 | **Microsoft Docs URL** | https://learn.microsoft.com/en-us/power-platform/admin/managed-environment-overview |
@@ -773,13 +791,13 @@
 |-------|--------|
 | **Name** | Data Loss Prevention (DLP) Policy |
 | **Category** | Governance - Security |
-| **Description** | Controls which connectors can be used together and in which environments |
+| **Description** | Classifies connectors into Business, Non-Business, and Blocked groups; connectors in different groups can't be combined in the same app/flow. Applied at tenant or environment scope. ([data policies / DLP](https://learn.microsoft.com/en-us/power-platform/admin/prevent-data-loss)) |
 | **Main use cases** | Prevent data leakage, restrict connector usage, enforce security |
 | **Best-fit project types** | All enterprise tenants |
-| **Required license** | Included in admin center |
+| **Required license** | Included in the Power Platform admin center ([data policies / DLP](https://learn.microsoft.com/en-us/power-platform/admin/prevent-data-loss)) |
 | **Premium/non-premium** | Included |
 | **Authentication/security model** | Power Platform Admin |
-| **Key limitations and quotas** | Can block legitimate use if misconfigured, custom connectors need explicit policy |
+| **Key limitations and quotas** | Can block legitimate use if misconfigured; custom connectors are classified by URL pattern and need explicit handling ([data policies / DLP](https://learn.microsoft.com/en-us/power-platform/admin/prevent-data-loss)) |
 | **Common mistakes** | Blocking all business connectors, not including custom connectors in policies |
 | **Current status** | Stable |
 | **Microsoft Docs URL** | https://learn.microsoft.com/en-us/power-platform/admin/prevent-data-loss |
@@ -801,7 +819,7 @@
 | **Required license** | Included |
 | **Premium/non-premium** | Included |
 | **Authentication/security model** | User permissions |
-| **Key limitations and quotas** | 32MB file size, not suitable for complex relationships |
+| **Key limitations and quotas** | Max 8 MB per file (.csv/.xml/.txt); 32 MB for .zip; ~20K rows recommended max — use a programmatic path for larger volumes. Not suitable for complex relationships. ([import data in model-driven apps](https://learn.microsoft.com/en-us/power-apps/user/import-data)) |
 | **Common mistakes** | Using for large migrations, not mapping lookup columns correctly |
 | **Current status** | Stable |
 | **Microsoft Docs URL** | https://learn.microsoft.com/en-us/power-apps/maker/data-platform/data-import |
@@ -845,4 +863,4 @@
 
 ---
 
-*End of Tool Catalogue. All licensing and URLs should be verified before client use.*
+*End of Tool Catalogue. Facts and list prices were verified against Microsoft Learn / Microsoft pricing pages as of 2026-06-19 (platform state 2026-H1) and cited inline. Microsoft publishes prices as indicative only and licensing/preview status changes frequently — re-verify list prices and any "(unverified...)" items against the current Microsoft sources before quoting to a client.*

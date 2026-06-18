@@ -1,9 +1,30 @@
+---
+verified_as_of: 2026-06-19
+platform_state: 2026-H1
+sources:
+  - https://learn.microsoft.com/en-us/power-platform/admin/dlp-connector-classification
+  - https://learn.microsoft.com/en-us/connectors/connector-reference/connector-reference-premium-connectors
+  - https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq
+  - https://learn.microsoft.com/en-us/connectors/sql/
+---
+
 # Connectors and Premium Audit Checklist
 
 > **Project:** _________________________________
 > **Date:** _________________________________
 > **Completed by:** _________________________________
 > **Environment:** _________________________________
+
+---
+
+## Platform reference (verified 2026-06-19, platform state 2026-H1)
+
+The connector tiers and DLP behaviour this checklist assumes are confirmed against Microsoft Learn:
+
+- **Premium connectors require a standalone Power Apps or Power Automate plan** — they are not covered by seeded Microsoft 365 use rights. As of 2026-H1, Power Apps Premium is licensed per user at $20/user/month, Power Apps per app at $5/user/app/month, and Power Automate Premium at $15/user/month ([Power Platform licensing FAQs](https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq)).
+- **Dataverse, SQL Server, HTTP, Azure Blob Storage, and Azure Queues are Premium-tier** connectors for Power Apps and Power Automate (SQL Server is Standard only in Azure Logic Apps) ([SQL Server connector](https://learn.microsoft.com/en-us/connectors/sql/); [premium connector list](https://learn.microsoft.com/en-us/connectors/connector-reference/connector-reference-premium-connectors)). Azure Service Bus is a premium connector (unverified as of 2026-06-19 — confirm against Microsoft Learn).
+- **Office 365 Outlook, SharePoint, OneDrive for Business, Microsoft Teams, Approvals, Excel Online (Business), and Microsoft 365 Users are Standard / core connectors** and cannot be blocked by classic data policies ([Connector classification](https://learn.microsoft.com/en-us/power-platform/admin/dlp-connector-classification)).
+- **DLP data policies sort every connector into one of three groups — Business, Non-Business, or Blocked.** A given app or flow can use connectors from only one of the Business/Non-Business groups at a time (they cannot share data across groups). New connectors default to the Non-Business group. Microsoft-owned standard connectors and the Dataverse connector cannot be blocked; Dataverse is the only premium connector that cannot be blocked ([Connector classification](https://learn.microsoft.com/en-us/power-platform/admin/dlp-connector-classification)).
 
 ---
 
@@ -43,6 +64,8 @@
 
 ## 3. Premium Connectors
 
+> Tier reference: Dataverse, SQL Server, HTTP, Azure Blob Storage, and Azure Queues are Premium-tier for Power Apps/Power Automate and require a standalone Power Apps or Power Automate license ([premium connector list](https://learn.microsoft.com/en-us/connectors/connector-reference/connector-reference-premium-connectors); [licensing FAQs](https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq)).
+
 | # | Check Item | Status | Notes |
 |---|-----------|--------|-------|
 | 3.1 | All premium connectors identified | [ ] | |
@@ -79,6 +102,8 @@
 ---
 
 ## 5. DLP Compliance
+
+> Behaviour reference: connectors are grouped Business / Non-Business / Blocked; an app or flow cannot combine connectors across the Business and Non-Business groups, new connectors default to Non-Business, and Microsoft standard connectors plus Dataverse cannot be blocked ([Connector classification](https://learn.microsoft.com/en-us/power-platform/admin/dlp-connector-classification)).
 
 | # | Check Item | Status | Notes |
 |---|-----------|--------|-------|

@@ -2,6 +2,21 @@
 title: "Service 01 — Power Apps Pro Dev"
 description: "Professional canvas and model-driven Power Apps development delivered as a packaged, source-controlled, tested solution."
 category: service
+verified_as_of: 2026-06-19
+platform_state: 2026-H1
+sources:
+  - https://learn.microsoft.com/en-us/power-platform/admin/pricing-billing-skus
+  - https://learn.microsoft.com/en-us/power-platform/admin/about-powerapps-perapp
+  - https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq
+  - https://learn.microsoft.com/en-us/power-platform/admin/capacity-storage
+  - https://learn.microsoft.com/en-us/ai-builder/credit-management
+  - https://learn.microsoft.com/en-us/ai-builder/endofaibcredits
+  - https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management
+  - https://learn.microsoft.com/en-us/power-platform/admin/manage-copilot-studio-messages-capacity
+  - https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/solution
+  - https://learn.microsoft.com/en-us/power-platform/alm/use-source-control-solution-files
+  - https://learn.microsoft.com/en-us/power-apps/maker/canvas-apps/delegation-overview
+  - https://learn.microsoft.com/en-us/power-platform/test-engine/overview
 related:
   - ../playbooks/canvas-app.md
   - ../playbooks/model-driven-app.md
@@ -33,7 +48,7 @@ Most line-of-business apps start life as a citizen-developer prototype that prov
 - A solution that deploys cleanly dev → test → prod via a documented, repeatable pipeline.
 - App-load and screen-transition performance validated against agreed targets (e.g. first meaningful screen < 3s on representative data — confirm targets per engagement).
 - Accessibility checks passed (App Checker + manual keyboard/screen-reader pass).
-- A regression test suite (Test Studio and/or Power Apps Test Engine) that gates future change.
+- A regression test suite that gates future change. Note the tooling has shifted: the standalone [Power Apps Test Engine is deprecated](https://learn.microsoft.com/en-us/power-platform/test-engine/overview) and Microsoft now directs automated UI/integration testing to the [Power Platform Playwright samples](https://learn.microsoft.com/en-us/power-platform/developer/playwright-samples/overview); [Test Studio](https://learn.microsoft.com/en-us/power-apps/maker/canvas-apps/test-studio) remains available for in-Studio canvas-app test cases.
 - Documented licensing footprint so per-user cost is known before rollout, not after.
 
 ## Ideal Client Profile
@@ -61,10 +76,10 @@ Headline deliverables: **Solution package, source code, and test suite.**
 Concrete artifacts:
 
 - **Unmanaged + managed solution packages** (`.zip`) with a clean publisher prefix and solution layering.
-- **Source-controlled app** unpacked via `pac` (Power Platform CLI) into the repo for diffable code review.
+- **Source-controlled app** unpacked via the `pac solution` commands of the [Power Platform CLI](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/solution) into the repo for diffable code review (`pac solution unpack`/`pack`/`clone`/`sync`; the standalone SolutionPackager is no longer the recommended path — its capabilities are now in `pac`, per [source control with solution files](https://learn.microsoft.com/en-us/power-platform/alm/use-source-control-solution-files)).
 - **Canvas app** (responsive layout, named formulas, components, reusable component library) and/or **model-driven app** (forms, views, dashboards, site map, business rules, business process flows).
 - **Connection references and environment variables** parameterised so nothing is hard-coded across environments.
-- **Test suite** — Test Studio cases and/or Power Apps Test Engine YAML, plus a documented manual UAT script.
+- **Test suite** — [Test Studio](https://learn.microsoft.com/en-us/power-apps/maker/canvas-apps/test-studio) cases and/or YAML/Power Fx automated tests, plus a documented manual UAT script. (The former Power Apps Test Engine is [deprecated](https://learn.microsoft.com/en-us/power-platform/test-engine/overview); new automated-test work should target the [Power Platform Playwright samples](https://learn.microsoft.com/en-us/power-platform/developer/playwright-samples/overview).)
 - **Performance pass** — App Checker results, delegation review, image/data optimisation.
 - **Accessibility pass** — App Checker accessibility findings remediated; manual keyboard and contrast checks.
 - **Deployment runbook** and rollback notes (see `../checklists/deployment.md`).
@@ -122,14 +137,14 @@ Use `../templates/client-proposal-template.md` and `../templates/scope-of-work-t
 
 ## Licensing & Capacity Considerations
 
-Licensing is the most common source of go-live surprises. Flag every premium dependency in design, not at deployment. (All specific figures below: **Needs verification against current Microsoft docs**.)
+Licensing is the most common source of go-live surprises. Flag every premium dependency in design, not at deployment. Specific figures and plan names below are verified against Microsoft Learn as of 2026-06-19; always re-confirm at proposal time because Microsoft revises these continuously.
 
-- **Premium connectors** (e.g. SQL Server, custom connectors, HTTP, Dataverse via certain paths) require a **Power Apps Premium per-user** or **per-app** plan — standard/seeded Microsoft 365 licensing will not cover them. Confirm each connector's tier in the design phase.
-- **Power Apps Per-App vs Per-User:** per-app is cheaper for narrow rollouts but caps the user to a fixed number of apps; per-user suits power users. Model both before recommending.
-- **Dataverse capacity:** database, file, and log storage are metered and consume tenant capacity. Large tables, attachments, or audit logging can exceed entitlements (**Needs verification against current Microsoft docs**).
-- **AI Builder credits:** any AI Builder model (form processing, prediction, GPT prompts) consumes credits from a metered pool — budget separately and warn the client (**Needs verification against current Microsoft docs**). Out of scope here unless named; see Service 02.
-- **Copilot Studio messages:** if the app embeds or links to a Copilot Studio agent, message consumption is billed against a separate message capacity (**Needs verification against current Microsoft docs**) — see Service 02.
-- **Environments:** dedicated dev/test environments may need Dataverse and could draw on capacity or sandbox entitlements.
+- **Premium connectors** (e.g. SQL Server, custom connectors, HTTP) require a standalone **Power Apps Premium** (per-user) or **Power Apps per app** plan — standard/seeded Microsoft 365 licensing does **not** cover premium, on-premises, or custom connectors, and every user who runs the app needs the entitlement, not just the maker ([Power Apps for Microsoft 365 capabilities table](https://learn.microsoft.com/en-us/power-platform/admin/pricing-billing-skus), [licensing FAQs](https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq)). Confirm each connector's tier in the design phase. Note: in a [Managed Environment](https://learn.microsoft.com/en-us/power-platform/admin/managed-environment-licensing) even standard-connector apps require a premium license to run.
+- **Power Apps per app vs per-user (Power Apps Premium):** the per app plan entitles a user to run **one app (or one portal) in one environment** and is allocated to environments rather than assigned to users; **Power Apps Premium** (formerly the per-user plan) entitles a user to run **unlimited apps** and is assigned per user ([About Power Apps per app plans](https://learn.microsoft.com/en-us/power-platform/admin/about-powerapps-perapp)). Per app suits narrow rollouts; Premium suits power users. Pay-as-you-go metering is also available. Model the options before recommending; current per-seat list prices change frequently, so pull live figures from the [Power Platform pricing page](https://www.microsoft.com/en-us/power-platform/products/power-apps/pricing) at proposal time (specific dollar figures unverified as of 2026-06-19 — confirm against Microsoft pricing).
+- **Dataverse capacity:** database, file, and log storage are metered separately and consume tenant capacity; entitlement accrues from active qualifying licenses plus a one-time per-tenant default (the default environment includes 3 GB database, 3 GB file, 1 GB log), and exceeding entitlement triggers admin-center warnings (banner under 15% remaining) and can ultimately suspend the service ([Dataverse capacity-based storage details](https://learn.microsoft.com/en-us/power-platform/admin/capacity-storage)). Large tables, attachments, or audit logging can exceed entitlements — size them in design.
+- **AI Builder / Copilot Credits:** any AI Builder capability (form processing, prediction, GPT/prompt actions) consumes credits at a per-capability rate from a metered pool. **Important 2025 change:** from 1 November 2025 AI Builder features consume **AI Builder credits or Copilot Credits**, AI Builder add-ons are renewal/true-up only for existing customers (new customers buy Copilot Credits), and AI Builder credits seeded in Power Platform/Dynamics licenses are being removed in November 2026 ([Licensing and AI Builder credits](https://learn.microsoft.com/en-us/ai-builder/credit-management), [End of AI Builder credits](https://learn.microsoft.com/en-us/ai-builder/endofaibcredits)). Budget separately and warn the client. Out of scope here unless named; see Service 02.
+- **Copilot Studio (Copilot Credits, not "messages"):** as of 1 September 2025 the consumption currency for Copilot Studio shifted from *messages* to **Copilot Credits**, billed via prepaid capacity packs (25,000 credits/pack/month, non-rolling) and/or pay-as-you-go Azure meters, with credit consumption varying by task complexity ([Billing rates and management](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management), [Manage Copilot Studio credits and capacity](https://learn.microsoft.com/en-us/power-platform/admin/manage-copilot-studio-messages-capacity)). If the app embeds or links to a Copilot Studio agent, budget this separately — see Service 02.
+- **Environments:** dedicated dev/test environments with Dataverse draw on tenant database/file/log capacity and (for sandbox/production beyond the default) require the appropriate Power Platform licensing or capacity (unverified specifics as of 2026-06-19 — confirm against Microsoft Learn).
 
 Always validate the final footprint against `../checklists/connectors-and-premium.md` and `../checklists/licensing-and-capacity.md`, and produce an estimate with `../templates/licensing-estimate-template.md`.
 
@@ -141,7 +156,7 @@ Follow the relevant playbooks step-by-step; do not freelance the build sequence:
 - **Model-driven apps:** `../playbooks/model-driven-app.md` — forms, views, business rules, business process flows, site map, security roles.
 - **Solution structure:** `../playbooks/dataverse-solution.md` for publisher prefixes, layering, and packaging discipline.
 
-Source control and parameterisation are non-negotiable from day one: unpack with `pac`, use connection references and environment variables, never hard-code IDs or URLs.
+Source control and parameterisation are non-negotiable from day one: unpack with [`pac solution`](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/solution), use connection references and environment variables, never hard-code IDs or URLs.
 
 ## Quality Gates
 
@@ -174,7 +189,7 @@ Kick off with `pp-agency new-project <name> --type power-apps`, then `pp-agency 
 **Risks**
 
 - **Licensing creep** — a connector or AI feature pulls the app into a premium tier mid-build. Mitigation: lock the licensing footprint in design; flag any change immediately.
-- **Delegation limits** — large Dataverse/SharePoint tables exceed delegable query limits, causing silent data truncation. Mitigation: delegation review in the QA gate; restructure queries or move logic server-side.
+- **Delegation limits** — non-delegable queries against large Dataverse/SharePoint/SQL tables return only the local row cap (500 by default, raisable to a maximum of 2,000 in app settings), causing silent data truncation rather than a hard error ([Understand delegation in a canvas app](https://learn.microsoft.com/en-us/power-apps/maker/canvas-apps/delegation-overview)). Mitigation: delegation review in the QA gate; use delegable functions/data sources or move logic server-side.
 - **Scope drift** — "while you're in there" requests inflate effort. Mitigation: change log against the scope gate; re-estimate before accepting.
 - **Tenant/environment dependencies** — DLP policies or missing capacity block deployment. Mitigation: validate environment readiness early via `../checklists/power-platform-environment.md`.
 - **Platform change** — Microsoft preview features and capacity rules shift. Mitigation: avoid preview features in production deliverables; re-verify all licensing facts at proposal time.

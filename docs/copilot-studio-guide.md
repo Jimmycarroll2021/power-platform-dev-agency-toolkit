@@ -1,8 +1,24 @@
+---
+verified_as_of: 2026-06-19
+platform_state: 2026-H1
+sources:
+  - https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management
+  - https://learn.microsoft.com/en-us/microsoft-copilot-studio/billing-licensing
+  - https://www.microsoft.com/en-us/microsoft-365-copilot/pricing/copilot-studio
+  - https://learn.microsoft.com/en-us/microsoft-copilot-studio/agent-extend-action-mcp
+  - https://learn.microsoft.com/en-us/microsoft-copilot-studio/guidance/channels
+  - https://learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-add-file-upload
+  - https://learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-add-sharepoint
+  - https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-quotas
+  - https://learn.microsoft.com/en-us/microsoft-copilot-studio/configuration-hand-off-omnichannel
+  - https://learn.microsoft.com/en-us/microsoft-copilot-studio/authoring-ask-with-adaptive-card
+---
+
 # Copilot Studio Comprehensive Guide
 
-> **Version**: 1.0 | **Last updated**: 2025-01-15
+> **Version**: 1.1 | **Last updated**: 2026-06-19 | **Verified as of**: 2026-06-19 (platform state 2026-H1)
 > **Applies to**: Microsoft Copilot Studio (formerly Power Virtual Agents)
-> **Needs verification against current Microsoft docs**: Copilot Studio evolves rapidly. Message pricing, channel availability, and feature names change frequently. MCP support status is particularly fluid.
+> **Note**: Copilot Studio evolves rapidly. Pricing, channel availability, and feature names change frequently. Facts below carry inline Microsoft Learn citations; anything that could not be confirmed against a primary Microsoft source is flagged with a dated-unverified marker. Re-verify before quoting to clients.
 
 ---
 
@@ -73,6 +89,8 @@ Use BOTH architectures together:
    - Configure fallback behavior explicitly
 ```
 
+> Terminology note (verified 2026-06-19): Microsoft's current terms are **classic orchestration** (one topic per turn, matched by manually authored trigger phrases) and **generative orchestration** (an LLM planner selects across topics, tools, knowledge, and connected agents). Generative orchestration is generally available and is required for MCP and for automatic tool selection; the orchestrator handles up to 128 tools per agent (25-30 recommended). Switch via Settings > Generative AI > Orchestration. [verified: [Orchestrate agent behavior with generative AI](https://learn.microsoft.com/en-us/microsoft-copilot-studio/advanced-generative-actions)]
+
 ---
 
 ## 3. Generative Answers and Knowledge Sources
@@ -88,19 +106,36 @@ Use BOTH architectures together:
 | **OneDrive** | Connect account | Personal documents | Personal scope |
 | **Custom knowledge** | API integration | External knowledge bases | Requires development |
 
+> Knowledge source types, limits, and licensing nuances verified against [Microsoft Learn — Knowledge sources summary](https://learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-copilot-studio). SharePoint lists are also supported as a knowledge source.
+
 ### 3.2 Setting Up Generative Answers
 
 ```
 Step 1: Knowledge > Add knowledge source
   Option A: Upload files
     - Drag and drop PDFs/DOCXs
-    - Max file size: Check current limits (typically 50MB per file)
-    - Supported: PDF, DOCX, PPTX, TXT, HTML
+    - Max file size: up to 512 MB per uploaded file for generative answers
+      [verified: learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-add-file-upload]
+    - Up to 500 files per agent for direct uploads (the 500-file limit does
+      NOT apply to the SharePoint knowledge source)
+      [verified: learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-quotas]
+    - Image, video, executable, and audio files are NOT supported as uploads;
+      encrypted/sensitivity-labelled/password-protected files are NOT supported
+    - Uploaded files are stored in Dataverse and consume Dataverse file storage
+    - Supported types include PDF, DOCX, PPTX, TXT, CSV, HTML and more
+      [verified: learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-add-file-upload]
 
   Option B: SharePoint
-    - Enter site URL: https://tenant.sharepoint.com/sites/knowledge
+    - Enter site URL (omit https://; must be a sharepoint.com domain)
     - Copilot Studio crawls libraries
     - Respects SharePoint permissions
+    - File-size ceiling depends on licensing: without a Microsoft 365 Copilot
+      license in the same tenant, generative answers only use SharePoint files
+      under 7 MB. With a Microsoft 365 Copilot license + Work IQ turned on,
+      PDF/PPTX/DOCX files up to 512 MB are supported.
+      [verified: learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-add-sharepoint]
+    - SharePoint/OneDrive document upload supports up to 1000 files per agent
+      [verified: learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-quotas]
 
   Option C: Public websites
     - Enter URLs (one per line)
@@ -216,7 +251,16 @@ Limitations:
 
 Licensing Warning:
   Flows triggered from Copilot Studio that use premium connectors
-  require appropriate Power Automate licensing for the flow owner.
+  require appropriate Power Automate / premium licensing for the flow owner.
+  Note: agent flow actions invoked from Copilot Studio are billed against
+  Copilot Credits at 13 Copilot Credits per 100 actions (when not covered by
+  an included Microsoft 365 Copilot user license).
+  [verified: learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management]
+  Connectors reached via MCP are also governed by Power Platform DLP policies:
+  MCP server access in Copilot Studio relies on Power Platform connectors, so a
+  data policy that regulates those connectors also regulates the MCP server and
+  its tools.
+  [verified: learn.microsoft.com/en-us/microsoft-copilot-studio/mcp-add-existing-server-to-agent]
 ```
 
 ---
@@ -302,8 +346,18 @@ Best practices:
 ```
 Pattern 1: Direct Handoff (Live Agent)
   Condition: User asks for "human" or "agent"
-  Action: Transfer to live agent (Dynamics 365 Customer Service)
-  Requirements: Omnichannel for Customer Service license
+  Action: Transfer to live agent (Dynamics 365 Customer Service /
+          engagement hub, via the Escalate system topic's Transfer
+          conversation node)
+  Requirements: Handoff requires Dynamics 365 Omnichannel (now part of
+          Dynamics 365 Customer Service / Contact Center) or another
+          engagement-hub solution; sign in with at least OC_Admin + Agent
+          Author roles and hold a Copilot Studio license plus a Chat Add-in
+          for Dynamics 365 Customer Service license. Note: credits continue
+          to be consumed while a user chats with a live agent if Copilot
+          Studio remains in the loop.
+          [verified: learn.microsoft.com/en-us/microsoft-copilot-studio/configuration-hand-off-omnichannel]
+          [verified: learn.microsoft.com/en-us/microsoft-copilot-studio/guidance/channels]
 
 Pattern 2: Ticket Creation
   Condition: Issue cannot be resolved
@@ -478,8 +532,22 @@ Example: Ticket Summary Card
   ]
 }
 
-Note: Variable substitution uses {variableName} syntax.
-Cards render in Teams, web chat, and some other channels.
+Note on schema version: Copilot Studio supports Adaptive Cards schema
+version 1.6 and earlier, but the usable version depends on the host: the
+Bot Framework Web Chat component supports 1.6 (but not Action.Execute) and
+the live chat widget used for Customer Service is limited to 1.5. Choose a
+schema version your target channel actually renders.
+[verified: learn.microsoft.com/en-us/microsoft-copilot-studio/authoring-ask-with-adaptive-card]
+
+Note on dynamic data: bind dynamic values into a card with Power Fx (or a
+JSON representation) in the Adaptive Card / Message node — not the literal
+{variableName} string substitution shown above, which is illustrative only.
+Use the Message node for display-only cards and the Adaptive Card / Question
+node for interactive cards that collect a response.
+[verified: learn.microsoft.com/en-us/microsoft-copilot-studio/authoring-send-message]
+
+Cards render in Teams, web chat, and some other channels (rendering varies by
+channel and client).
 ```
 
 ---
@@ -491,13 +559,16 @@ Cards render in Teams, web chat, and some other channels.
 | Channel | Authentication | Best For | Setup Complexity |
 |---------|---------------|----------|-----------------|
 | **Microsoft Teams** | Automatic SSO | Internal employees | Easy |
+| **Microsoft 365 Copilot** | M365 identity | Employees in Copilot Chat | Easy |
+| **SharePoint** | M365 identity | Site-embedded Q&A | Easy |
+| **Power Pages** | Configurable | Portal/public-facing support | Medium |
 | **Web (Demo)** | Optional | Testing, demos | None |
-| **Custom Website** | Configurable | Public-facing support | Medium |
-| **Mobile App** | Configurable | Branded mobile experience | High |
-| **Email** | Email identity | Email-based support | Medium |
-| **Facebook** | Facebook auth | Consumer-facing | Medium |
-| **Direct Line API** | Custom | Any custom channel | High |
-| **Omnichannel** | Dynamics 365 | Customer service center | High |
+| **Custom Website** | Configurable | Public-facing support (via React Web Chat / WebChat JS) | Medium |
+| **Mobile App** | Configurable | Branded mobile experience (via Direct Line) | High |
+| **Direct Line API** | Custom | Any custom channel (REST + WebSocket) | High |
+| **Dynamics 365 Customer Service / engagement hub** | Dynamics 365 | Customer service center / live-agent handoff | High |
+
+> Channels verified against [Microsoft Learn — Publish agents to channels and clients](https://learn.microsoft.com/en-us/microsoft-copilot-studio/guidance/channels): Copilot Studio natively deploys to Teams, Microsoft 365 Copilot, SharePoint, Power Pages, and more, with custom apps/web via the Direct Line API. Email and Facebook/Facebook Messenger were Power Virtual Agents-era channels and are not listed in current Copilot Studio channel guidance (unverified as of 2026-06-19 — confirm availability against Microsoft Learn before promising them to clients).
 
 ### 10.2 Teams Deployment
 
@@ -599,49 +670,87 @@ Based on analytics:
 ### 13.1 Capacity Model
 
 ```
-Copilot Studio licensing:
-  Base: $200/month for 25,000 messages
-  Additional: Message packs available
+Copilot Studio licensing (verified 2026-06-19, platform state 2026-H1):
+  Capacity pack: $200/pack/month for 25,000 Copilot Credits (prepaid),
+    pooled tenant-wide.
+  Also available: pay-as-you-go via an Azure subscription (per-credit
+    metered, no commitment) and a pre-purchase / commit plan (save up to
+    ~20% with upfront Copilot Credit Commit Units).
+  [verified: www.microsoft.com/en-us/microsoft-365-copilot/pricing/copilot-studio]
+  [verified: learn.microsoft.com/en-us/microsoft-copilot-studio/billing-licensing]
 
-What counts as a message:
-  - User message sent to copilot
-  - Copilot response sent to user
-  - Internal copilot action (API call, knowledge search)
+IMPORTANT TERMINOLOGY CHANGE:
+  As of 1 September 2025, the billing unit is "Copilot Credits," not
+  "messages." The quantity per prepaid pack (25,000) and the pay-as-you-go
+  rate did not change. Older "message pack / 25,000 messages" wording maps
+  1:1 to "Copilot Credit pack / 25,000 Copilot Credits."
+  [verified: learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management]
 
-What does NOT count:
-  - Transfer to live agent (after transfer)
-  - User messages during agent handoff
-  - System messages (sign-in prompts)
+Per-interaction billing rates (Copilot Credits), verified:
+  - Classic answer                          1 credit
+  - Generative answer                       2 credits
+  - Agent action (trigger/topic transition/
+    deep reasoning/computer use)            5 credits
+  - Tenant graph grounding (per message)    10 credits
+  - Agent flow actions (per 100 actions)    13 credits
+  - Text/generative AI tools: basic 1 / standard 15 / premium 100 credits
+  - Content processing tools (per page)     8 credits
+  A single complex turn can combine rates (e.g. tenant-graph-grounded
+  generative answer = 10 + 2 = 12 credits).
+  [verified: learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management]
 
-Needs verification against current Microsoft docs:
-  Message counting rules and pricing changed in 2024.
-  Verify current pricing and what's included.
+What does NOT consume prepaid Copilot Studio capacity:
+  - Employee-facing (B2E) agent usage where the user is licensed with
+    Microsoft 365 Copilot and the agent runs under that authenticated
+    identity (subject to fair-use limits)
+  - Test runs of agent flows in the designer / test chat
+  [verified: learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management]
+
+Overage enforcement:
+  - Custom agents are disabled when a tenant reaches 125% of prepaid
+    capacity (ongoing conversations finish; new invocations are rejected).
+  - Agent flow enforcement is separate: at full consumption, NEW agent flow
+    runs are blocked while the parent agent keeps serving non-flow turns.
+  - Unused credits do not roll over; usage resets on the 1st of the month.
+  [verified: learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management]
 ```
 
 ### 13.2 Estimating Message Volume
 
 ```
-Example: IT Helpdesk Copilot
+Estimate by Copilot Credits consumed, NOT by raw message count. Each turn
+is billed at the per-feature rates above (classic answer 1, generative
+answer 2, agent action 5, tenant graph grounding 10, etc.). Use the official
+estimator to model real consumption:
+  Microsoft Copilot Studio agent usage estimator —
+  https://microsoft.github.io/copilot-studio-estimator/
+  [verified: learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management]
+
+Example: IT Helpdesk Copilot (illustrative)
 
 Assumptions:
   - 500 employees
-  - Average 2 copilot sessions per employee per month
-  - Average 10 messages per session (5 user + 5 copilot)
+  - Average 2 sessions per employee per month
+  - Average per session: 4 classic answers + 2 generative answers
+    = (4 x 1) + (2 x 2) = 8 Copilot Credits per session
 
 Calculation:
-  500 users x 2 sessions x 10 messages = 10,000 messages/month
+  500 users x 2 sessions x 8 credits = 8,000 Copilot Credits/month
+  One capacity pack = 25,000 credits ($200/month)
+  Usage: 8,000 / 25,000 = 32% of one pack
+  Cost: $200/month (or pay-as-you-go for the metered equivalent)
 
-  Base pack: 25,000 messages ($200/month)
-  Usage: 10,000/25,000 = 40% of capacity
-  Cost: $200/month
+  Add 50% headroom = 12,000 credits -> still within one pack.
 
-  Buffer: Add 50% for growth = 15,000 messages
-  Still within base pack.
+High-volume / tenant-graph-grounded scenario:
+  Grounded turns cost more (e.g. 10 credits for tenant graph grounding +
+  2 for the generative answer = 12 credits each). Model these explicitly in
+  the estimator; raw "sessions x 10" math understates grounded agents.
 
-High-volume scenario:
-  5,000 employees, 5 sessions/month, 10 messages each
-  = 250,000 messages/month
-  = 10 base packs = ~$2,000/month
+Reminder: B2E usage by Microsoft 365 Copilot-licensed users under their own
+identity is included and does not draw down prepaid capacity (fair-use
+limits apply).
+  [verified: learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management]
 ```
 
 ---
@@ -649,17 +758,35 @@ High-volume scenario:
 ## 14. MCP Support Status
 
 ```
-MCP (Model Context Protocol) Support:
-  Status: Check current Microsoft documentation
+MCP (Model Context Protocol) Support (verified 2026-06-19):
+  Status: Supported, documented production capability in Copilot Studio.
+  Copilot Studio currently supports MCP tools and resources (prompts are
+  part of the MCP spec but tools + resources are what Copilot Studio
+  consumes today).
+  [verified: learn.microsoft.com/en-us/microsoft-copilot-studio/agent-extend-action-mcp]
 
-As of early 2025:
-  - Microsoft announced Copilot Studio connector ecosystem expansion
-  - MCP may be supported for custom tool integration
-  - Verify current status before proposing to clients
+How it works:
+  - Connect an existing MCP server via the MCP onboarding wizard
+    (Tools > Add a tool > New tool > Model Context Protocol), or build one.
+  - Tools/resources the server publishes appear automatically and sync
+    dynamically when the server changes; you can selectively turn tools on/off.
 
-Needs verification against current Microsoft docs:
-  MCP support is rapidly evolving. Check the latest documentation
-  for current capabilities and limitations.
+Requirements and governance:
+  - You MUST turn on generative orchestration to use MCP.
+    [verified: learn.microsoft.com/en-us/microsoft-copilot-studio/agent-extend-action-mcp]
+  - MCP connectivity runs over Power Platform connectors, so Power Platform
+    DLP policies that govern those connectors also govern the MCP server and
+    its tools.
+    [verified: learn.microsoft.com/en-us/microsoft-copilot-studio/mcp-add-existing-server-to-agent]
+  - Transport: Copilot Studio supports the Streamable (HTTP) transport. SSE
+    transport is deprecated and is no longer supported for MCP after
+    August 2025 (unverified as of 2026-06-19 — confirm exact transport
+    support against Microsoft Learn).
+  - You can publish an MCP connector for cross-tenant reuse via connector
+    certification.
+
+Always confirm current MCP capabilities and limits on Microsoft Learn before
+proposing to clients — this surface still moves quickly.
 ```
 
 ---
@@ -683,4 +810,4 @@ Needs verification against current Microsoft docs:
 
 ---
 
-*End of Copilot Studio Guide. Verify all pricing, channel availability, and feature status against current Microsoft documentation.*
+*End of Copilot Studio Guide. Facts verified as of 2026-06-19 (platform state 2026-H1) against Microsoft Learn and the Microsoft 365 Copilot pricing pages; see the frontmatter `sources` list and inline citations. Pricing, channel availability, and feature status still change frequently — re-verify against current Microsoft documentation before committing to client deliverables.*

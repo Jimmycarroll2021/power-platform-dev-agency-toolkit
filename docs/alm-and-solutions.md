@@ -1,8 +1,26 @@
+---
+verified_as_of: 2026-06-19
+platform_state: 2026-H1
+sources:
+  - https://learn.microsoft.com/en-us/power-platform/alm/pipelines
+  - https://learn.microsoft.com/en-us/power-platform/alm/set-up-pipelines
+  - https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/solution
+  - https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/admin
+  - https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/data
+  - https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/pcf
+  - https://learn.microsoft.com/en-us/power-platform/alm/devops-build-tool-tasks
+  - https://learn.microsoft.com/en-us/power-platform/developer/howto/install-cli-net-tool
+  - https://learn.microsoft.com/en-us/power-platform/alm/create-patches-simplify-solution-updates
+  - https://learn.microsoft.com/en-us/power-platform/alm/solution-layers-alm
+  - https://learn.microsoft.com/en-us/power-platform/alm/solution-concepts-alm
+  - https://learn.microsoft.com/en-us/power-apps/maker/data-platform/environmentvariables-azure-key-vault-secrets
+---
+
 # ALM and Solutions Guide
 
-> **Version**: 1.0 | **Last updated**: 2025-01-15
+> **Version**: 1.1 | **Last updated**: 2026-06-19 | **Verified as of**: 2026-06-19 (platform state 2026-H1)
 > **Purpose**: Application Lifecycle Management for Power Platform - environments, solutions, deployment pipelines, and branching strategies.
-> **Needs verification against current Microsoft docs**: Pipeline features, CLI commands, and solution capabilities evolve frequently.
+> Pipeline features, CLI commands, and solution capabilities evolve frequently; claims below carry inline Microsoft Learn citations. Re-verify against [Microsoft Learn ALM docs](https://learn.microsoft.com/en-us/power-platform/alm/) before relying on version-specific behaviour.
 
 ---
 
@@ -53,17 +71,24 @@ Layer 1: System Solution (managed - Microsoft)
 
 When component exists in multiple layers:
   TOP layer wins (Layer 4 overrides Layer 3, etc.)
+  EXCEPTION: model-driven app, form, and site map components MERGE
+  across layers; all other component types use "top level wins".
 
 To see layering:
   Solution > Component > ... > See solution layers
   (Shows which solution last modified the component)
 ```
 
+> Layering and merge behaviour confirmed against
+> [Solution layers and merge behavior](https://learn.microsoft.com/en-us/power-platform/alm/solution-layers-alm).
+> The unmanaged layer is a single layer that sits above all managed layers; the
+> last managed solution installed sits above earlier managed solutions.
+
 ### 1.3 Patching
 
 ```
-PATCH = Small update to existing managed solution
-        (Only includes changed components)
+PATCH = Small update to existing parent managed solution
+        (Contains ONLY the changes; layered on top of the parent)
 
 When to use:
   - Hotfix in production
@@ -73,17 +98,32 @@ When to use:
 When NOT to use:
   - Major feature release (use full upgrade)
   - Adding many new components
+  - Removing components (patches CANNOT delete components - use an upgrade)
   - Changing table structure significantly
 
-Workflow:
-  1. DEV: Make fix in unmanaged solution
-  2. DEV: Export as PATCH (not full solution)
-  3. PROD: Import patch on top of existing managed solution
-  4. Later: Create full upgrade that includes all patches
+Version rule: a patch must raise the BUILD or REVISION number only
+  (e.g. base 1.0.0.0 -> patch 1.0.1.0). It cannot raise the major or
+  minor version. The parent is locked while child patches exist.
 
-Create patch:
-  pac solution patch --version 1.0.1.0 --publisher contoso
+Workflow:
+  1. DEV: Clone a patch from the parent solution (creates a child patch
+          solution at a higher build/revision version)
+  2. DEV: Make the fix inside the patch solution, then export it managed
+  3. PROD: Import the managed patch on top of the existing managed parent
+  4. Later: Clone the solution (rolls all patches into a new base) and
+          ship it as a managed upgrade, then DeleteAndPromote in target
 ```
+
+> Patches are created with the **CloneAsPatch** action / "Clone a Patch" in
+> the maker portal (`make.powerapps.com` > Solutions > ... > Clone > Clone a
+> Patch) - there is **no** `pac solution patch` verb. The `pac solution`
+> group exposes `clone`, `upgrade`, `version`, and `online-version` for the
+> CLI-driven equivalents. Microsoft notes that clone-a-patch / clone-a-solution
+> are **not recommended** for team development with source control; the
+> healthier pattern is to increment the version in the unmanaged DEV solution
+> and export a managed build artifact for upgrade. See
+> [Create patches](https://learn.microsoft.com/en-us/power-platform/alm/create-patches-simplify-solution-updates)
+> and [pac solution reference](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/solution).
 
 ---
 
@@ -168,7 +208,11 @@ PROD:
 Native, low-code CI/CD built into Power Platform.
 
 Requirements:
-  - Managed Environment (premium feature)
+  - Target environments must be Managed Environments (premium)
+    Note: the DEV/source environment does NOT have to be Managed, and the
+    pipelines host should be a production environment but need not be Managed.
+    As of Feb 2026 Microsoft auto-enables Managed Environments on pipeline
+    targets that are not already enabled.
   - Pipeline admin permissions
   - At least 2 environments (dev + target)
 
@@ -184,6 +228,10 @@ Cons:
   - No advanced testing gates
   - Requires Managed Environments
 ```
+
+> Managed Environment requirement and the Feb 2026 auto-enablement confirmed via
+> [Overview of pipelines](https://learn.microsoft.com/en-us/power-platform/alm/pipelines)
+> and [Set up pipelines](https://learn.microsoft.com/en-us/power-platform/alm/set-up-pipelines).
 
 ### 3.2 Setting Up Pipelines
 
@@ -372,6 +420,15 @@ stages:
               SkipProductUpdateDependencies: false
 ```
 
+> Power Platform Build Tools task versions and the Solution Checker RuleSet GUID
+> `0ad12346-e108-40b8-a956-9a8f95ea18c9` are confirmed against
+> [Build tool tasks](https://learn.microsoft.com/en-us/power-platform/alm/devops-build-tool-tasks):
+> the current major version is `@2` (e.g. `PowerPlatformToolInstaller@2`,
+> `PowerPlatformChecker@2`, `PowerPlatformImportSolution@2`). You **cannot** mix
+> task versions within a single pipeline. The Tool Installer task must be added
+> once before any other Power Platform task. These are the same actions exposed
+> as [GitHub Actions for Power Platform](https://learn.microsoft.com/en-us/power-platform/alm/devops-github-actions).
+
 ### 4.2 Service Principal Setup for CI/CD
 
 ```
@@ -443,12 +500,16 @@ pac solution publish
 # List solutions
 pac solution list
 
-# Check solution version
-pac solution version
+# Update the solution build/revision version (does NOT take --version;
+# use --buildversion / --revisionversion, or --strategy gittags|filetracking)
+pac solution version --buildversion 3
+# Get/set the version of a solution loaded in Dataverse:
+pac solution online-version --solution-name MySolution --solution-version 1.0.0.2
 
 # ===== SOLUTION CHECKER =====
-# Run solution checker
-pac solution check --path ./MySolution.zip --output ./checker-results
+# Run solution checker (note: the flag is --outputDirectory, not --output;
+# --geo selects the Power Apps Checker service region, e.g. UnitedStates)
+pac solution check --path ./MySolution.zip --outputDirectory ./checker-results --geo UnitedStates
 
 # ===== PACK/UNPACK =====
 # Unpack (extract solution to source files)
@@ -467,12 +528,16 @@ pac admin create --name "DEV-ProjectX" --region unitedstates --type Sandbox
 # Delete environment
 pac admin delete --environment "https://dev-projectx.crm.dynamics.com"
 
-# ===== DATA =====
-# Export data (Configuration Migration Tool)
+# ===== DATA (Configuration Migration Tool - config data only, NOT bulk) =====
+# Export data
 pac data export --schemaFile ./schema.xml --dataFile ./data.zip --environment https://yourorg.crm.dynamics.com
 
-# Import data
-pac data import --dataFile ./data.zip --environment https://yourorg.crm.dynamics.com
+# Import data (current CLI uses --data for the input file)
+pac data import --data ./data.zip --environment https://yourorg.crm.dynamics.com
+# NOTE: pac data uses the Configuration Migration Tool and is for small config
+# datasets only. The pac data plugin no longer runs on Microsoft-hosted CI
+# agents (dropped late 2025); in pipelines use the Build Tools
+# PowerPlatformExportData / PowerPlatformImportData tasks instead.
 
 # ===== PCF =====
 # Initialize PCF component
@@ -481,6 +546,16 @@ pac pcf init --namespace ContosoNamespace --name StarRating --template field
 # Push PCF to environment
 pac pcf push --publisher-prefix contoso
 ```
+
+> All `pac` verbs above are confirmed against the current CLI reference:
+> [solution](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/solution),
+> [admin](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/admin),
+> [data](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/data),
+> and [pcf](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/pcf).
+> Notable corrections from prior versions of this guide: there is no
+> `pac solution patch` verb; `pac solution version` updates the build/revision
+> only (no `--version` argument); `pac solution check` uses `--outputDirectory`;
+> and `pac data import` takes `--data`.
 
 ### 5.2 pac CLI in GitHub Actions
 
@@ -518,6 +593,16 @@ jobs:
       run: pac solution publish
 ```
 
+> The .NET tool package id `Microsoft.PowerApps.CLI.Tool` and the
+> `dotnet tool install --global` command are confirmed via
+> [Install Power Platform CLI with .NET Tool](https://learn.microsoft.com/en-us/power-platform/developer/howto/install-cli-net-tool).
+> Ensure a compatible .NET SDK is installed in the runner first (use
+> `actions/setup-dotnet`). On .NET 10+ you can skip install and run one-shot with
+> `dnx Microsoft.PowerApps.CLI.Tool --yes ...`. For ephemeral runners, add the
+> global `--log-to-console` flag so diagnostics reach the pipeline log. For most
+> CI/CD, prefer the maintained [GitHub Actions for Power Platform](https://learn.microsoft.com/en-us/power-platform/alm/devops-github-actions)
+> over a raw `pac` install.
+
 ---
 
 ## 6. Solution Checker
@@ -528,7 +613,7 @@ jobs:
 Solution Checker validates code quality and security:
 
 Via pac CLI:
-  pac solution check --path ./MySolution.zip --output ./results
+  pac solution check --path ./MySolution.zip --outputDirectory ./results --geo UnitedStates
 
 Via Power Platform:
   make.powerapps.com > Solutions > ... > Solution Checker > Run
@@ -536,11 +621,12 @@ Via Power Platform:
 Via Azure DevOps:
   PowerPlatformChecker@2 task (shown in pipeline example above)
 
-Results categories:
+Results categories (Power Apps Checker severity levels):
   - Critical: Must fix before deployment
   - High: Should fix
   - Medium: Consider fixing
-  - Low: Informational
+  - Low: Minor
+  - Informational: Advisory only
 
 Common issues:
   - JS: Use of eval() - Security risk
@@ -551,6 +637,12 @@ Common issues:
   - General: Unused variables
 ```
 
+> Verified via [pac solution check reference](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/solution):
+> the output flag is `--outputDirectory`, the region flag is `--geo`, and the
+> default `--ruleSet` is "Solution Checker". The five severity levels
+> (Critical, High, Medium, Low, Informational) match the `OverrideLevel` values
+> accepted by the checker's rule-level override file.
+
 ---
 
 ## 7. Environment Variables and Connection References
@@ -560,12 +652,14 @@ Common issues:
 ```
 Purpose: Store environment-specific configuration
 
-Types:
+Types (Microsoft Learn data-type names):
   - Text: API URLs, connection strings
-  - Number: Timeout values, thresholds
+  - Decimal number: Timeout values, thresholds
+  - Yes/No (Boolean): Feature toggles
   - JSON: Complex configuration
-  - Data Source: Dataverse connection references
-  - Secret: Passwords (stored in Azure Key Vault)
+  - Data source: Dataverse / connector data source config
+  - Secret: Secrets stored in Azure Key Vault (only KV is supported;
+            usable in Power Automate flows and custom connectors only)
 
 ALM workflow:
   DEV: Create env var in unmanaged solution
@@ -585,6 +679,13 @@ Important: Always set the CURRENT value after importing
            to a new environment. The default value comes
            from the source environment.
 ```
+
+> Environment variable data types and Secret/Key Vault behaviour confirmed via
+> [Use environment variables in solutions](https://learn.microsoft.com/en-us/power-apps/maker/data-platform/environmentvariables)
+> and [Use environment variables for Azure Key Vault secrets](https://learn.microsoft.com/en-us/power-apps/maker/data-platform/environmentvariables-azure-key-vault-secrets).
+> Azure Key Vault is the only supported secret store, it must be in the same
+> tenant, and the Dataverse service principal needs the **Key Vault Secrets User**
+> role (the older Key Vault Reader role is deprecated for this purpose).
 
 ### 7.2 Connection References in ALM
 
@@ -776,6 +877,13 @@ Version update rules:
   Major rewrite:       1.2.0 -> 2.0.0
 ```
 
+> Note on field names: Dataverse stores a solution version as
+> `major.minor.build.revision` (NOT ...PATCH.BUILD). A managed **patch** may
+> only raise the build or revision number relative to its parent; a cloned
+> (upgrade) solution may raise major/minor. The "PATCH" label above is the
+> SemVer convention, not the Dataverse field name. See
+> [Create patches](https://learn.microsoft.com/en-us/power-platform/alm/create-patches-simplify-solution-updates).
+
 ---
 
 ## 11. Rollback Procedures
@@ -789,7 +897,8 @@ Method 1: Version rollback (if previous version exists)
   3. Publish all customizations
 
 Method 2: Uninstall and reinstall
-  1. Settings > Solutions
+  1. make.powerapps.com > Solutions (the classic "Settings > Solutions"
+     path is legacy)
   2. Delete current managed solution
      (Check dependencies first - may need to remove dependent components)
   3. Import previous managed version
@@ -822,4 +931,4 @@ Method 3: Environment restore (nuclear option)
 
 ---
 
-*End of ALM Guide. Verify all CLI commands and pipeline features against current Microsoft documentation.*
+*End of ALM Guide. Verified as of 2026-06-19 (platform state 2026-H1) against Microsoft Learn (see frontmatter `sources`). Re-verify version-specific behaviour against [Microsoft Learn ALM docs](https://learn.microsoft.com/en-us/power-platform/alm/) before relying on it.*

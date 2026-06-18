@@ -1,8 +1,21 @@
+---
+verified_as_of: 2026-06-19
+platform_state: 2026-H1
+sources:
+  - https://learn.microsoft.com/en-us/ai-builder/credit-management
+  - https://learn.microsoft.com/en-us/ai-builder/administer-licensing
+  - https://learn.microsoft.com/en-us/ai-builder/model-types
+  - https://learn.microsoft.com/en-us/ai-builder/availability-region
+  - https://learn.microsoft.com/en-us/ai-builder/prediction-prereq
+  - https://learn.microsoft.com/en-us/ai-builder/object-detection-train-model
+  - https://learn.microsoft.com/en-us/ai-builder/before-you-build-text-classification-model
+---
+
 # AI Builder Comprehensive Guide
 
-> **Version**: 1.0 | **Last updated**: 2025-01-15
-> **Applies to**: AI Builder in Power Platform
-> **Needs verification against current Microsoft docs**: AI Builder credit allocation, model availability, and pricing change frequently. GPT model availability varies by region.
+> **Version**: 1.1 | **Last updated**: 2026-06-19 (verified against Microsoft Learn)
+> **Applies to**: AI Builder in Power Platform (platform state 2026-H1)
+> **Major licensing shift (verify before any client costing)**: As of 2026-H1, AI Builder credits are being phased out in favour of **Copilot Credits**. New customers can no longer purchase the AI Builder capacity add-on and must buy Copilot Credits; existing customers can renew/buy add-ons only until **2026-11-01**. Seeded AI Builder credits in Power Apps/Power Automate/Dynamics 365 licenses are **removed on 2026-11-01** — after that only AI Builder add-on credits remain. ([credit-management](https://learn.microsoft.com/en-us/ai-builder/credit-management)) Model availability and exact credit rates still vary by region; always confirm against the [AI Builder capability rate table](https://learn.microsoft.com/en-us/ai-builder/administer-licensing) and the [Microsoft Power Platform Licensing Guide (pdf)](https://go.microsoft.com/fwlink/?LinkId=2085130).
 
 ---
 
@@ -33,14 +46,19 @@ Decision Tree:
 
 ### 2.1 Document Processing Models
 
-| Model | Use Case | Sample Docs | Credit Cost |
-|-------|----------|-------------|-------------|
-| **Invoice Processing** | Extract invoice fields | Invoices from vendors | ~High |
-| **Receipt Processing** | Expense receipt extraction | Employee receipts | ~Medium |
-| **Identity Document** | Extract passport, license info | Government IDs | ~Medium |
-| **Business Card** | Contact info extraction | Business cards | ~Low |
-| **Custom Document** | Any structured/semi-structured form | Your custom forms | ~High (training) |
-| **Text Recognition (OCR)** | Extract text from any image | Scanned docs, photos | ~Low |
+Model names below match the current AI Builder model catalogue. ([model-types](https://learn.microsoft.com/en-us/ai-builder/model-types)) "Build type" is whether the model is prebuilt (ready to use) or custom (you build/train/publish).
+
+| Model | Build type | Use Case | Sample Docs |
+|-------|-----------|----------|-------------|
+| **Invoice processing** | Prebuilt | Extract invoice fields | Invoices from vendors |
+| **Receipt processing** | Prebuilt | Expense receipt extraction | Employee receipts |
+| **ID reader** (was "Identity Document") | Prebuilt | Extract passport, license info | Government IDs |
+| **Business card reader** | Prebuilt | Contact info extraction | Business cards |
+| **Contract processing** | Prebuilt | Extract clauses/data from contracts | Contracts |
+| **Document processing** (was "Custom Document") | Custom | Any structured/semi-structured form | Your custom forms |
+| **Text recognition (OCR)** | Prebuilt | Extract text from any image | Scanned docs, photos |
+
+Relative credit cost varies per capability; consult the [AI Builder capability rate table](https://learn.microsoft.com/en-us/ai-builder/administer-licensing) for exact per-call rates rather than ordinal "~High/~Low" estimates.
 
 **Document Processing Pipeline**:
 ```
@@ -57,29 +75,31 @@ Step 7: Archive original document
 
 | Model | Use Case | Training Data |
 |-------|----------|---------------|
-| **Category Classification** | Classify text into categories | 50+ labeled samples per category |
-| **Entity Extraction** | Extract named entities from text | 50+ labeled samples |
-| **Sentiment Analysis** | Determine text sentiment | Pre-built (no training) |
-| **Language Detection** | Detect language of text | Pre-built (no training) |
-| **Key Phrase Extraction** | Extract key phrases | Pre-built (no training) |
-| **Text Translation** | Translate between languages | Pre-built (no training) |
+| **Category Classification** | Classify text into categories | Min. 10 distinct text samples per tag, 2+ tags (custom); also available prebuilt ([before-you-build-text-classification-model](https://learn.microsoft.com/en-us/ai-builder/before-you-build-text-classification-model)) |
+| **Entity Extraction** | Extract named entities from text | Custom (build/train) or prebuilt; provide ample labeled samples per entity ([entity-extraction-overview](https://learn.microsoft.com/en-us/ai-builder/entity-extraction-overview)) |
+| **Sentiment Analysis** | Determine text sentiment | Prebuilt (no training) ([prebuilt-sentiment-analysis](https://learn.microsoft.com/en-us/ai-builder/prebuilt-sentiment-analysis)) |
+| **Language Detection** | Detect language of text | Prebuilt (no training) ([prebuilt-language-detection](https://learn.microsoft.com/en-us/ai-builder/prebuilt-language-detection)) |
+| **Key Phrase Extraction** | Extract key phrases | Prebuilt (no training) ([prebuilt-key-phrase](https://learn.microsoft.com/en-us/ai-builder/prebuilt-key-phrase)) |
+| **Text Translation** | Translate between languages | Prebuilt (no training); GA in Europe & US only ([prebuilt-text-translation](https://learn.microsoft.com/en-us/ai-builder/prebuilt-text-translation)) |
 
 ### 2.3 Prediction and Specialized Models
 
 | Model | Use Case | Training Data | Notes |
 |-------|----------|---------------|-------|
-| **Prediction** | Predict outcomes | 300+ historical records with outcomes | Dataverse only |
-| **Object Detection** | Identify objects in images | 15+ images per object | Images must be labeled |
-| **Formulas (GPT)** | Generate text with prompts | None (prompt-based) | Credit per call |
+| **Prediction** | Predict outcomes | Min. 50 rows total **and** ≥10 rows per outcome class; 1,000+ rows recommended for good accuracy ([prediction-prereq](https://learn.microsoft.com/en-us/ai-builder/prediction-prereq)) | Custom model, Dataverse table |
+| **Object Detection** | Identify objects in images | Min. 15 images per object; 50+ per label for reliable scores ([object-detection-train-model](https://learn.microsoft.com/en-us/ai-builder/object-detection-train-model)) | Images must be labeled |
+| **AI prompts / Text generation** (formerly "Formulas (GPT)" / "Create text with GPT") | Generate text with prompts | None (prompt-based) | Always consumes credits — even in preview/testing of the *prebuilt Text generation model*, though custom prompt testing in Prompt Builder is free. Prebuilt "Text generation" model is Preview, US-only ([model-types](https://learn.microsoft.com/en-us/ai-builder/model-types)) |
 
 ---
 
-## 3. GPT Prompts in Power Automate and Power Apps
+## 3. AI Prompts (GPT) in Power Automate and Power Apps
 
-### 3.1 Creating a GPT Prompt
+> Microsoft now calls this capability **AI prompts** (built in **Prompt Builder**), not "GPT Prompts". Custom prompts can run on AI Builder credits in Power Apps/Power Automate, and on Copilot Credits in Copilot Studio. Credit cost depends on input + output tokens and the underlying model (basic/standard/premium tiers). ([credit-management](https://learn.microsoft.com/en-us/ai-builder/credit-management)) The step labels below are illustrative and the AI hub navigation changes; verify current menu paths in the maker portal.
+
+### 3.1 Creating an AI Prompt
 
 ```
-Step 1: AI Builder > Explore > GPT Prompts > Create
+Step 1: Power Apps/Power Automate > ... More > AI hub > AI models / Prompts > Create
 Step 2: Define prompt with input variables:
 
 Prompt text:
@@ -99,7 +119,7 @@ Step 5: Use in flow or app
 ### 3.2 Using GPT Prompt in Power Automate
 
 ```
-Action: Create text with GPT (AI Builder)
+Action: Run a prompt / Create text with GPT (AI Builder) -- exact action label varies by maker portal version
   - Prompt: Select your saved prompt
   - CustomerMessage: triggerBody()['emailBody']
   - Output: Generated text (JSON string)
@@ -172,22 +192,41 @@ Training costs:
   Prediction model: ~5,000-20,000 credits
 ```
 
-**Needs verification against current Microsoft docs**: Credit consumption rates change. Verify current rates before estimating costs.
+> The per-call credit figures above are **illustrative order-of-magnitude estimates only (unverified as of 2026-06-19 — confirm against Microsoft Learn)**. Microsoft does not publish a single public per-model credit table on Learn; the authoritative numbers live in the [AI Builder capability rate table](https://learn.microsoft.com/en-us/ai-builder/administer-licensing) and the [Microsoft Power Platform Licensing Guide (pdf)](https://go.microsoft.com/fwlink/?LinkId=2085130). One published worked example: **receipt processing = 32 AI Builder credits per receipt** ([credit-management](https://learn.microsoft.com/en-us/ai-builder/credit-management)) — note this is well below the "~50-100" estimate above, so treat the table as directional, not authoritative. Capabilities are now grouped into Basic/Standard/Premium/Content-Processing tiers that drive the rate. Always price from the rate card before estimating costs.
 
 ### 4.2 Credit Licensing
 
+Seeded ("included") AI Builder credits per license, confirmed against Microsoft Learn ([credit-management](https://learn.microsoft.com/en-us/ai-builder/credit-management)). **All seeded credits below are removed on 2026-11-01** — after that date only AI Builder add-on credits remain; new workloads consume Copilot Credits.
+
+| License | Seeded AI Builder credits | Cap |
+|---------|---------------------------|-----|
+| AI Builder add-on (T1, T2, T3) | 1,000,000 | None |
+| Power Apps Premium | 500 | Max 1,000,000 / tenant |
+| Power Apps per app | 250 (per-app licenses bought before Nov 2022 include none) | Max 1,000,000 / tenant |
+| Power Automate Premium | 5,000 | Max 1,000,000 / tenant |
+| Power Automate Process | 5,000 | Max 1,000,000 / tenant |
+| Power Automate Hosted RPA add-on | 5,000 | Max 1,000,000 / tenant |
+| Power Automate Unattended RPA add-on | 5,000 | Max 1,000,000 / tenant |
+| Dynamics 365 F&O | 20,000 | Max 20,000 / tenant |
+
 ```
-Included credits (verify current allocation):
-  - Some Power Apps licenses include credits
-  - Dynamics 365 licenses may include credits
-  - Standalone: $500 per 1M credits/month
+Standalone capacity (existing customers, until 2026-11-01):
+  AI Builder capacity add-on T1 = 1,000,000 credits/month for $500/month
+  (yearly prepaid Tier 1). T2 requires min 10 packs, T3 min 50 packs.
+  New customers CANNOT buy this add-on — they buy Copilot Credits instead
+  (pay-as-you-go: 1 Copilot Credit = $0.01).
+
+Credits do NOT carry over month to month — usage resets on the 1st.
+Training, and testing prebuilt/custom models, are FREE (no credits) —
+  EXCEPT prompts, which always consume credits, even in preview.
 
 How to check tenant credits:
-  Power Platform Admin Center > Resources > Capacity > AI Builder credits
+  Power Platform Admin Center > Licensing > Capacity add-ons > Summary
 
-How to check environment credits:
-  make.powerapps.com > AI Builder > Help > Credits
+How to check environment credits / consumption:
+  Power Platform Admin Center > Licensing > Capacity add-ons (consumption report)
 ```
+Sources: [credit-management](https://learn.microsoft.com/en-us/ai-builder/credit-management), [administer-licensing](https://learn.microsoft.com/en-us/ai-builder/administer-licensing).
 
 ### 4.3 Estimating Credit Usage for a Project
 
@@ -222,12 +261,14 @@ Step 5: Convert to licensing:
 
 ```
 Method 1: Admin Center
-  Power Platform Admin Center > Resources > Capacity > AI Builder
-  Shows: Total allocated, used, remaining
+  Power Platform Admin Center > Licensing > Capacity add-ons > Summary
+  Shows: Allocation bar (allocated) and Consumption bar (consumed) out of purchased
+  (Source: learn.microsoft.com/en-us/ai-builder/credit-management)
 
-Method 2: AI Builder Portal
-  make.powerapps.com > AI Builder > Help
-  Shows: Environment-level usage
+Method 2: Consumption report
+  Power Platform Admin Center > Licensing > Capacity add-ons > consumption report
+  Shows: Per-environment, per-day, per-user computed consumption
+  Also: AI Builder Activity page in Power Automate for real-time predicts
 
 Method 3: Power Automate Analytics
   Flow runs > Filter by AI Builder actions
@@ -462,24 +503,33 @@ Trigger: When email arrives in invoices@company.com
 ## 9. Region Availability Notes
 
 ```
-AI Builder models are NOT available in all regions.
+AI Builder models are NOT available in all regions. AI Builder was first
+released in Europe and the US; models deploy in the region hosting your
+Power Platform environment.
+(Source: learn.microsoft.com/en-us/ai-builder/availability-region)
 
 Before proposing AI Builder to client:
-1. Check region availability:
+1. Check region availability (canonical, current page):
    https://learn.microsoft.com/en-us/ai-builder/availability-region
 
-2. Common limitations:
-   - GPT prompts: Limited regions (check current list)
-   - Custom models: May not be available in sovereign clouds
-   - Preview models: Usually only in select regions
+2. Confirmed limitations as of 2026-H1 (verified against the page above):
+   - Text translation: GA only in Europe and United States
+   - Text generation (prebuilt prompt model): Preview, United States only
+   - Object detection: not available in many regions (e.g. Canada, France,
+     Germany, several EU/APAC) - check the table
+   - Prediction/Category classification/Entity extraction: NOT in Korea or Norway
+   - Document Automation, image/document prompt inputs: NOT in GCC / GCC High
+   - DoD cloud: AI Builder features not available
+   - AI prompt model availability: see Copilot Studio "Model availability by
+     region" (learn.microsoft.com/en-us/microsoft-copilot-studio/prompt-model-settings)
 
 3. Workaround if not available:
    - Use Azure OpenAI via custom connector
    - Use Azure AI Document Intelligence
    - Process in available region (data residency considerations)
 
-Needs verification against current Microsoft docs:
-  Region availability changes frequently with new model releases.
+Region availability changes with new model releases - re-check the page
+above before each client engagement.
 ```
 
 ---
@@ -530,8 +580,14 @@ AI Builder Credits:
 
 Licensing:
   If client has existing allocation: Check if sufficient
-  If not: 1M credits = ~$500/month (verify current pricing)
-  Cost: ~$250/month (using half of 1M pack)
+  If not (EXISTING customers only, until 2026-11-01):
+    AI Builder add-on T1 = 1M credits = $500/month (yearly prepaid)
+    (confirmed: learn.microsoft.com/en-us/ai-builder/credit-management)
+  NEW customers: must buy Copilot Credits (1 credit = $0.01); the add-on
+    is end-of-sale. Re-baseline this whole calc in Copilot Credits.
+  Note: credits do NOT carry over month to month, and add-ons are sold in
+    whole 1M packs (no half-pack) - the "~$250" figure below is an
+    amortised cost-of-consumption illustration, not a purchasable SKU.
 
 Storage:
   2,000 invoices x 500KB = 1GB/month
@@ -555,7 +611,7 @@ Savings: ~95%
 |---------|-------------|----------|
 | Not estimating credit usage | Budget overrun mid-project | Calculate before starting |
 | No human review design | AI errors go straight to system | Build review queue |
-| Training with too few samples | Poor accuracy | Minimum 5-10 samples, more is better |
+| Training with too few samples | Poor accuracy | Meet the documented minimums (e.g. category classification 10/tag, object detection 15/object, prediction 50 rows + 10/class); aim well above them ([model-types](https://learn.microsoft.com/en-us/ai-builder/model-types)) |
 | Ignoring confidence scores | Accepting low-confidence extractions | Always check and route |
 | Not validating AI output | Data corruption in downstream systems | Validation rules in flow |
 | Single model for all doc types | Poor accuracy across variations | Separate models per type |
@@ -569,4 +625,4 @@ Savings: ~95%
 
 ---
 
-*End of AI Builder Guide. Verify all credit rates, model availability, and pricing against current Microsoft documentation before client engagements.*
+*End of AI Builder Guide. Verified against Microsoft Learn on 2026-06-19 (platform state 2026-H1). Credit rates, model availability, and the AI Builder credits → Copilot Credits transition (add-on end-of-sale; seeded credits removed 2026-11-01) change frequently — re-verify against [credit-management](https://learn.microsoft.com/en-us/ai-builder/credit-management), [administer-licensing](https://learn.microsoft.com/en-us/ai-builder/administer-licensing), and [availability-region](https://learn.microsoft.com/en-us/ai-builder/availability-region) before each client engagement.*

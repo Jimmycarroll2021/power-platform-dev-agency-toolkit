@@ -1,8 +1,21 @@
+---
+verified_as_of: 2026-06-19
+platform_state: 2026-H1
+sources:
+  - https://learn.microsoft.com/en-us/power-apps/maker/canvas-apps/delegation-overview
+  - https://learn.microsoft.com/en-us/power-apps/maker/canvas-apps/connections/connection-sharepoint-online
+  - https://learn.microsoft.com/en-us/power-platform/developer/howto/install-cli-net-tool
+  - https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/pcf
+  - https://learn.microsoft.com/en-us/power-apps/developer/component-framework/component-framework-for-canvas-apps
+  - https://learn.microsoft.com/en-us/power-apps/mobile/mobile-offline-overview
+  - https://learn.microsoft.com/en-us/power-pages/security/external-access
+---
+
 # Power Apps Comprehensive Guide
 
-> **Version**: 1.0 | **Last updated**: 2025-01-15
+> **Version**: 1.1 | **Last updated**: 2026-06-19 (fact-checked against Microsoft Learn)
 > **Applies to**: Canvas Apps, Model-Driven Apps, Custom Pages
-> **Needs verification against current Microsoft docs**: Features and limits change frequently.
+> **Platform state**: 2026-H1. Features and limits change frequently — re-verify against current Microsoft Learn before relying on any limit or licensing figure.
 
 ---
 
@@ -18,7 +31,7 @@ This is the first decision on every project. Get this wrong and everything else 
 | **Complex relationships** | Harder to build | Native | Medium |
 | **Security model** | App-level + connector | Row/column/field level | Inherits model app |
 | **Rapid development** | Fast for simple apps | Fast for data-heavy | Extra effort |
-| **Offline support** | Yes (with setup) | Limited | Limited |
+| **Offline support** | Yes (Dataverse + mobile app) | Yes (offline-first, mobile app) | Limited (inherits host) |
 | **Best for** | Field apps, custom UX | CRM, case mgmt, data apps | Custom dashboards |
 | **When to choose** | Mobile-first, unique UI | Complex data, security | Custom viz in model app |
 
@@ -149,27 +162,31 @@ CountRows(Filter(Gallery1.AllItems, Status = "Pending"))
 
 ### 2.4 Delegation Warnings (CRITICAL)
 
-**The 2000-row limit**: Canvas apps can only process 2000 rows locally. Everything beyond that must be delegated to the data source.
+**The non-delegation row limit**: When a query (or part of one) can't be delegated, Power Apps processes records locally and the result is capped by the app's **Data row limit** setting — **default 500, configurable from 1 to 2,000** (Settings > General > Data row limit). It is *not* a flat "2000 rows" cap, and 2,000 is the maximum, not the default. Anything beyond the limit silently returns incorrect/partial results, so delegate as much as possible (and set the limit to 1 during testing to surface non-delegable formulas early). ([delegation overview](https://learn.microsoft.com/en-us/power-apps/maker/canvas-apps/delegation-overview))
 
 | Data Source | Delegable Functions | Non-Delegable |
 |-------------|--------------------| --------------|
-| Dataverse | Filter, Sort, SortByColumns, Lookup, First, CountRows, Max, Min, Avg, Sum | Search (partial), AddColumns, ShowColumns |
-| SharePoint | Filter, Sort, SortByColumns, First | CountRows, Max, Min, Sum, Avg, Search |
-| SQL Server | Most functions | Varies by setup |
+| Dataverse | Filter, Sort, SortByColumns, Lookup, First, Search, Sum, Avg, Min, Max, CountRows/Count (UpdateIf/RemoveIf delegate on Dataverse) | AddColumns, ShowColumns, GroupBy, Choices, Collect/ClearCollect, FirstN/Last/LastN |
+| SharePoint | Filter, Lookup, Sort, SortByColumns, StartsWith, comparison operators (`=`, `<`, `>`, etc.), And/Or | Search, CountRows, Count, Sum, Avg, Min, Max, Not, IsBlank (on text) — see note below |
+| SQL Server | Most functions (Filter, Sort, Lookup, Sum, Avg, Min, Max, CountRows) | Varies by setup |
 | Excel Online | None (not delegable) | Everything |
 
+> SharePoint's delegable set is narrow: aggregates (`Sum`, `Avg`, `Min`, `Max`, `CountRows`, `Count`) and `Search` do **not** delegate to SharePoint, and `UpdateIf`/`RemoveIf` only *simulate* delegation up to the 500/2,000 record limit. Sources: [Dataverse delegable functions](https://learn.microsoft.com/en-us/power-apps/maker/canvas-apps/connections/connection-common-data-service#power-apps-delegable-functions-and-operations-for-dataverse), [SharePoint delegable functions](https://learn.microsoft.com/en-us/power-apps/maker/canvas-apps/connections/connection-sharepoint-online#power-apps-delegable-functions-and-operations-for-sharepoint), [SQL Server delegable functions](https://learn.microsoft.com/en-us/power-apps/maker/canvas-apps/connections/sql-connection-overview#power-apps-functions-and-operations-delegable-to-sql-server).
+
 ```powerapps
-// BAD: Non-delegable - will only get 2000 rows then filter
+// BAD: Non-delegable - Collect() pulls only up to the Data row limit (500 default / 2000 max) then filters locally
 Filter(Collect(MyLocalCollection, Accounts), Status = "Active")
 
 // GOOD: Delegable - filter happens at data source
 Filter(Accounts, Status = "Active")
 
-// BAD: CountRows on large table (not delegable in SharePoint)
+// BAD: CountRows on large SharePoint list does NOT delegate to SharePoint - counts only the first 500/2000 rows
 CountRows(Filter(SharePointList, Status = "Active"))
 
-// GOOD: Use delegable alternative
-CountIf(SharePointList, Status = "Active")  // SharePoint delegable
+// NOTE: There is no delegable count workaround for SharePoint. CountIf/CountRows do not delegate to SharePoint.
+// To count large SharePoint lists accurately, move the data to Dataverse or SQL (both delegate aggregate counts),
+// or maintain a running count elsewhere. (unverified workaround patterns aside, the delegation limit is per
+// SharePoint connector docs)
 
 // BAD: Multiple non-delegable functions chained
 First(Sort(Filter(Accounts, Year(CreatedOn) = 2024), Name))
@@ -361,11 +378,13 @@ Use SQL Server when:
 - Reporting requirements
 
 NEVER use Excel Online for production apps:
-- No delegation
-- Concurrent edit issues
-- 5MB file limit
+- No delegation (Excel supports no delegable operations - capped at the 500/2000 Data row limit)
+- Concurrent edit issues (concurrent writes from multiple clients cause merge conflicts; file can lock for up to ~6 minutes)
+- Loads at most 2,000 records into a canvas app; not a relational store
+- File size limits depend on connector: ~25 MB for the Excel Online (Business) connector, up to 5 GB for a direct cloud-storage Excel connection (NOT a "5 MB" limit)
 - No relationships
-- No security
+- No row/column security
+Source: https://learn.microsoft.com/en-us/connectors/excelonlinebusiness/
 ```
 
 ---
@@ -391,10 +410,13 @@ DON'T use PCF when:
 ### 5.2 PCF Quick Start
 
 ```bash
-# Install Power Apps CLI
-npm install -g pac
+# Install Power Platform CLI (pac) - it is a .NET tool, NOT an npm package.
+# Requires .NET (10.x recommended for pac 2.x). There is no `npm install -g pac`.
+dotnet tool install --global Microsoft.PowerApps.CLI.Tool
+# Alternatives: Windows MSI installer, or the "Power Platform Tools" VS Code extension.
+# Source: https://learn.microsoft.com/en-us/power-platform/developer/howto/install-cli-net-tool
 
-# Create new PCF component
+# Create new PCF component (template values: field | dataset)
 pac pcf init --namespace MyNamespace --name StarRating --template field --run-npm-install
 
 # Build
@@ -407,21 +429,28 @@ pac pcf push --publisher-prefix mypref
 
 # Add to form via form designer
 ```
+> `pac` is the Microsoft Power Platform CLI. Confirmed commands: [`pac pcf init` / `pac pcf push`](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/pcf), [`pac auth create`](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/auth). Publisher prefix must be 2-8 alphanumeric characters, start with a letter, and not start with `mscrm`.
 
 ### 5.3 PCF Limitations
 
 ```
-- Canvas apps: limited PCF support (dataset components not supported)
+- Canvas apps DO support both field and dataset code components (canvas dataset
+  components are supported - the older "not supported" limitation no longer applies);
+  the PCF feature must be enabled per environment by an admin.
+  Source: https://learn.microsoft.com/en-us/power-apps/developer/component-framework/component-framework-for-canvas-apps
 - Must use pac CLI (no visual designer)
 - Security review required for AppSource publishing
-- Cannot use external CDN resources (must be bundled)
+- External CDN / network resources have restrictions and should generally be bundled (unverified as of 2026-06-19 - confirm against Microsoft Learn)
 - Must handle theming manually
 - Mobile performance needs testing
+- Power Apps component framework is not supported for on-premises environments
 ```
 
 ---
 
 ## 6. Offline Capabilities
+
+> Both canvas AND model-driven apps support mobile offline via the Power Apps mobile app. Model-driven apps use an **offline-first** experience (the default in the modern app designer) backed by a local SQLite cache, with automatic background sync and conflict detection — it is not canvas-only. ([model-driven mobile offline overview](https://learn.microsoft.com/en-us/power-apps/mobile/mobile-offline-overview))
 
 ### 6.1 Canvas App Offline (Dataverse)
 
@@ -451,13 +480,20 @@ If(!Connection.Connected, Notify("Working offline", NotificationType.Warning))
 ### 6.2 Offline Limitations
 
 ```
-- Canvas apps only (not model-driven)
-- Dataverse only (not SharePoint, SQL)
+- The notes below describe CANVAS app offline. Model-driven apps ALSO support offline
+  (offline-first mode) - see the callout at the start of Section 6.
+- Dataverse only for canvas offline (not SharePoint, SQL)
 - Must use Power Apps mobile app
 - Images/files have special handling
 - Initial sync can be slow
-- Conflict resolution is last-write-wins
+- Conflict handling: model-driven offline-first performs automatic conflict detection on
+  sync (not a simple last-write-wins). Canvas offline conflict behaviour is more limited;
+  design to minimise concurrent edits. (canvas conflict-resolution specifics unverified as
+  of 2026-06-19 - confirm against Microsoft Learn)
 - Not suitable for real-time collaboration
+- Model-driven offline limitations include: N:N "Add Existing" is read-only offline, web
+  resources are partially supported (prefer PCF), duplicate detection/merge unsupported
+  offline. ([offline limitations](https://learn.microsoft.com/en-us/power-apps/mobile/offline-limitations))
 ```
 
 ---
@@ -582,7 +618,7 @@ Option 3: Embedded in Teams
 
 | Mistake | Impact | Solution |
 |---------|--------|----------|
-| Not delegating queries | App only sees 2000 rows | Use delegable functions with Dataverse/SQL |
+| Not delegating queries | App only sees the Data row limit (500 default / 2000 max) | Use delegable functions with Dataverse/SQL |
 | Loading all data OnStart | Slow app start | Use Concurrent(), lazy load |
 | Hardcoding record IDs | Breaks across environments | Use environment variables |
 | No error handling | Silent failures | Add error labels, Notify() |

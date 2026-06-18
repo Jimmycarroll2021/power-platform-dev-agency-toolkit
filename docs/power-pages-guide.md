@@ -1,8 +1,21 @@
+---
+verified_as_of: 2026-06-19
+platform_state: 2026-H1
+sources:
+  - https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq
+  - https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/pages
+  - https://learn.microsoft.com/en-us/power-pages/configure/power-platform-cli-solution-management
+  - https://learn.microsoft.com/en-us/power-pages/security/table-permissions
+  - https://learn.microsoft.com/en-us/power-pages/security/authentication/
+  - https://learn.microsoft.com/en-us/power-pages/security/authentication/azure-ad-b2c-provider
+  - https://learn.microsoft.com/en-us/power-pages/admin/add-custom-domain
+---
+
 # Power Pages Comprehensive Guide
 
-> **Version**: 1.0 | **Last updated**: 2025-01-15
+> **Version**: 1.1 | **Last updated**: 2026-06-19
 > **Applies to**: Microsoft Power Pages (formerly Power Apps Portals)
-> **Needs verification against current Microsoft docs**: Pricing, authentication options, and feature availability change frequently.
+> **Verification**: Pricing, authentication, ALM commands, and feature availability verified against Microsoft Learn on 2026-06-19 (platform state 2026-H1). Pricing and feature availability change frequently — re-verify before quoting figures to a client.
 
 ---
 
@@ -18,6 +31,8 @@
 | **URL** | Custom domain supported | N/A (embedded or mobile app) |
 | **SEO** | Good (public pages indexable) | N/A |
 | **Mobile** | Responsive web | Native app experience |
+
+> Power Pages is built natively on Microsoft Dataverse as its primary data store (external data is reachable via APIs/connectors, but the site's own data model is Dataverse) — confirmed against [Microsoft Learn](https://learn.microsoft.com/en-us/power-pages/security/table-permissions). Power Pages supports federated identity providers (Microsoft Entra External ID / Azure AD B2C, generic OpenID Connect, SAML 2.0, WS-Federation) plus a local provider — [Microsoft Learn: authentication overview](https://learn.microsoft.com/en-us/power-pages/security/authentication/).
 
 ```
 Decision Tree:
@@ -75,6 +90,8 @@ Step 5: Configure:
 
 Step 6: Preview and publish
 ```
+
+> The default site URL format is `<sitename>.powerappsportals.com`; you can later attach one custom domain (site must be in production state, requires an SSL certificate and a CNAME) — confirmed against [Microsoft Learn: Add a custom domain name](https://learn.microsoft.com/en-us/power-pages/admin/add-custom-domain).
 
 ### 2.2 Site Structure
 
@@ -145,8 +162,13 @@ Site
 | **OAuth 2.0** | Social login (Google, Facebook) | Medium | Excellent (one-click) |
 | **SAML 2.0** | Enterprise SSO (Okta, ADFS) | High | Excellent (enterprise SSO) |
 | **OpenID Connect** | Custom identity provider | Medium | Good |
+| **WS-Federation** | Legacy enterprise IdPs | High | Good |
 
-### 3.2 Azure AD B2C Setup (Recommended for External Users)
+> Verified against [Microsoft Learn: authentication overview](https://learn.microsoft.com/en-us/power-pages/security/authentication/). Power Pages supports a local provider plus federated providers over OpenID Connect, SAML 2.0, and WS-Federation; Azure AD B2C is configured as an OpenID Connect provider. Microsoft now **recommends Microsoft Entra External ID (and discourages the local provider)** for new external-facing sites — Azure AD B2C remains supported but is the older path, and Microsoft documents migrating identity providers to Entra External ID. Azure AD has been renamed **Microsoft Entra ID**.
+
+### 3.2 Azure AD B2C / Entra External ID Setup (External Users)
+
+> Microsoft recommends **Microsoft Entra External ID** for new external-facing sites; Azure AD B2C (shown below) is still supported and configured as an OpenID Connect provider. Both are set up the same way in Power Pages. Verified against [Microsoft Learn: set up an OpenID Connect provider with Azure AD B2C](https://learn.microsoft.com/en-us/power-pages/security/authentication/azure-ad-b2c-provider).
 
 ```
 Step 1: Create Azure AD B2C tenant
@@ -226,12 +248,12 @@ Permission types:
   - Append: Add related records
   - Append To: Be added as related
 
-Access types:
-  - Global: All records in table
-  - Contact: Records linked to current contact
-  - Account: Records linked to current contact's parent account
-  - Self: Contact's own record (profile only)
-  - Parent: Records linked to parent entity
+Access types (verified against Microsoft Learn — see citation after this block):
+  - Global: All records in table (use cautiously; with the Anonymous role this exposes all rows)
+  - Contact: Records related to the signed-in contact (needs an N:1 relationship to the contact table)
+  - Account: Records related to the contact's parent account (needs an N:1 relationship to the account table)
+  - Self: The signed-in contact's own record (profile only)
+  - Parent: Records linked via a parent table permission. NOTE: the Parent access type is configured only in the Portal Management app, not the design studio; polymorphic lookups are not supported for parent-child permissions.
 
 Example: Case Management Portal
 
@@ -259,6 +281,8 @@ Table: Knowledge Article
   Scope: All published articles
   Web roles: Anonymous Users, Authenticated Users
 ```
+
+> Access types, the web-role association model, and the Portal-Management-app-only Parent type are confirmed against [Microsoft Learn: Set table permissions in Power Pages](https://learn.microsoft.com/en-us/power-pages/security/table-permissions). All authenticated contacts get the built-in **Authenticated Users** role; all unauthenticated visitors get **Anonymous Users**. Table permissions take effect only when associated with a web role.
 
 ### 4.2 Setting Up Table Permissions
 
@@ -510,26 +534,41 @@ Auto-registration settings:
 ### 8.1 Site Configuration Export/Import
 
 ```
-Power Pages doesn't use solutions directly (different from apps/flows).
+Two supported ALM approaches (verified against Microsoft Learn — see citations below):
 
-ALM approach:
-1. Use Power Platform CLI (pac) for site export/import:
-   pac auth create --url https://yourorg.crm.dynamics.com
-   pac powerpages upload --path ./site-config
-   pac powerpages download --path ./site-config --webSiteId <id>
+NOTE on command name: `pac paportal` -> `pac powerpages` (CLI v1.27) -> `pac pages`
+(CLI v1.32). `powerpages` and `paportal` still work, but `pac pages` is the
+recommended command going forward.
 
-2. Store site configuration in source control:
+NOTE on data models: the --modelVersion flag selects 1 (Standard) or 2 (Enhanced).
+Run `pac pages list -v` to see which data model a site uses.
+
+Approach A — CLI download/upload (Standard or Enhanced data model):
+1. Authenticate and list sites to get the website ID:
+   pac auth create --environment https://yourorg.crm.dynamics.com
+   pac pages list
+2. Download site content (writes a manifest used for delta uploads):
+   pac pages download --path ./site-config --webSiteId <id> --modelVersion 2
+3. Store site configuration in source control:
    git add ./site-config/
    git commit -m "Portal v1.2.0"
+4. Deploy to a target environment (cross-environment = full upload; intra-environment
+   uses the manifest for delta uploads):
+   pac pages upload --path ./site-config --modelVersion 2 --environment <target>
+   # or use a deployment profile: pac pages upload --path ./site-config --deploymentProfile dev --modelVersion 2
 
-3. Deploy to target environment:
-   pac powerpages upload --path ./site-config --environment <target>
+Approach B — Solution-aware deployment (Enhanced data model; preview as of 2026-06-19):
+   The enhanced data model supports adding a Power Pages site to a Dataverse solution,
+   so the website moves with normal solution ALM:
+   pac solution init --publisher-name '<name>' --publisher-prefix '<prefix>' --outputDirectory <dir>
+   pac solution add-solution-component -sn <SolutionName> -c <powerpagesite record ID> -ct <componentType>
+   pac solution export   # then import to the target environment via normal ALM
 
-4. For Dataverse schema changes:
-   Export solution with tables/forms/views
-   Import to target environment
-   Then upload Power Pages configuration
+For Dataverse schema changes (either approach): export the solution with tables/forms/
+views, import to the target environment, then deploy the Power Pages configuration.
 ```
+
+> CLI commands, parameters, and the `paportal`->`powerpages`->`pages` rename are confirmed against [Microsoft Learn: pac pages command group](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/pages). Solution-aware Power Pages deployment (enhanced data model, preview) is confirmed against [Microsoft Learn: Power Platform CLI solution support for Power Pages](https://learn.microsoft.com/en-us/power-pages/configure/power-platform-cli-solution-management).
 
 ### 8.2 Environment Strategy
 
@@ -613,28 +652,55 @@ DO NOT:
 ## 11. Licensing
 
 ```
-Power Pages licensing model:
+Power Pages licensing model (verified against Microsoft Learn — see citation
+below; list prices, USD, commercial channel, as of 2026-06-19):
 
-Authenticated users:
-  - $200/month per 100 daily authenticated users
-  - "Daily authenticated user" = unique user who signs in per day
-  - Counted at tenant level, pooled across sites
+Capacity is per WEBSITE per CALENDAR MONTH (NOT "daily", NOT pooled at tenant
+level). Subscription capacity is purchased in packs and assigned at the
+ENVIRONMENT level. Uniqueness for authenticated users is keyed on the Dataverse
+contact record ID; for anonymous users on a browser-cookie ID.
 
-Anonymous users:
-  - Separate (lower) pricing tier
-  - Counted by page views or unique users
-  - Verify current pricing model
+Authenticated users (subscription, sold in packs of 100 users/site/month):
+  - Tier 1 (1+ pack,  100+ users):    $200 / pack / month
+  - Tier 2 (100+ packs, 10,000+ users): $75 / pack / month
+  - Tier 3 (1,000+ packs, 100,000+ users): $50 / pack / month
+  - A user who signs in any number of times in the month counts once.
+  - Pay-as-you-go meter also available (priced per authenticated user/site/month).
+  - Minimum 25 authenticated-user capacity assigned per environment.
+
+Anonymous users (subscription, sold in packs of 500 users/site/month):
+  - Tier 1 (1+ pack,  500+ users):    $75 / pack / month
+  - Tier 2 (20+ packs, 10,000+ users): $37.50 / pack / month
+  - Tier 3 (200+ packs, 100,000+ users): $25 / pack / month
+  - Sign-in/registration pages and system pages (/_*) are NOT counted; a user
+    who browses anonymously then logs in the same UTC day counts only as
+    authenticated.
+
+Use rights via other licenses (internal authenticated users):
+  - Power Apps Premium (per user) and Dynamics 365 enterprise licenses: access
+    unlimited Power Pages websites.
+  - Power Apps per app: access one Power Pages website in the licensed environment.
+
+Storage included per subscription capacity pack:
+  - Authenticated pack: +2 GB Dataverse database + 16 GB Dataverse file (accrues
+    to the tenant).
+  - Anonymous pack:     +500 MB Dataverse database + 4 GB Dataverse file.
 
 Capacity considerations:
-  - Dataverse storage for portal data
-  - File storage for uploaded documents
-  - API call capacity
-
-Needs verification against current Microsoft docs:
-  Power Pages licensing changed significantly from portal add-on model.
-  Verify current pricing and what counts as a "daily authenticated user."
+  - Dataverse database + file storage for portal data and uploaded documents.
+  - Power Platform request (API call) limits apply at the tenant/license level.
+  - Unused monthly user capacity does not carry over.
 ```
+
+> Pricing tiers, the per-website/per-month (not daily) counting rule, the
+> contact-ID uniqueness rule, anonymous packs, environment-level assignment
+> (min 25 authenticated), included storage, and use rights via Power Apps /
+> Dynamics 365 licenses are all confirmed against
+> [Microsoft Learn: Power Platform licensing FAQs (Power Pages section)](https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq).
+> For the latest list prices also see the
+> [Power Pages pricing page](https://www.microsoft.com/en-us/power-platform/products/power-pages/pricing).
+> List prices change — re-verify before quoting to a client.
 
 ---
 
-*End of Power Pages Guide. Verify all pricing, authentication setup steps, and feature availability against current Microsoft documentation.*
+*End of Power Pages Guide. Core facts (licensing, authentication providers, table-permission access types, pac CLI commands, default domain, solution-aware ALM) were verified against Microsoft Learn on 2026-06-19 (platform state 2026-H1) — see the `sources` list in the frontmatter at the top. Pricing and preview-feature status change frequently; re-verify against current Microsoft documentation before quoting figures or committing to an approach.*

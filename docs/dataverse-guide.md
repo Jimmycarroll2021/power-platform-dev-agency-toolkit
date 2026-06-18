@@ -1,8 +1,22 @@
+---
+verified_as_of: 2026-06-19
+platform_state: 2026-H1
+sources:
+  - https://learn.microsoft.com/en-us/power-apps/maker/data-platform/types-of-entities
+  - https://learn.microsoft.com/en-us/power-apps/maker/data-platform/types-of-fields
+  - https://learn.microsoft.com/en-us/power-apps/maker/data-platform/define-rollup-fields
+  - https://learn.microsoft.com/en-us/power-platform/admin/capacity-storage
+  - https://learn.microsoft.com/en-us/power-platform/admin/backup-restore-environments
+  - https://learn.microsoft.com/en-us/power-apps/developer/data-platform/analyze-performance
+  - https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/solution
+  - https://learn.microsoft.com/en-us/power-automate/replace-workflows-with-flows
+---
+
 # Dataverse Comprehensive Guide
 
-> **Version**: 1.0 | **Last updated**: 2025-01-15
+> **Version**: 1.1 | **Last updated**: 2026-06-19
 > **Applies to**: Microsoft Dataverse (formerly Common Data Service)
-> **Needs verification against current Microsoft docs**: Capacity limits, licensing, and preview features change frequently.
+> **Verified as of**: 2026-06-19 against Microsoft Learn (platform state 2026-H1). Capacity limits, licensing, and preview features change frequently — reconfirm against the linked Microsoft Learn pages before relying on exact figures.
 
 ---
 
@@ -55,13 +69,15 @@ Required columns for every custom table:
 
 ### 2.2 Column Types Quick Reference
 
+Column type limits below are confirmed against [Column data types in Microsoft Dataverse (Microsoft Learn)](https://learn.microsoft.com/en-us/power-apps/maker/data-platform/types-of-fields).
+
 | Column Type | Use For | Notes |
 |-------------|---------|-------|
-| Single Line Text | Short text, names, IDs | Max 4,000 chars |
+| Single Line Text | Short text, names, IDs | Max 4,000 chars (confirmed) |
 | Multiple Lines Text | Descriptions, notes | Rich text or plain |
 | Whole Number | Integer values | No decimals |
-| Decimal Number | Precise decimals | Up to 10 decimal points |
-| Floating Point | Scientific calculations | Less precise than decimal |
+| Decimal Number | Precise decimals | Up to 10 decimal places (confirmed); range +/-100,000,000,000 |
+| Floating Point | Scientific calculations | Less precise than decimal (max 5 decimal places, per Microsoft Learn) |
 | Currency | Money values | Auto currency conversion |
 | Date Only | Birthdays, deadlines | No time component |
 | Date and Time | Timestamps, events | Includes timezone |
@@ -84,7 +100,7 @@ Required columns for every custom table:
 | Feature | When to Use | Limitations |
 |---------|-------------|-------------|
 | **Calculated Column** | Formula-based derived value (no code) | Can't reference related table fields, read-only, sync |
-| **Rollup Column** | Aggregate from child records | Async (can take up to 1 hour), only certain aggregates |
+| **Rollup Column** | Aggregate from child records | Async — the system Calculate Rollup Field job recalculates hourly by default (confirmed), only certain aggregates ([Microsoft Learn](https://learn.microsoft.com/en-us/power-apps/maker/data-platform/define-rollup-fields)) |
 | **Business Rule** | Client-side validation, show/hide | Single table only, limited logic |
 | **Cloud Flow** | Cross-table logic, external API | Async, requires flow license |
 | **Plugin** | Real-time server-side, complex logic | Requires C# developer |
@@ -101,7 +117,8 @@ Rollup Column Example:
   Type: Rollup
   Related: Invoices (child)
   Aggregation: SUM of invoiceAmount WHERE status = Paid
-  // Updates on schedule (every hour by default)
+  // Updated by the Calculate Rollup Field system job, hourly by default
+  // (admin can modify recurrence). Confirmed against Microsoft Learn.
 ```
 
 ---
@@ -300,8 +317,17 @@ Security Note: Store secrets in Azure Key Vault, never in code.
 
 ### Classic Workflow Migration
 
+Microsoft positions classic Dataverse workflows as legacy and recommends building new
+automation with Power Automate cloud flows; it explicitly advises reviewing and replacing
+existing classic background workflows with flows. Note: as of 2026-06-19 there is no
+published hard end-of-support / retirement date for classic background or real-time
+workflows themselves (the formal retirement applies to the Dataverse *legacy connector*,
+not the workflow engine). See [Replace classic Dataverse workflows with Power Automate
+(Microsoft Learn)](https://learn.microsoft.com/en-us/power-automate/replace-workflows-with-flows).
+Custom process actions remain synchronous real-time workflows and are not convertible to flows.
+
 ```
-Classic Workflows are DEPRECATED.
+Classic Workflows are LEGACY — migrate to Power Automate where practical.
 
 Migration path:
   Classic Workflow (real-time) -> Business Rule + Cloud Flow
@@ -371,7 +397,11 @@ try {
 // DO: Use early-bound types
 target.GetAttributeValue<string>("contoso_name");
 
-// DO NOT: Make long-running external calls (30 sec timeout)
+// DO NOT: Make long-running external calls. Dataverse enforces a HARD 2-minute limit
+//         per message operation (covers the operation + all synchronous plugins; async
+//         registration does NOT extend it). Confirmed against Microsoft Learn:
+//         https://learn.microsoft.com/en-us/power-apps/developer/data-platform/analyze-performance
+//         Note: the default .NET HttpClient timeout is 100s — set a shorter timeout and fail fast.
 // DO NOT: Query entire tables (use filters)
 // DO NOT: Forget to unregister test plugins
 // DO NOT: Use plugins when cloud flows suffice
@@ -524,21 +554,38 @@ Query audit logs via Web API:
 
 ### 10.1 System Backups (Automatic)
 
+Verified against [Back up and restore environments (Microsoft Learn)](https://learn.microsoft.com/en-us/power-platform/admin/backup-restore-environments).
+
 ```
-Dataverse creates automatic backups:
-- Daily: 28 days retention
-- Manual: Create on-demand via admin center
-- System state: Backed up automatically
+Dataverse creates automatic ("system") backups:
+- System backups run automatically and continuously (Azure SQL Database under the hood) —
+  not a single nightly snapshot.
+- Default retention is 7 days. (The old "28 days for everyone" figure is incorrect.)
+- 28-day retention is NOT universal:
+    * Production environments with one or more Dynamics 365 apps installed are
+      retained for 28 days automatically.
+    * Production MANAGED ENVIRONMENTS can be configured to 7, 14, 21, or 28 days.
+    * All other (non-production / non-managed) environments use the 7-day default
+      regardless of the setting.
+- Manual: create on-demand via admin center (manual backups follow the same
+  configured retention period).
 
 Restore:
   Power Platform Admin Center > Environment > Backups
   Select backup > Restore
-  WARNING: Restore overwrites current environment
+  NOTE: You can't restore directly to a production environment — first switch the
+        environment type to Sandbox, restore, then switch back to Production.
+  WARNING: Restore overwrites the target environment.
 
-Best practice: Restore to a NEW environment first to verify
+Best practice: Restore to a NEW (or sandbox) environment first to verify.
 ```
 
 ### 10.2 Solution-Based Backup
+
+For granular recovery, use solutions. The `pac solution export` flags below (`--path`,
+`--name`, `--managed`) are confirmed against the [pac solution command reference
+(Microsoft Learn)](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/solution).
+`--managed` is a switch (its presence exports a managed solution; omit it for unmanaged).
 
 ```
 For granular recovery, use solutions:
@@ -628,21 +675,43 @@ Always edit in DEV, export managed, import to target.
 
 ### 12.1 Capacity Types
 
-| Type | Included | What Counts |
-|------|----------|-------------|
-| Database | 10MB per user license | Table data, metadata |
-| File | 20MB per user license | Attachments, images |
-| Log | 2MB per user license | Audit logs, plugin traces |
+Dataverse capacity-based storage has THREE pooled types — Database, File, and Log — pooled
+at the tenant level (not per-environment). What counts toward each is confirmed against
+[Dataverse capacity-based storage details (Microsoft Learn)](https://learn.microsoft.com/en-us/power-platform/admin/capacity-storage).
+
+| Type | What Counts |
+|------|-------------|
+| Database | Table rows, metadata, relational data, indexes (everything not file/log) |
+| File | Attachments, Annotation/Attachment bodies, file/image column data |
+| Log | Audit logs (AuditBase), plugin trace logs (PlugInTraceLogBase), elastic tables |
+
+> **Correction (2026-06-19):** Earlier versions of this guide listed per-user accruals of
+> "10MB database / 20MB file / 2MB log per user license." Those figures reflect the
+> *legacy* (pre-April 2019) storage model and are no longer accurate. In the current
+> capacity-based model, per-user accruals **vary by license SKU** (e.g. Team Member
+> licenses grant no per-user storage at all) and the authoritative figures live in the
+> [Power Platform Licensing Guide](https://go.microsoft.com/fwlink/p/?linkid=2085130). Exact
+> per-SKU MB/GB accruals are not published on a single Microsoft Learn conceptual page and so
+> are left here as **(unverified as of 2026-06-19 — confirm against the Power Platform
+> Licensing Guide)**.
 
 ```
-Example: 100 Power Apps users
-  Database: 100 x 10MB = 1GB pooled
-  File: 100 x 20MB = 2GB pooled
-  Log: 100 x 2MB = 200MB pooled
+Confirmed baselines (Microsoft Learn, capacity-storage):
+  - Default environment included capacity: 3 GB Database, 3 GB File, 1 GB Log.
+  - Every environment consumes at least 1 GB, even without an associated database.
+  - Storage types are not fully fungible: excess File entitlement can't cover a
+    Database or Log deficit (but excess Database can cover Log/File overuse).
+  - Trial, preview, support, and developer environments don't count toward capacity.
+
+Per-license accrual example (ILLUSTRATIVE ONLY — confirm exact figures against the
+Power Platform Licensing Guide; do not quote these as fact):
+  100 Power Apps users -> pooled Database + File + Log entitlement added to the
+  tenant pool at the per-SKU rate published in the Licensing Guide.
 
 Monitor:
-  Power Platform Admin Center > Resources > Capacity
-  Set alerts at 80% capacity
+  Power Platform Admin Center > Licensing > Capacity add-ons (Summary / Dataverse tabs)
+  Capacity warning notifications fire at <15% remaining, again at <5% remaining,
+  then on overage. Set your own alerting before those thresholds.
 ```
 
 ### 12.2 Storage Optimization
@@ -664,23 +733,28 @@ DON'T:
 [X] Create unnecessary indexes
 ```
 
-### 12.3 Elastic Tables (Preview - Verify Status)
+### 12.3 Elastic Tables
+
+Elastic tables are now a generally available, first-class Dataverse table type (listed
+alongside Standard, Activity, and Virtual in [Types of tables (Microsoft Learn)](https://learn.microsoft.com/en-us/power-apps/maker/data-platform/types-of-entities);
+the earlier "(Preview)" label in this guide is outdated). They're powered by Azure Cosmos DB
+and intended for very large datasets (tens of millions of rows and up).
 
 ```
-Use for: High-volume, short-lived data
+Use for: High-volume datasets / spiky, rapidly growing or semi-structured workloads
   - IoT telemetry
   - Log entries
   - Event streams
   - Chat messages
 
 Characteristics:
-  - Horizontal scaling
-  - Lower cost per GB
-  - Different query characteristics
-  - Some features not available (plugins, etc.)
-
-Needs verification against current Microsoft docs:
-  Preview status and feature availability
+  - Horizontal (elastic) scaling, low-latency point lookups
+  - Per-record time-to-live (TTL) column support
+  - Logical partitioning; JSON-format single-line-of-text columns
+  - Some standard-table features are NOT supported, e.g.:
+      * N:N relationships aren't supported; 1:N is limited (no cascading)
+      * Deep insert isn't supported (create related records independently)
+      * Strong consistency only within a logical session
 ```
 
 ---
@@ -704,4 +778,4 @@ Needs verification against current Microsoft docs:
 
 ---
 
-*End of Dataverse Guide. Verify all limits, pricing, and feature availability against current Microsoft documentation.*
+*End of Dataverse Guide. Verified as of 2026-06-19 against Microsoft Learn (platform state 2026-H1). Limits, pricing, and feature availability change frequently — reconfirm exact figures (especially per-SKU storage accruals and preview/GA status) against current Microsoft documentation before relying on them.*

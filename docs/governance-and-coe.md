@@ -1,8 +1,21 @@
+---
+verified_as_of: 2026-06-19
+platform_state: 2026-H1
+sources:
+  - https://learn.microsoft.com/en-us/power-platform/admin/api-request-limits-allocations
+  - https://learn.microsoft.com/en-us/power-platform/admin/prevent-data-loss
+  - https://learn.microsoft.com/en-us/power-platform/admin/dlp-connector-classification
+  - https://learn.microsoft.com/en-us/power-platform/admin/managed-environment-overview
+  - https://learn.microsoft.com/en-us/power-platform/admin/managed-environment-licensing
+  - https://learn.microsoft.com/en-us/power-platform/guidance/coe/setup
+  - https://learn.microsoft.com/en-us/power-platform/guidance/coe/core-components
+---
+
 # Governance and Center of Excellence (CoE) Guide
 
-> **Version**: 1.0 | **Last updated**: 2025-01-15
+> **Version**: 1.1 | **Last updated**: 2026-06-19 | **Verified against Microsoft Learn**: 2026-06-19 (platform state 2026-H1)
 > **Purpose**: Establishing governance, deploying the CoE Starter Kit, and managing Power Platform at scale.
-> **Needs verification against current Microsoft docs**: CoE Starter Kit components and Managed Environment features change with monthly releases.
+> **Note**: The CoE Starter Kit is [no longer actively maintained by Microsoft](https://learn.microsoft.com/en-us/power-platform/guidance/coe/setup) — its core capabilities now ship natively in the Power Platform admin center (Inventory, Usage, Monitor, Actions). The kit remains downloadable and supported for existing/new deployments but won't gain new features. Managed Environments features change with monthly releases; re-verify component lists against current Microsoft docs.
 
 ---
 
@@ -64,6 +77,8 @@ PILLAR 6: Maker Onboarding
 
 ## 2. CoE Starter Kit Components
 
+> Verified against [CoE Starter Kit setup](https://learn.microsoft.com/en-us/power-platform/guidance/coe/setup) and [Use core components](https://learn.microsoft.com/en-us/power-platform/guidance/coe/core-components). The kit is **no longer actively maintained**; Microsoft now recommends the Power Platform admin center's native Inventory/Usage/Monitor/Actions experiences. Components below remain accurate for existing deployments but the exact app/flow names evolve between releases.
+
 ### 2.1 Core Components
 
 | Component | What It Does | Key Features |
@@ -83,45 +98,63 @@ PILLAR 6: Maker Onboarding
 ### 2.2 Setup Requirements
 
 ```
-Prerequisites:
-  - Dedicated environment (NOT production)
-  - Power Platform Admin role in Azure AD
-  - Power Automate Per User license (for flows)
-  - Power Apps Per User license (for apps)
+Prerequisites (per Microsoft Learn — see citation below):
+  - A dedicated environment WITH a Dataverse database (a production-type
+    environment; Microsoft recommends one test + one production env)
+  - Install identity: Power Platform service admin OR global tenant admin
+    (Dynamics 365 service admin is NOT supported)
+  - Power Apps Per User license (non-trial) + a Microsoft 365 license
+  - Power Automate Per User license, or Per Flow licenses (non-trial)
+  - A premium license for EVERY app user (Command Center and other CoE
+    apps use Dataverse + premium connectors)
+  - Power BI Pro (to share the CoE Power BI report); Power BI Premium
+    per user or per capacity if using the data-export inventory mechanism
+  - Office 365 mailbox usable by the Office 365 Outlook connector
   - Dataverse capacity (monitor - CoE uses significant storage)
-  - SQL Server Connector (premium, for some features)
+  Source: https://learn.microsoft.com/en-us/power-platform/guidance/coe/setup
 
 Environment Setup:
   1. Create dedicated CoE environment
      Name: "CoE-Admin"
-     Type: Production (flows need to run continuously)
+     Type: Production with a Dataverse database; default language English;
+           security group set to None (open access); no sample apps/data
      Region: Same as main production
 
   2. Install CoE Starter Kit:
-     Download: https://aka.ms/coestarterkitdownload
-     Import solution: CoEStarterKit.zip
-     Run setup wizard
+     Download: https://aka.ms/CoEStarterKitDownload  (confirmed live link)
+     Import the managed core-components solution:
+       CenterofExcellenceCoreComponents_x.xx_managed.zip
+     (Import can take up to ~1 hour; upgrades up to ~2 hours.)
+     Then open the "CoE Setup and Upgrade Wizard" app for a guided setup
+     (the wizard is in preview; manual setup is the fallback).
 
   3. Configure core components:
      - Admin email address
      - Environment naming pattern
-     - DLP policy names
+     - Data policy (DLP) names
      - Exclusion lists (if any)
 
-  4. Turn on sync flows:
-     Admin - Sync Template v3 ( runs daily )
-     This populates the inventory Dataverse tables
+  4. Turn on inventory sync flows:
+     "Admin | Sync Template v4 (Driver)" — triggers the inventory crawl.
+     (Microsoft also offers a data-export inventory mechanism, in
+     experimental preview, that pulls from Azure Data Lake instead of
+     running the cloud-flow crawl.) This populates the inventory
+     Dataverse tables. The first run can take several hours.
 
   5. Verify data:
-     Check Admin - Command Center app
+     Check the CoE Admin Command Center app
      Confirm apps, flows, environments visible
 ```
 
 ### 2.3 Monthly Maintenance
 
 ```
-Required monthly tasks:
-  [ ] Update CoE Starter Kit (new version released monthly)
+Required maintenance tasks:
+  [ ] Update CoE Starter Kit. A new version is released monthly (usually
+      the first full week of the month), but Microsoft recommends
+      upgrading AT LEAST every three months — not necessarily every
+      month. Test upgrades in a dedicated test env first.
+      (https://learn.microsoft.com/en-us/power-platform/guidance/coe/setup)
   [ ] Review compliance report (apps without descriptions)
   [ ] Review orphaned resources (owner left company)
   [ ] Review DLP policy violations
@@ -138,8 +171,11 @@ Required monthly tasks:
 
 ### 3.1 Features
 
+> Verified against the [Managed Environments overview](https://learn.microsoft.com/en-us/power-platform/admin/managed-environment-overview). Managed Environments is a suite of premium capabilities that can be applied to ANY environment type (it is not itself a separate "environment type"). The feature set below is confirmed, with corrections noted inline.
+
 ```
-Managed Environments = Premium environment type with built-in governance
+Managed Environments = Suite of premium governance capabilities applied
+to an environment (any type), NOT a distinct environment type.
 
 Feature 1: Sharing Limits
   - Limit sharing to security groups only
@@ -166,10 +202,18 @@ Feature 5: Solution Checker Enforcement
   - Require solution checker before import
   - Block solutions with critical issues
 
-Feature 6: Backup and Restore
-  - Automatic daily backups
-  - On-demand backups
-  - Point-in-time restore
+Feature 6: Extended Backup
+  - The Managed Environments-specific feature is "Extended backup"
+    (longer retention). Automatic system backups, on-demand manual
+    backups, and point-in-time restore are STANDARD Dataverse
+    environment capabilities, available without Managed Environments;
+    Managed Environments adds extended backup retention on top.
+
+Other Managed Environments capabilities (confirmed, not in the
+original list): Environment groups, Maker welcome content, Pipelines
+in Power Platform, IP cookie binding, Customer Managed Key (CMK),
+Customer Lockbox, Virtual Network support, conditional access on
+individual apps, app-access control, and data masking rules.
 ```
 
 ### 3.2 Enabling Managed Environments
@@ -198,18 +242,32 @@ Step 4: Set budget allocation (optional)
 
 Step 5: Save
 
-Note: There is a cost per Managed Environment.
-Verify current pricing before enabling.
+Note on licensing (corrected): There is NO separate per-environment
+fee for Managed Environments. Instead, Managed Environments is an
+entitlement included with standalone premium licenses (Power Apps
+Premium, Power Automate Premium, Microsoft Copilot Studio, Power Pages,
+Dynamics 365). When an environment is managed, EVERY active user must
+hold a qualifying premium/standalone license (or qualifying pay-as-you-go
+meter); all apps/flows in a managed environment are treated as premium
+regardless of the connectors used. The Developer Plan does NOT grant
+Managed Environment use rights for end users. A single premium license
+(e.g. Power Apps Premium OR Power Automate Premium) covers a user across
+app + flow workloads in that environment.
+Source: https://learn.microsoft.com/en-us/power-platform/admin/managed-environment-licensing
 ```
 
 ---
 
-## 4. DLP Policies Design
+## 4. DLP Policies (Data Policies) Design
+
+> Verified against [Manage data policies](https://learn.microsoft.com/en-us/power-platform/admin/prevent-data-loss) and [Connector classification](https://learn.microsoft.com/en-us/power-platform/admin/dlp-connector-classification). Microsoft's current term is **data policies**; "DLP" remains the common name. The three-group model and the cross-group blocking rule below are confirmed.
 
 ### 4.1 Policy Structure
 
 ```
-DLP policies have connector groups:
+Data (DLP) policies classify every connector into exactly three groups
+(confirmed by Microsoft Learn). New/unassigned connectors land in
+Non-Business by default unless you change the default group:
 
 Business Group (allowed to connect to each other):
   - SharePoint
@@ -243,14 +301,20 @@ This prevents data leakage (e.g., SharePoint -> Gmail).
 
 ```
 Environment-level policies:
-  - Apply to specific environments
+  - Apply to a single specific environment
   - Different rules for dev/test/prod
-  - Override tenant-level policies
+  - CORRECTION: environment-level policies do NOT override tenant-level
+    policies. Per Microsoft Learn, "Environment-level data policies
+    can't override tenant-wide data policies." When multiple policies
+    apply, they COMBINE, and the most restrictive outcome wins (if ANY
+    applicable policy Blocks a connector, it is blocked).
+    (https://learn.microsoft.com/en-us/power-platform/admin/prevent-data-loss)
 
 Tenant-level policies:
-  - Apply to all environments (unless overridden)
+  - Apply to all environments (or an included/excluded subset)
   - Baseline security
-  - Prevent completely blocked connectors
+  - Combine with environment-level policies (see combined-effect rules:
+    https://learn.microsoft.com/en-us/power-platform/admin/dlp-combined-effect-multiple-policies)
 
 Best practice:
   1. Tenant-level: Block clearly dangerous connectors
@@ -355,10 +419,33 @@ Log capacity:
   - Audit logs (if configured)
   - Flow run history (retained period)
 
-API request limits:
-  - Per user: 40,000/24 hours (premium)
-  - Per environment: 500,000/24 hours (sandbox), higher for production
-  - Per flow: No explicit limit (within user/env limits)
+Power Platform request (PPR) limits — CORRECTED per Microsoft Learn
+(https://learn.microsoft.com/en-us/power-platform/admin/api-request-limits-allocations):
+  - Limits are PER LICENSED USER per 24 hours (a sliding window),
+    tracked at the user level and NOT pooled at environment or tenant
+    level. The previous "500,000/24h per environment (sandbox)" figure
+    was incorrect — there is no per-environment request entitlement of
+    that kind.
+  - 40,000 / 24h per user: paid premium licenses (Power Apps Premium,
+    Power Automate Premium / per-user plan, most Dynamics 365 Enterprise
+    & Professional apps).
+  - 6,000 / 24h per user: Power Apps per-app, Power Apps pay-as-you-go,
+    Microsoft 365 apps with Power Platform access, Dynamics 365 Team
+    Member.
+  - 250,000 / 24h per license: Power Automate Process / per-flow plan,
+    and Microsoft Copilot Studio base + add-on packs (entitlement is on
+    the FLOW/license, shared across all its users).
+  - 200 / 24h: paid Power Apps Portals login.
+  - Multiple licenses on one user stack additively (e.g. D365 Customer
+    Service Enterprise + Power Apps per-user = 40,000 + 40,000 = 80,000).
+  - The 500,000/24h figure DOES exist, but only as the pooled
+    NON-LICENSED (application/service/system user) tenant-level base for
+    Dynamics 365 Enterprise & Professional (+5,000 per USL, up to 10M).
+  - A separate 5-minute limit of 100,000 requests applies regardless of
+    license. (Most tenants are still in a transition period with more
+    generous enforced limits.)
+  - Service-protection limits (Dataverse, connectors, Power Automate)
+    apply IN ADDITION to these entitlement limits.
 ```
 
 ### 6.2 Monitoring Setup
@@ -621,10 +708,17 @@ General:
 ```
 Power Platform privacy settings:
 
-Tenant-level:
-  Admin Center > Settings > Privacy
-  [x] Disable Copilot data sharing (if required)
-  [x] Opt out of AI training data usage (if required)
+Tenant-level (Power Platform Admin Center > Settings > Tenant settings):
+  [x] "Data sharing for Dynamics 365 Copilot and Power Platform Copilot
+      AI Features" toggle — note: this is OFF BY DEFAULT (Microsoft does
+      NOT use your data to train/improve Copilot unless you opt in). It
+      is also currently available only for US-region tenants. Opting out
+      later deletes shared data within 30 days.
+  [x] "Copilot in Power Apps" maker toggle can be turned off, BUT
+      generally available Copilot features are on by default and can only
+      be turned off by contacting Microsoft Support. Cross-geo data
+      sharing for Copilot can also be toggled off at tenant level.
+      (https://learn.microsoft.com/en-us/power-platform/faqs-copilot-data-sharing)
   [x] Configure data residency
 
 Environment-level:
@@ -657,4 +751,6 @@ User-level:
 
 ---
 
-*End of Governance and CoE Guide. Verify all CoE Starter Kit components and Managed Environment features against current Microsoft documentation.*
+*End of Governance and CoE Guide. Consequential platform facts (request limits, DLP/data-policy behaviour, Managed Environments features and licensing, CoE Starter Kit setup) were verified against Microsoft Learn on 2026-06-19 (platform state 2026-H1) — see the `sources` in the frontmatter. CoE Starter Kit component names and Managed Environments capabilities evolve with monthly releases; re-verify against current Microsoft documentation before relying on exact app/flow names.*
+
+> **HIPAA BAA note (unverified as of 2026-06-19 — confirm against Microsoft Learn):** the statement in §11 that a HIPAA Business Associate Agreement "is required" is general guidance; confirm current Microsoft HIPAA/BAA coverage and any service-specific exclusions against the Microsoft Trust Center / Microsoft Learn before relying on it for a compliance attestation.

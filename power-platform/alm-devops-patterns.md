@@ -3,6 +3,13 @@ title: "ALM and DevOps Patterns"
 description: "ALM patterns for Power Platform including branching, pipelines, and release management"
 category: "devops"
 tags: ["alm", "devops", "pipelines", "branching", "deployment"]
+verified_as_of: 2026-06-19
+platform_state: 2026-H1
+sources:
+  - https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/solution
+  - https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/admin
+  - https://learn.microsoft.com/en-us/power-platform/alm/devops-build-tool-tasks
+  - https://learn.microsoft.com/en-us/power-platform/alm/devops-github-actions
 ---
 
 # ALM and DevOps Patterns
@@ -56,6 +63,8 @@ Examples:
 ## 2. Pipeline Configuration
 
 ### Azure DevOps Pipeline
+
+The `PowerPlatform*@2` tasks below (ToolInstaller, ExportSolution, UnpackSolution, ImportSolution) are the current Microsoft Power Platform Build Tools tasks, and `@2` is the current major version. The import-task inputs used here (`authenticationType`, `PowerPlatformSPN`, `SolutionInputFile`, `AsyncOperation`, `MaxAsyncWaitTime`, `UseDeploymentSettingsFile`, `DeploymentSettingsFile`, `OverwriteUnmanagedCustomizations`, `PublishWorkflows`) are all valid. Confirmed against [Build tool tasks](https://learn.microsoft.com/en-us/power-platform/alm/devops-build-tool-tasks). Note: the `ConvertToManaged` import input is obsolete — importing a managed solution converts components automatically.
 
 ```yaml
 # azure-pipelines.yml
@@ -163,6 +172,8 @@ stages:
 
 ### GitHub Actions Pipeline
 
+The `microsoft/powerplatform-actions/*@v1` actions used below (`actions-install`, `export-solution`, `unpack-solution`, `import-solution`) and their inputs (`environment-url`, `app-id`, `client-secret`, `tenant-id`, `solution-name`, `solution-output-file`, `managed`, `solution-file`, `solution-folder`, `solution-type`, `publish-changes`) are confirmed against the official action set. `actions-install` must run first. See [GitHub Actions for Microsoft Power Platform](https://learn.microsoft.com/en-us/power-platform/alm/devops-github-actions).
+
 ```yaml
 # .github/workflows/deploy.yml
 name: Deploy Solution
@@ -248,13 +259,16 @@ param(
 pac auth create --environment $EnvironmentUrl
 
 # Export solution
-$managedFlag = if ($Managed) { "true" } else { "false" }
-pac solution export `
-    --name $SolutionName `
-    --path $OutputPath `
-    --managed $managedFlag `
-    --include-general `
-    --autosave-settings
+# Note: --managed is a switch (no value); add it only when $Managed is true.
+# Use "--include general" (value passed to --include) — there is no "--include-general" flag.
+# (--autosave-settings does not exist on pac solution export and has been removed.)
+$exportArgs = @(
+    "--name", $SolutionName,
+    "--path", $OutputPath,
+    "--include", "general"
+)
+if ($Managed) { $exportArgs += "--managed" }
+pac solution export @exportArgs
 
 # Unpack for source control
 $zipPath = Join-Path $OutputPath "$SolutionName.zip"
@@ -281,14 +295,15 @@ param(
 pac auth create --environment $EnvironmentUrl
 
 # Import
-$publishFlag = if ($PublishChanges) { "true" } else { "false" }
-$stageFlag = if ($StageForUpgrade) { "true" } else { "false" }
+# Note: --publish-changes is a switch (no value). The upgrade switch is
+# --stage-and-upgrade (there is no --stage-for-upgrade). There is no
+# --convert-to-managed flag on pac solution import — components are converted to
+# managed automatically when you import a managed solution .zip.
+$importArgs = @("--path", $SolutionPath)
+if ($PublishChanges)  { $importArgs += "--publish-changes" }
+if ($StageForUpgrade) { $importArgs += "--stage-and-upgrade" }
 
-pac solution import `
-    --path $SolutionPath `
-    --publish-changes $publishFlag `
-    --stage-for-upgrade $stageFlag `
-    --convert-to-managed false
+pac solution import @importArgs
 
 Write-Host "Solution imported successfully"
 ```
@@ -368,6 +383,8 @@ Dev ──export──▶ Git Repo ──build──▶ SIT ──validate──
 
 ### Managed Solution Rollback
 
+The `pac solution list`, `pac solution delete --solution-name`, and `pac solution import --path` commands below are confirmed against the [pac solution command reference](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/solution).
+
 ```powershell
 # 1. List available solution versions
 pac solution list
@@ -386,9 +403,14 @@ pac solution list
 
 ```powershell
 # 1. Restore environment from backup
+# Flags per the pac admin reference: --selected-backup takes a backup timestamp
+# ('mm/dd/yyyy hh:mm') OR the string 'latest'; --source-env is the environment the
+# backup was taken from; --target-env is where it is restored (defaults to source
+# if omitted). There is no --source-backup or --target flag.
 pac admin restore `
-    --source-backup $backupId `
-    --target $environmentId
+    --selected-backup $backupTimestamp `
+    --source-env $sourceEnvironmentId `
+    --target-env $targetEnvironmentId
 
 # 2. Alternative: Restore specific tables via dataflow
 # (requires pre-exported data)
@@ -412,24 +434,28 @@ pac admin restore `
 
 ### Full CI/CD Script
 
+All commands below are confirmed against the [pac solution command reference](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/solution). Key flag corrections: `--managed`, `--publish-changes`, and `--stage-and-upgrade` are **switches** that take no value — pass them only when the condition applies. `pac solution check --path … --outputDirectory …` is valid. There is no `--convert-to-managed` flag on `pac solution import`; managed conversion happens automatically when you import a managed solution .zip.
+
 ```bash
 #!/bin/bash
 set -e
 
 ENV_URL=$1
 SOLUTION_NAME=$2
-MANAGED=$3
+MANAGED=$3   # pass "true" to export as a managed solution
 
 # Step 1: Authenticate
 echo "Authenticating..."
 pac auth create --environment "$ENV_URL" --name ci-cd
 
 # Step 2: Export solution
+# --managed is a switch (no value); add it only when MANAGED=true.
 echo "Exporting solution $SOLUTION_NAME..."
-pac solution export \
-    --name "$SOLUTION_NAME" \
-    --path "./artifacts/${SOLUTION_NAME}.zip" \
-    --managed "$MANAGED"
+EXPORT_ARGS=(--name "$SOLUTION_NAME" --path "./artifacts/${SOLUTION_NAME}.zip")
+if [ "$MANAGED" == "true" ]; then
+    EXPORT_ARGS+=(--managed)
+fi
+pac solution export "${EXPORT_ARGS[@]}"
 
 # Step 3: Check solution health
 echo "Checking solution..."
@@ -437,12 +463,12 @@ pac solution check --path "./artifacts/${SOLUTION_NAME}.zip" \
     --outputDirectory "./artifacts/check"
 
 # Step 4: Import to target (if deploy flag set)
+# --publish-changes is a switch (no value); no --convert-to-managed flag exists.
 if [ "$4" == "--deploy" ]; then
     echo "Deploying to target environment..."
     pac solution import \
         --path "./artifacts/${SOLUTION_NAME}.zip" \
-        --publish-changes true \
-        --convert-to-managed false
+        --publish-changes
 fi
 
 echo "Done!"

@@ -2,6 +2,16 @@
 title: "Service 13 — Integration Platform"
 description: "Third-party system integrations for Power Platform: custom connectors, API management, and middleware patterns that connect Dataverse, apps, and flows to external systems securely and at scale."
 category: service
+verified_as_of: 2026-06-19
+platform_state: 2026-H1
+sources:
+  - https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq
+  - https://learn.microsoft.com/en-us/power-platform/admin/api-request-limits-allocations
+  - https://learn.microsoft.com/en-us/power-platform/admin/capacity-storage
+  - https://learn.microsoft.com/en-us/ai-builder/credit-management
+  - https://learn.microsoft.com/en-us/ai-builder/endofaibcredits
+  - https://learn.microsoft.com/en-us/microsoft-copilot-studio/billing-licensing
+  - https://learn.microsoft.com/en-us/power-platform/admin/dlp-connector-classification
 related:
   - ../playbooks/custom-connector.md
   - ../playbooks/azure-function-integration.md
@@ -105,7 +115,7 @@ Phased delivery. Effort is indicative and depends on the number of systems, auth
 
 > Planning ranges only — **indicative, confirm current rates** at proposal time. Not a quote and not a client commitment.
 
-- **Day-rate band:** specialist integration engineering typically falls in a **mid-to-senior consulting day-rate band**; confirm the current agency rate card before quoting. (Needs verification against current rate card.)
+- **Day-rate band:** specialist integration engineering typically falls in a **mid-to-senior consulting day-rate band**; confirm the current agency rate card before quoting. (unverified as of 2026-06-19 — confirm against Microsoft Learn) — note: this is an internal agency rate, not a Microsoft-published figure, so it can only be confirmed against the live rate card.
 - **S (3–6 days):** small fixed-price package suits a single, well-understood connector.
 - **M (7–15 days):** fixed-price if the API contract and auth model are confirmed in discovery; otherwise **T&M** with a capped estimate.
 - **L (16–35+ days):** **T&M recommended** — middleware, on-prem gateway, and cert/secret rotation carry discovery risk that fixed-price tends to over-price or under-deliver.
@@ -114,16 +124,16 @@ Phased delivery. Effort is indicative and depends on the number of systems, auth
 
 ## Licensing & Capacity Considerations
 
-> Integration work almost always crosses into **premium** territory. Verify every line below against current Microsoft licensing before committing. (Needs verification against current Microsoft docs.)
+> Integration work almost always crosses into **premium** territory. The lines below are verified against current Microsoft licensing as of 2026-06-19 (platform state 2026-H1); re-confirm at proposal time as Microsoft revises licensing periodically.
 
-- **Premium connectors:** custom connectors, HTTP, Azure-based, and most non-Microsoft connectors are **premium**. Every user who runs an app/flow using them needs **Power Apps Premium (per-user)** or **Per-App** licensing, or the flow needs an appropriate **Power Automate Premium / Process** license. (Needs verification against current Microsoft docs.)
-- **Custom connectors are premium by definition** — even if the underlying API is free, the connector triggers premium licensing requirements for end users.
-- **On-premises data gateway:** required for on-prem systems (SQL, file shares, legacy DBs). Gateway use is itself a premium scenario; size the gateway host and plan for HA if production-critical. (Needs verification against current Microsoft docs.)
-- **Power Platform request limits / API entitlements:** each license tier carries daily Power Platform request limits; high-volume integrations can exhaust them and require **Power Platform Requests** add-on capacity. Model expected call volume early. (Needs verification against current Microsoft docs.)
+- **Premium connectors:** custom connectors, HTTP, Azure-based, and most non-Microsoft connectors are **premium**. A standalone Power Apps or Power Automate plan license is required to access all premium, on-premises, and custom connectors — every user who runs an app/flow using them needs **Power Apps Premium (per-user)** or **Power Apps Per-App** licensing, or the flow needs an appropriate **Power Automate Premium / Process** license. In-product licensing enforcement for these connectors began **April 1, 2025**. ([Power Platform licensing FAQs](https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq))
+- **Custom connectors are premium by definition** — even if the underlying API is free, the connector triggers premium licensing requirements for end users. ([Power Platform licensing FAQs](https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq))
+- **On-premises data gateway:** required for on-prem systems (SQL, file shares, legacy DBs). Microsoft confirms gateways "were a premium capability before the transition and they continue to be a premium capability" — size the gateway host and plan for HA if production-critical. ([Power Platform licensing FAQs](https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq))
+- **Power Platform request limits / API entitlements:** each license tier carries daily Power Platform request (PPR) limits — e.g. **40,000 requests/24h** for a Power Apps Premium / Power Automate Premium / Dynamics 365 enterprise user, **6,000** for Power Apps Per-App and Microsoft 365–seeded users, and **250,000** for a Power Automate Process / per-flow license. High-volume integrations can exhaust them; the **Power Platform Request capacity add-on** raises a user's or flow's limit by **+50,000 requests/24h** per add-on (stackable). Note all tenants are currently in a more-generous **transition period** until reporting reaches GA. Model expected call volume early. ([Requests limits and allocations](https://learn.microsoft.com/en-us/power-platform/admin/api-request-limits-allocations))
 - **Azure costs (separate from Power Platform):** Azure Functions, API Management, Key Vault, and storage are billed on Azure consumption — **not** covered by Power Platform licenses. Budget these as recurring run-cost.
-- **Dataverse capacity:** integrations that write to Dataverse consume **database/file/log capacity**; high-volume sync can grow storage fast. Monitor and plan capacity. (Needs verification against current Microsoft docs.)
-- **AI Builder credits / Copilot Studio messages:** if the integration feeds AI Builder models or a Copilot Studio agent, those consume **AI Builder credits** and **Copilot Studio message** entitlements respectively — budget separately. (Needs verification against current Microsoft docs.)
-- **DLP policies:** custom and premium connectors may be blocked or restricted by tenant Data Loss Prevention policy — confirm the connector is allowed in the target environment before build.
+- **Dataverse capacity:** integrations that write to Dataverse consume **database, file, and log capacity** (the three Dataverse capacity-based storage types); high-volume sync can grow storage fast, and audit/plug-in-trace logs count against log capacity. Microsoft may suspend the service if entitlements are exceeded, so monitor usage and plan capacity (add-ons are sold per storage type). ([Dataverse capacity-based storage](https://learn.microsoft.com/en-us/power-platform/admin/capacity-storage))
+- **AI Builder credits / Copilot Studio currency:** if the integration feeds AI Builder models or a Copilot Studio agent, those consume capacity that you must budget separately. **Note the late-2025 currency change:** Copilot Studio moved from "messages" to **Copilot Credits** on **September 1, 2025**, and Microsoft began a **progressive end of AI Builder credits** from **October 2025** — AI Builder features in apps/flows now consume remaining AI Builder credits first and then fall back to **Copilot Credits**, while agents and agent flows consume Copilot Credits only. Existing seeded AI Builder credit entitlements run until **November 1, 2026** (or contract term). Budget in Copilot Credits going forward. ([Licensing and AI Builder credits](https://learn.microsoft.com/en-us/ai-builder/credit-management), [End of AI Builder credits](https://learn.microsoft.com/en-us/ai-builder/endofaibcredits), [Copilot Studio billing and licensing](https://learn.microsoft.com/en-us/microsoft-copilot-studio/billing-licensing))
+- **DLP policies:** custom and premium connectors can be classified into Business / Non-Business / **Blocked** data groups by tenant Data Loss Prevention policy; a blocked connector cannot be saved in an app or flow. All Microsoft-owned premium connectors and third-party connectors can be blocked (core connectors like Dataverse cannot). Confirm the connector is allowed in the target environment before build. ([Connector classification](https://learn.microsoft.com/en-us/power-platform/admin/dlp-connector-classification))
 
 Run `pp-agency estimate-licensing -c gbp` (or `usd`/`eur`) to produce a planning estimate, and treat all figures as indicative pending Microsoft confirmation.
 

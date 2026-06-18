@@ -1,8 +1,20 @@
+---
+verified_as_of: 2026-06-19
+platform_state: 2026-H1
+sources:
+  - https://learn.microsoft.com/en-us/power-automate/limits-and-config
+  - https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/types
+  - https://learn.microsoft.com/en-us/power-platform/admin/api-request-limits-allocations
+  - https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/faqs
+  - https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/solution
+  - https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/
+---
+
 # Power Automate Comprehensive Guide
 
-> **Version**: 1.0 | **Last updated**: 2025-01-15
+> **Version**: 1.1 | **Last updated**: 2026-06-19 | **Verified as of**: 2026-06-19 (platform state 2026-H1)
 > **Applies to**: Power Automate Cloud Flows, Desktop Flows, Business Process Flows
-> **Needs verification against current Microsoft docs**: Licensing details, connector list, and limits change frequently.
+> **Note**: Licensing details, connector lists, and service limits change frequently. Facts below carry inline Microsoft Learn citations where verified; anything that could not be confirmed from a primary Microsoft source is flagged inline as unverified. Always re-check against [Microsoft Learn](https://learn.microsoft.com/en-us/power-automate/limits-and-config) before production use.
 
 ---
 
@@ -72,11 +84,15 @@ Trigger: When a row is added, modified or deleted
 
 ### 3.2 Recurrence (Scheduled) Triggers
 
-| License | Min Frequency | Notes |
-|---------|--------------|-------|
-| Seeded (M365) | 15 minutes | Limited to standard connectors |
-| Premium | 1 minute | Full connector access |
-| Per Flow | 1 minute | Dedicated throughput |
+The historical *plan-based* minimum-frequency caps (e.g. "15 minutes on seeded plans") have been **removed**. There are no longer plan-based limits on flow trigger frequency or on the number of runs; usage is now governed by Power Platform request limits tied to a flow's performance profile ([licensing types](https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/types), [request limits](https://learn.microsoft.com/en-us/power-platform/admin/api-request-limits-allocations)). The platform-wide minimum recurrence interval is **60 seconds** for every profile ([limits-and-config](https://learn.microsoft.com/en-us/power-automate/limits-and-config)).
+
+| License | Min recurrence interval | Connector access | Notes |
+|---------|------------------------|------------------|-------|
+| Free / Seeded (M365) | 60 seconds (platform minimum) | Standard connectors only | Seeded plans can use premium/custom connectors only in-context of the licensing app ([deep dive](https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/deep-dive-on-specific-license)) |
+| Premium (per user) | 60 seconds | Standard, premium, custom | 40,000 Power Platform requests/user/24h ([request limits](https://learn.microsoft.com/en-us/power-platform/admin/api-request-limits-allocations#request-limits-in-power-automate)) |
+| Process (per flow, capacity) | 60 seconds | Standard, premium, custom | 250,000 requests/license/24h, stackable up to 10 ([licensing types](https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/types)) |
+
+> Although there is no longer a hard plan-based minimum, Microsoft still recommends reducing trigger frequency where possible and using trigger conditions to avoid burning request capacity ([scheduled tasks](https://learn.microsoft.com/en-us/power-automate/run-scheduled-tasks)).
 
 ```
 Recurrence pattern for "business hours only":
@@ -104,8 +120,11 @@ Response:
   - Body: {"status": "received", "id": "@{triggerBody()['id']}"}
 
 // Important: Add Response BEFORE long-running actions
-// HTTP triggers timeout after 120 seconds if no Response
+// Inbound HTTP requests (including the HTTP Request trigger) must return a
+// response within 120 seconds (2 minutes) - confirmed by Microsoft Learn.
+// Actions placed AFTER the response action continue running beyond this limit.
 ```
+> Citation: inbound request timeout is **120 seconds (2 minutes)** ([limits-and-config — Timeout](https://learn.microsoft.com/en-us/power-automate/limits-and-config)).
 
 ---
 
@@ -134,12 +153,24 @@ Response:
 
 **Command-line check**:
 ```bash
-# List flows in environment (solution-aware shown with solution name)
-pac flow list
+# NOTE: There is NO `pac flow` command group in the Power Platform CLI.
+# (Corrected against Microsoft Learn - the documented command groups are
+#  admin, application, auth, canvas, catalog, code, connection, connector,
+#  copilot, data, env, help, managed-identity, model, modelbuilder, package,
+#  pages, pcf, pipeline, plugin, power-fx, solution, telemetry, test, tool.)
+# Cloud flows are solution components, so manage/inspect them via solutions.
 
-# List flows in a solution
+# List all solutions in the connected environment (flows live inside solutions)
+pac solution list
+
+# List solutions in a specific environment (URL or GUID accepted)
 pac solution list --environment https://yourorg.crm.dynamics.com
+
+# To enumerate the flows themselves, open the solution in make.powerapps.com,
+# or use the Power Automate Management connector ("List flows as Admin") /
+# Power Apps Admin PowerShell (Get-AdminFlow).
 ```
+> Citations: pac command groups ([CLI command groups](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/)); `pac solution list` with `--environment` (URL or GUID) ([pac solution reference](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/solution)).
 
 ---
 
@@ -179,7 +210,7 @@ Actions:
    - priority: if(equals(outputs('Get_case')?['body/prioritycode'], '1'), 'high', 'normal')
 ```
 
-**Licensing Warning**: Child flows run in the caller's context. The calling flow's owner must have a premium license that covers both flows.
+**Licensing Warning**: For cloud flows, one Process (per flow) license covers the flow it is assigned to **and its child flows** ([licensing FAQs](https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/faqs)). If you license by user instead, the owner needs a Power Automate Premium license that covers the premium connectors used across the parent and its child flows.
 
 ### 5.2 Reusable Error Handling Pattern
 
@@ -249,19 +280,24 @@ Scope "Finally":
 ```
 On any action, click "..." > Settings > Retry Policy:
 
-Option 1: Default (4 retries, exponential backoff)
+Option 1: Default (exponential backoff)
+  // The default policy depends on the flow's performance profile:
+  //   Low profile:          up to 2 retries
+  //   Medium / High profile: up to 12 retries
+  // (NOT a fixed "4 retries" - corrected against Microsoft Learn)
 Option 2: None (no retries)
 Option 3: Fixed interval
-  - Count: 5
-  - Interval: 10 (seconds)
+  - Count: up to 90 (max retry attempts)
+  - Interval: e.g. PT10S
 Option 4: Exponential interval
-  - Count: 5
-  - Interval: 5 (seconds)
-  - Minimum interval: 5
-  - Maximum interval: 60
+  - Count: up to 90 (max retry attempts)
+  - Minimum interval: PT5S (5 seconds is the platform minimum delay)
+  - Maximum interval: e.g. PT1H (max retry delay is 1 day)
 
 // Use for: HTTP calls to unreliable APIs, database operations
+// Configurable limits: max retry attempts = 90, max delay = 1 day, min delay = 5 seconds
 ```
+> Citations: default retry policy is **up to 2 retries (Low)** or **up to 12 retries (Medium/High)**; configurable **retry attempts max 90**, **maximum delay 1 day**, **minimum delay 5 seconds** ([limits-and-config — Retry policy](https://learn.microsoft.com/en-us/power-automate/limits-and-config)).
 
 ### 6.3 Timeout Configuration
 
@@ -272,9 +308,11 @@ On any action, click "..." > Settings > Timeout:
 - PT1H = 1 hour
 - P1D = 1 day
 
-// Maximum flow run duration: 30 days
-// Individual action timeout: up to 30 days (but limited by flow timeout)
+// Maximum flow run duration: 30 days (confirmed)
+// Outbound asynchronous request timeout: configurable up to 30 days (confirmed)
+// Outbound synchronous request timeout: 120 seconds (fixed, not configurable)
 ```
+> Citations: run duration **30 days**; outbound async request **configurable up to 30 days**; outbound synchronous request **120 seconds** ([limits-and-config](https://learn.microsoft.com/en-us/power-automate/limits-and-config)).
 
 ---
 
@@ -337,8 +375,9 @@ Examples:
 ### 8.2 Service Account Setup
 
 ```
-1. Create Azure AD user: svc-powerautomate-prod@tenant.onmicrosoft.com
-2. Assign Power Automate Per User license
+1. Create Microsoft Entra ID user: svc-powerautomate-prod@tenant.onmicrosoft.com
+   (Azure AD is now Microsoft Entra ID)
+2. Assign a Power Automate Premium license (formerly "Power Automate per user")
 3. Add to required security groups
 4. Assign Dataverse security role (e.g., "Flow Service Account")
 5. Login as service account once to activate license
@@ -390,10 +429,12 @@ Apply to each loop:
   Concurrency control: ON
   Degree of parallelism: 10
 
-// Default: 20 concurrent (if not set)
-// Maximum: 50
-// Use with caution: API limits still apply
+// Default degree of parallelism: 1 (i.e. sequential) when concurrency is OFF
+// When concurrency control is ON, set a value between 1 and 50 (max is 50)
+// (Corrected: the default is 1, not 20.)
+// Use with caution: connector/API limits still apply
 ```
+> Citation: "Apply to each concurrency" default is **1**, configurable between **1 and 50** ([limits-and-config — Concurrency, looping, and debatching limits](https://learn.microsoft.com/en-us/power-automate/limits-and-config)).
 
 ### 9.3 Avoiding Common Bottlenecks
 
@@ -425,24 +466,29 @@ Apply to each loop:
 | Adobe PDF Services | Document manipulation | Pay per use |
 | DocuSign / Adobe Sign | E-signatures | Per-service licensing |
 
-**Critical licensing rule**: If a flow uses ONE premium connector, EVERY user who:
-- Owns the flow
-- Triggered the flow
-- Is referenced in the flow (approvals, mentions)
+**Critical licensing rule** (corrected against Microsoft Learn — it depends on the flow type):
 
-needs a premium license OR the flow must be licensed with Per Flow license.
+- **Automated and scheduled flows** run in the background and use the **owner's** limits/entitlement. Only the **flow owner** needs a Power Automate Premium license for the premium connector — not every running user.
+- **Instant (on-demand) flows** use the limits of the **user who runs them**. Every user who triggers such a flow needs a Power Automate Premium license.
+- In either case, you can instead license the **flow itself** with a **Power Automate Process** capacity license (formerly "per flow"), which allows premium/custom connectors regardless of the owning or triggering user's license. The flow must be in a solution for a Process license to be assigned.
+
+> Citations: "automated/scheduled flows always use the limits of the owner; instant flows use the limits of the account that started the process" ([request limits FAQ](https://learn.microsoft.com/en-us/power-platform/admin/api-request-limits-allocations#request-limits-in-power-automate), [licensing FAQs](https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/faqs)); Process license premium-connector entitlement ([licensing types](https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/types)).
 
 ### 10.2 Seeded vs Premium License Coverage
 
 ```
-SEEDED (M365/E5): Works with standard connectors only
+SEEDED (M365/E5) & FREE: Standard connectors generally
   Standard: SharePoint, Outlook, OneDrive, Teams, Excel Online, Planner,
-            Forms, To Do, Yammer, RSS, Notification, Office 365 Users
+            Forms, To Do, RSS, Notification, Office 365 Users
+  // Seeded licenses CAN use premium/custom connectors, but only when the
+  // flow runs in-context of (and is associated to) the app the seeded
+  // license comes from. Standalone premium connector use needs Premium.
 
-PREMIUM: Required for
+PREMIUM (or Process capacity) required for general use of:
   Dataverse, SQL, HTTP, Custom connectors, Azure services,
   Salesforce, Dynamics, premium third-party connectors
 ```
+> Citation: seeded vs Premium/Process connector entitlements and the in-context exception for seeded licenses ([licensing types](https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/types), [seeded licenses deep dive](https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/deep-dive-on-specific-license)). Authoritative standard-vs-premium designation per connector: [Connector reference](https://learn.microsoft.com/en-us/connectors/connector-reference/).
 
 ---
 
@@ -468,10 +514,16 @@ Use when:
 
 ```
 Requirements:
-- Dedicated Windows Server/VM
-- Unattended RPA bot license ($150/bot/month)
+- Dedicated Windows Server/VM (self-hosted) OR a Microsoft-hosted machine
+- Unattended RPA entitlement. This is delivered by a Power Automate PROCESS
+  capacity license (each Process license bears one unattended bot, allocated
+  to a machine), or a Hosted Process license for Microsoft-hosted RPA.
+  (Specific per-bot list price unverified as of 2026-06-19 - confirm against
+   Microsoft Learn / the Power Automate pricing page. The legacy standalone
+   "unattended RPA add-on" has been folded into Process/Hosted Process.)
 - Service account with appropriate permissions
-- Machine registered in Power Automate machine runtime
+- Machine registered in Power Automate machine runtime (registration
+  requires a Power Automate Premium user)
 
 Use when:
 - Process runs overnight or on schedule
@@ -480,8 +532,8 @@ Use when:
 - Multiple processes need to run on same machine (concurrent bots)
 
 Setup:
-1. Register machine in Power Automate portal
-2. Assign unattended bot license
+1. Register machine in Power Automate portal (done by a Premium user)
+2. Allocate a Process license to the machine to provide the unattended bot
 3. Create desktop flow
 4. Create cloud flow that calls desktop flow with "Run a flow built by Power Automate Desktop"
 5. Configure machine group for HA
@@ -660,22 +712,32 @@ Scope "On Success" (run after Main Logic is successful)
 
 ## 14. Flow Limits Summary
 
+All values below are verified against [Microsoft Learn — Limits of automated, scheduled, and instant flows](https://learn.microsoft.com/en-us/power-automate/limits-and-config) unless flagged otherwise.
+
 | Limit | Value | Notes |
 |-------|-------|-------|
-| Flow run duration | 30 days | Maximum |
-| Action timeout | 30 days (configurable) | But limited by flow duration |
-| Message size | 256 MB | With chunking |
-| File size (chunked) | 1 GB | Via chunking |
-| Actions per flow run | 100,000 | Hard limit |
-| List rows page size | 5,000 | Use pagination for more |
-| Maximum list rows | 100,000 | With pagination |
-| Apply to each concurrency | 50 | Default 20 |
-| Until loop iterations | 5,000 | Hard limit |
-| Branch nesting | 8 levels | Nested conditions |
-| Expression length | 8,192 characters | |
-| Variable size | 209 MB | |
-| Retry count | 10 | Configurable per action |
-| Retention period | 30 days (free) / 90 days (premium) | Run history |
+| Flow run duration | 30 days | Maximum; pending steps (e.g. approvals) time out after 30 days |
+| Outbound async request timeout | Configurable up to 30 days | Limited by flow run duration |
+| Outbound synchronous request / inbound request timeout | 120 seconds (2 min) | Fixed (HTTP trigger, instant flows) |
+| Message size | **100 MB** | Corrected (was 256 MB). Whole payload, not just the file |
+| Message size with chunking | 1 GB | For actions that support chunking |
+| Actions per flow **definition** | **500** | Corrected. The 100,000 figure is Power Platform requests per 5 min, not actions per run. Use child flows beyond 500 |
+| Power Platform requests | 100,000 per 5 min | Plus 24h limits by profile: 10k Low / 200k Medium / 500k High |
+| Apply to each array items | 5,000 (Low) / 100,000 (others) | Per loop |
+| Paginated items | 5,000 (Low) / 100,000 (others) | Trigger multiple runs for more |
+| Apply to each concurrency (degree of parallelism) | **1 default, 1–50 configurable** | Corrected (default is 1, not 20; max 50) |
+| Until loop iterations | **Default 60, max 5,000** | Corrected to add default |
+| Concurrent runs (when Concurrency Control on) | 1–100 (default 25) | Off by default; turning on is irreversible |
+| Allowed nesting depth for actions | 8 | Use child flows beyond 8 levels |
+| Switch scope cases | 25 | Per Switch |
+| Variables per workflow | 250 | Per flow definition |
+| Characters per expression | 8,192 | Per expression |
+| Expression evaluation limit | 131,072 characters | For @concat()/@base64()/@string() |
+| Request URL character limit | 16,384 characters | |
+| Variable size | (specific cap unverified as of 2026-06-19 — confirm against Microsoft Learn) | No explicit per-variable size limit is published on the limits-and-config page; effective size is bounded by message-size/content-throughput limits |
+| Retry attempts (configurable) | **90** | Corrected (was 10). Max delay 1 day, min delay 5 s |
+| Run retention in storage | **30 days** | Corrected. Flat 30 days regardless of license; the 90-day figure is the "no trigger activity" suspension window, not run-history retention |
+| Custom connectors | 50 per user | 500 requests/min per connection |
 
 ---
 
@@ -703,4 +765,12 @@ Before go-live, verify:
 
 ---
 
-*End of Power Automate Guide. Verify all limits and licensing against current Microsoft documentation before production use.*
+*End of Power Automate Guide. Facts verified against Microsoft Learn as of 2026-06-19 (platform state 2026-H1). Limits and licensing change frequently — re-verify against current Microsoft documentation before production use.*
+
+**Primary sources used for verification:**
+- [Limits of automated, scheduled, and instant flows](https://learn.microsoft.com/en-us/power-automate/limits-and-config)
+- [Types of Power Automate licenses](https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/types)
+- [Requests limits and allocations](https://learn.microsoft.com/en-us/power-platform/admin/api-request-limits-allocations)
+- [Power Automate licensing FAQ](https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/faqs)
+- [pac solution CLI reference](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/solution)
+- [pac CLI command groups](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/)

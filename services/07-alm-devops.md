@@ -2,6 +2,20 @@
 title: "Service 07 — ALM & DevOps"
 description: "Application lifecycle management for Power Platform: solution architecture, source-controlled pipelines, environment strategy, and automated deployment from dev through to production."
 category: service
+verified_as_of: 2026-06-19
+platform_state: 2026-H1
+sources:
+  - https://learn.microsoft.com/en-us/power-platform/alm/pipelines
+  - https://learn.microsoft.com/en-us/power-platform/admin/managed-environment-licensing
+  - https://learn.microsoft.com/en-us/power-platform/admin/managed-environment-overview
+  - https://learn.microsoft.com/en-us/power-platform/admin/powerapps-licensing-faq
+  - https://learn.microsoft.com/en-us/power-platform/admin/capacity-storage
+  - https://learn.microsoft.com/en-us/ai-builder/credit-management
+  - https://learn.microsoft.com/en-us/ai-builder/endofaibcredits
+  - https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management
+  - https://learn.microsoft.com/en-us/power-platform/admin/manage-copilot-studio-messages-capacity
+  - https://learn.microsoft.com/en-us/power-platform/alm/conn-ref-env-variables-build-tools
+  - https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/solution
 related:
   - ../playbooks/alm-pipeline.md
   - ../checklists/alm-solution-readiness.md
@@ -63,7 +77,7 @@ Concrete artifacts produced by this engagement:
 - **Source control setup** — repository structure for unpacked solutions, branching model (trunk-based or GitFlow-lite), and `.gitignore` for Power Platform artifacts.
 - **Pipeline build** — automated export → unpack → commit and pack → import → deploy flow. Implemented via Power Platform Pipelines (in-product) and/or Azure DevOps / GitHub Actions with the Power Platform Build Tools / `pac cli`.
 - **Connection references & environment variables** — all environment-specific config externalised so the same managed solution promotes across environments without edits.
-- **Deployment settings files** — `deploymentSettings.json` templates per target environment.
+- **Deployment settings files** — deployment settings JSON templates per target environment. The Power Platform CLI generates this file (`pac solution create-settings --solution-zip <zip> --settings-file <name>`) to pre-populate connection references and environment variables for fully automated import via `pac solution import --settings-file` or the Build Tools Import Solution task; the ALM Accelerator convention names this file `deploymentSettings.json` ([pre-populate connection references and environment variables](https://learn.microsoft.com/en-us/power-platform/alm/conn-ref-env-variables-build-tools); [pac solution command group](https://learn.microsoft.com/en-us/power-platform/developer/cli/reference/solution)).
 - **Release runbook** — step-by-step promotion and rollback procedure.
 - **Gated promotion** — approval gates between test and prod with documented sign-off.
 - **Handover & enablement** — walkthrough so the client team can run releases independently.
@@ -121,14 +135,14 @@ All figures are **indicative planning ranges only — confirm current rates** be
 
 ALM tooling itself is largely included, but the platform it deploys to often is not. Flag these early.
 
-- **Power Platform Pipelines (in-product)** are available in the Power Platform admin experience; advanced/managed-environment features may require **Managed Environments**, which require **premium licensing** for users in those environments (Needs verification against current Microsoft docs).
-- **Managed Environments** capabilities (including some pipeline governance features) require every user in the environment to hold a qualifying premium license — Power Apps Premium, Power Automate Premium, or equivalent (Needs verification against current Microsoft docs).
-- **Premium connectors** in the solutions being deployed (SQL Server, custom connectors, HTTP, Dataverse-as-premium scenarios) require **Power Apps Premium** or **Per-App** plans for every user (Needs verification against current Microsoft docs).
-- **Dataverse capacity** — each environment consumes Database, File, and Log capacity from the tenant pool. Standing up additional dev/test/UAT environments multiplies storage consumption (Needs verification against current Microsoft docs).
-- **Environment count** — additional environments may require available capacity or add-on environment capacity (Needs verification against current Microsoft docs).
-- **AI Builder credits** — if deployed solutions contain AI Builder models, credit consumption applies per environment and is **not** transferred by the pipeline; credits must be provisioned in the target tenant/environment (Needs verification against current Microsoft docs).
-- **Copilot Studio** — agents have **message-based consumption**; promoting a Copilot Studio solution does not provision message capacity in the target environment (Needs verification against current Microsoft docs).
-- **Azure DevOps / GitHub** — pipeline runners (Microsoft-hosted or self-hosted agents/runners) and parallel jobs may carry their own cost outside the Power Platform (Needs verification against current Microsoft docs).
+- **Power Platform Pipelines (in-product)** are an official, built-in Power Platform feature accessed within native product experiences (the maker solution view and the Deployment Pipeline Configuration app). The pipelines host doesn't have to be a Managed Environment, and developer environments used only for dev/test can run on the developer plan — but **all other (non-developer) environments used in pipelines must be enabled as Managed Environments** ([pipelines overview](https://learn.microsoft.com/en-us/power-platform/alm/pipelines)). Note: from February 2026 Microsoft began auto-enabling Managed Environments for pipeline target environments that aren't already enabled ([pipelines overview](https://learn.microsoft.com/en-us/power-platform/alm/pipelines)).
+- **Managed Environments** — "Licenses granting premium use rights are required for all Managed Environments." When an environment is designated Managed, all apps and flows in it are treated as premium regardless of connector, so **every active user (maker and consumer) must hold a qualifying premium license** — Power Apps Premium, Power Automate Premium, a qualifying Dynamics 365 license, or equivalent capacity/pay-as-you-go entitlement ([Managed Environments licensing](https://learn.microsoft.com/en-us/power-platform/admin/managed-environment-licensing); [Managed Environments overview](https://learn.microsoft.com/en-us/power-platform/admin/managed-environment-overview)). End-user in-app licensing notifications for non-compliant Managed Environment use are rolling out from June 2026 ([Managed Environments licensing](https://learn.microsoft.com/en-us/power-platform/admin/managed-environment-licensing)).
+- **Premium connectors** in the solutions being deployed (SQL Server, custom connectors, HTTP, Dataverse, on-premises data gateway scenarios) require a standalone premium plan — **Power Apps Premium (per user)** or **Power Apps per app** — for every user who interacts with the app; they aren't covered by a Microsoft 365 license. The historical grandfathering exemption for reclassified connectors closed on 1 October 2024 ([Power Apps licensing FAQs](https://learn.microsoft.com/en-us/power-platform/admin/powerapps-licensing-faq)).
+- **Dataverse capacity** — capacity is measured at the tenant level across three separate types (Database, File, and Log) and pooled across environments. Admins can preallocate capacity from the tenant pool to an environment, which reduces what's available to others — so standing up additional dev/test/UAT environments consumes from the same shared pool ([Dataverse capacity-based storage](https://learn.microsoft.com/en-us/power-platform/admin/capacity-storage)).
+- **Environment count** — creating a new environment requires a minimum of 1 GB of available Dataverse capacity; if the tenant exceeds its storage entitlement, create/copy/restore environment operations are blocked (data already stored stays durable) ([Dataverse capacity-based storage](https://learn.microsoft.com/en-us/power-platform/admin/capacity-storage)). Add-on Dataverse Database/File/Log capacity can be purchased, or a temporary 25% extension applied for 45 days, up to three times per tenant ([extend Dataverse capacity](https://learn.microsoft.com/en-us/power-platform/admin/extend-capacity)).
+- **AI Builder credits / Copilot Credits** — AI Builder consumption is metered against credits that are pooled at the tenant level and **assigned per environment** by an admin; a pipeline that promotes an AI Builder model does not provision that capacity in the target, so credits must be assigned in the target tenant/environment. Note the platform transition: new customers can no longer buy the AI Builder capacity add-on and must use Copilot Credits, and seeded AI Builder credits from premium licenses end on 1 November 2026 ([Licensing and AI Builder credits](https://learn.microsoft.com/en-us/ai-builder/credit-management); [End of AI Builder credits](https://learn.microsoft.com/en-us/ai-builder/endofaibcredits)).
+- **Copilot Studio** — agents are billed on consumption, now denominated in **Copilot Credits** (the currency changed from "messages" to Copilot Credits effective 1 September 2025; prepaid capacity packs and the pay-as-you-go rate are unchanged). Prepaid capacity is pooled at the tenant level but **must be assigned to an environment** to enable agent features there, so promoting a Copilot Studio solution does not provision message/credit capacity in the target environment ([Copilot Studio billing rates and management](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management); [manage Copilot Studio credits and capacity](https://learn.microsoft.com/en-us/power-platform/admin/manage-copilot-studio-messages-capacity)).
+- **Azure DevOps / GitHub** — these are alternatives to (or extensions of) in-product pipelines for advanced ALM, using the Power Platform Build Tools / `pac cli` ([extend pipelines with the CLI](https://learn.microsoft.com/en-us/power-platform/alm/pipelines)). Their pipeline runners (Microsoft-hosted or self-hosted agents/runners) and parallel jobs carry their own cost outside the Power Platform (Azure DevOps / GitHub Actions billing — unverified as of 2026-06-19 — confirm against Microsoft Learn).
 
 Run the [../checklists/licensing-and-capacity.md](../checklists/licensing-and-capacity.md) and [../checklists/connectors-and-premium.md](../checklists/connectors-and-premium.md) before committing to a topology, and document findings with [../templates/licensing-estimate-template.md](../templates/licensing-estimate-template.md).
 
@@ -196,7 +210,7 @@ Sign off each gate before advancing.
 **Risks:**
 
 - **Unmanaged customisations in production** — un-layering existing unmanaged solutions can be time-consuming and may surface hidden dependencies. Mitigate with the assessment phase and [../templates/risk-register-template.md](../templates/risk-register-template.md).
-- **Capacity exhaustion** — adding dev/test/UAT environments may exceed available Dataverse capacity. Mitigate by sizing up front via the licensing checklist (Needs verification against current Microsoft docs).
+- **Capacity exhaustion** — adding dev/test/UAT environments draws from the shared tenant Dataverse pool; creating an environment needs ≥1 GB free, and exceeding the tenant entitlement blocks create/copy/restore operations. Mitigate by sizing up front via the licensing checklist ([Dataverse capacity-based storage](https://learn.microsoft.com/en-us/power-platform/admin/capacity-storage)).
 - **Connection/auth drift** — connection references not externalised cause import failures. Mitigate per the solution-readiness gate.
 - **Org change resistance** — makers used to editing production may resist the gated process. Mitigate with enablement and clear environment roles.
-- **Tooling cost** — Microsoft-hosted runner minutes and parallel jobs in DevOps/GitHub can carry separate cost (Needs verification against current Microsoft docs).
+- **Tooling cost** — Microsoft-hosted runner minutes and parallel jobs in Azure DevOps / GitHub can carry separate cost (Azure DevOps / GitHub Actions billing — unverified as of 2026-06-19 — confirm against Microsoft Learn).

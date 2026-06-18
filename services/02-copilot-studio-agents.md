@@ -2,6 +2,19 @@
 title: "Service 02 — Copilot Studio Agents"
 description: "Design and delivery of Microsoft Copilot Studio agents: topics, knowledge sources, generative orchestration, and agent flows integrated into Power Platform."
 category: service
+verified_as_of: 2026-06-19
+platform_state: 2026-H1
+sources:
+  - https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management
+  - https://learn.microsoft.com/en-us/microsoft-copilot-studio/billing-licensing
+  - https://learn.microsoft.com/en-us/power-platform/admin/manage-copilot-studio-messages-capacity
+  - https://learn.microsoft.com/en-us/ai-builder/endofaibcredits
+  - https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq
+  - https://learn.microsoft.com/en-us/connectors/connector-reference/connector-reference-premium-connectors
+  - https://learn.microsoft.com/en-us/microsoft-copilot-studio/flows-overview
+  - https://learn.microsoft.com/en-us/power-platform/admin/capacity-storage
+  - https://learn.microsoft.com/en-us/microsoft-365-copilot/extensibility/faq
+  - https://learn.microsoft.com/en-us/microsoft-copilot-studio/configuration-end-user-authentication
 related:
   - ../playbooks/copilot-studio-agent.md
   - ../playbooks/agent-flow-workflow.md
@@ -27,7 +40,7 @@ Measurable outcomes we target:
 - **Containment & escalation quality** — clean handoff with full conversation context, not dead-ends.
 - **Time-to-answer** — seconds instead of hours/days for the long tail of routine questions.
 - **Grounding accuracy** — answers traceable to a citable source, with measured hallucination/incorrect-answer rate.
-- **Cost per resolved conversation** — modelled against the per-message consumption (see Licensing below).
+- **Cost per resolved conversation** — modelled against Copilot Studio consumption (billed in **Copilot Credits** since 1 Sept 2025, replacing the former "messages" unit; see Licensing below) ([Copilot Studio billing rates](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management)).
 
 ## Ideal Client Profile
 
@@ -35,7 +48,7 @@ Buyers and triggers/signals that indicate fit:
 
 - A **service desk, HR shared-services, or contact-centre** team handling high volumes of repetitive, knowledge-based queries.
 - Existing Microsoft 365 / Power Platform tenant, content already in **SharePoint, Dataverse, or public web** that can serve as knowledge sources.
-- A failed or stalled **first-generation chatbot** (classic Power Virtual Agents, rule-only bot) that needs generative grounding and action-taking.
+- A failed or stalled **first-generation chatbot** (classic Power Virtual Agents — now termed "classic chatbots," the predecessor to Copilot Studio and without generative AI support; rule-only bot) that needs generative grounding and action-taking ([Upgrade to Copilot Studio unified authoring](https://learn.microsoft.com/en-us/microsoft-copilot-studio/unified-authoring-conversion)).
 - Desire to surface the agent in **Microsoft Teams, a website, or as a custom-engine/declarative agent** in Microsoft 365 Copilot.
 - A sponsor who can name a **measurable deflection or response-time KPI** and provide subject-matter access to validate answers.
 
@@ -104,20 +117,21 @@ Planning ranges only — **indicative; confirm current rates** before any commit
 - **M engagement:** fixed-price for a defined topic/action set; change requests for added topics or actions.
 - **L engagement:** time-and-materials (T&M) or phased fixed-price by milestone, given orchestration and integration variability.
 
-Recommendation: **fixed-price** where scope (topics, knowledge sources, actions, channels) is firmly bounded; **T&M** where generative orchestration scope or back-end integration is exploratory. Platform consumption (Copilot Studio messages) is a **separate run-cost line item** the client owns — never roll it into the build price.
+Recommendation: **fixed-price** where scope (topics, knowledge sources, actions, channels) is firmly bounded; **T&M** where generative orchestration scope or back-end integration is exploratory. Platform consumption (Copilot Studio Copilot Credits) is a **separate run-cost line item** the client owns — never roll it into the build price ([Copilot Studio billing rates](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management)).
 
 ## Licensing & Capacity Considerations
 
-Verify all figures against current Microsoft licensing documentation — these change frequently. Each item below is a planning warning, not a confirmed price.
+Verify all figures against current Microsoft licensing documentation — these change frequently. Figures below are verified as of 2026-06-19 against Microsoft Learn (2026-H1 platform state); treat them as planning inputs, not quotes.
 
-- **Copilot Studio messages / capacity packs** — Copilot Studio is consumption-based: each interaction consumes "messages" from a tenant message pack (or pay-as-you-go via Azure). Generative answers, knowledge lookups, and agent actions consume **different message quantities** per the published consumption rate card. *(Needs verification against current Microsoft docs — message multipliers and pack sizes change.)* Model expected volume × consumption rate before quoting any run cost.
-- **Generative orchestration & knowledge** — answers grounded on knowledge sources and generative actions typically consume **more messages per turn** than a simple authored-topic response. *(Needs verification against current Microsoft docs.)*
-- **Premium connectors** — any agent flow that uses a **premium connector** (e.g. custom connector, HTTP, many LOB connectors) requires appropriate Power Platform / premium licensing for the flow's run context. *(Needs verification — confirm which connectors are premium for the target tenant.)*
-- **Power Automate / agent flows** — agent flows run as cloud flows and are subject to **Power Platform request limits and flow licensing**; high-frequency actions may need Power Automate Premium or per-flow capacity. *(Needs verification against current Microsoft docs.)*
-- **AI Builder credits** — if the agent triggers AI Builder models (e.g. document processing), those consume **AI Builder credits** separately from Copilot Studio messages. *(Needs verification.)*
-- **Dataverse capacity** — storing conversation transcripts, custom tables, or write-back data consumes **Dataverse database/file/log capacity**. Confirm available tenant capacity. *(Needs verification.)*
-- **Microsoft 365 Copilot publishing** — publishing as a declarative/custom-engine agent into M365 Copilot may have **separate licensing prerequisites** for end users. *(Needs verification against current Microsoft docs.)*
-- **Authentication** — end-user authentication options (no auth / Microsoft / manual OAuth) affect both security posture and which data the agent can ground on. Confirm with the client's identity team.
+- **Copilot Studio Copilot Credits / capacity packs** — Copilot Studio is consumption-based. **As of 1 September 2025 the billing unit changed from "messages" to "Copilot Credits"** — the common currency across Copilot Studio capabilities. Capacity is sold as **tenant-wide Copilot Credit capacity packs of 25,000 credits at US$200/pack/month**, or via **pay-as-you-go** by linking an Azure subscription billing policy in the Power Platform admin center (≈ US$0.01 per Copilot Credit on PAYG). Capacity is pooled across the tenant and resets monthly (no roll-over) ([Copilot Studio billing rates](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management); [Copilot Studio licensing](https://learn.microsoft.com/en-us/microsoft-copilot-studio/billing-licensing); [Manage Copilot Studio credits and capacity](https://learn.microsoft.com/en-us/power-platform/admin/manage-copilot-studio-messages-capacity)). Model expected volume × consumption rate before quoting any run cost.
+- **Consumption rates by feature** — different feature types consume different credit quantities per the published rate card: **classic answer = 1, generative answer = 2, agent action = 5, tenant graph grounding = 10, agent flow actions = 13 per 100 actions**; AI/prompt tools bill per 1,000 tokens (basic/standard/premium tiers). A single interaction can combine several feature types — e.g. a tenant-graph-grounded generative reply ≈ 12 credits (10 grounding + 2 generative). Grounded/generative turns therefore cost materially more than a static authored-topic answer ([Copilot Studio billing rates](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management)).
+- **Microsoft 365 Copilot included usage** — for employee-facing (B2E) scenarios, agents invoked by a user **licensed with Microsoft 365 Copilot** do not draw down the Copilot Studio pack/meter for classic answers, generative answers, or tenant-graph grounding (subject to fair-use limits) ([Copilot Studio billing rates](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management)).
+- **Premium connectors** — using **premium, on-premises, or custom connectors** (e.g. SQL Server, Azure, HTTP, Dynamics 365, many LOB connectors) requires a standalone Power Apps/Power Automate plan; standard Microsoft 365 (E3/E5) licences do not cover them. Within an app context, a Power Apps licence covers premium/custom connectors for in-context flows; isolated flows need a standalone Power Automate Premium or process licence. Confirm which connectors are premium for the target tenant against the connector reference ([Power Platform licensing FAQs](https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq); [List of premium connectors](https://learn.microsoft.com/en-us/connectors/connector-reference/connector-reference-premium-connectors)).
+- **Agent flows vs. Power Automate cloud flows** — **agent flows created natively in Copilot Studio are billed through Copilot Studio consumption (Copilot Credits) and do not require an individual Power Automate licence** — this differs from classic Power Automate cloud flows, which do require Power Automate licensing. When prepaid Copilot Credits are exhausted, **agent-flow enforcement blocks new flow runs** (the rest of the agent keeps working). Converting a cloud flow to an agent flow is a one-way change that moves billing to Copilot Credits ([Agent flows overview](https://learn.microsoft.com/en-us/microsoft-copilot-studio/flows-overview); [Copilot Studio billing rates](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management)).
+- **AI Builder credits** — **AI Builder credits are being progressively retired (announced Oct 2025) and replaced by Copilot Credits.** AI Builder features are unaffected and continue to run on Copilot Credits. In apps/flows a dual-mode model applies (AI Builder credits consumed first, then Copilot Credits); within Copilot Studio agents and agent flows, AI Builder actions consume Copilot Credits only. Seeded AI Builder credits are honoured through 1 Nov 2026 (or the contract term) ([End of AI Builder credits](https://learn.microsoft.com/en-us/ai-builder/endofaibcredits); [AI Builder licensing and Copilot Credits](https://learn.microsoft.com/en-us/ai-builder/message-management)).
+- **Dataverse capacity** — storing conversation transcripts, custom tables, or write-back data consumes **Dataverse database / file / log capacity**, tracked separately under the capacity-based storage model (database and file entitlements pool across Dataverse and finance-and-operations; log is Dataverse-only). The default environment includes 3 GB database, 3 GB file, and 1 GB log. Audit and plug-in trace logs count against log capacity. Confirm available tenant capacity in the admin center before storing transcripts ([Dataverse capacity-based storage details](https://learn.microsoft.com/en-us/power-platform/admin/capacity-storage)).
+- **Microsoft 365 Copilot publishing** — to **ground an agent in organizational data**, the tenant needs either Microsoft 365 Copilot licences or Copilot Studio pay-as-you-go (Copilot Credits) enabled; a Copilot Studio trial can build/test but cannot publish. End users consuming a declarative agent need a Microsoft 365 Copilot add-on or Copilot Chat access via an eligible Microsoft 365 plan ([Microsoft 365 Copilot extensibility FAQ](https://learn.microsoft.com/en-us/microsoft-365-copilot/extensibility/faq); [Copilot Studio licensing](https://learn.microsoft.com/en-us/microsoft-copilot-studio/billing-licensing)).
+- **Authentication** — end-user authentication offers three options: **No authentication, Authenticate with Microsoft (Entra ID, auto-configured, supports SSO), or Authenticate manually (Entra ID or generic OAuth2)**. Teams and Microsoft 365 Copilot channels require an authenticated option (anonymous is not allowed); a DLP policy can force authentication and disable the "No authentication" option. Auth mode affects both security posture and which data the agent can ground on — confirm with the client's identity team ([Configure user authentication](https://learn.microsoft.com/en-us/microsoft-copilot-studio/configuration-end-user-authentication)).
 
 Run `node packages/cli/dist/index.js estimate-licensing -c usd` (or `gbp`/`eur`) to produce a planning estimate; treat its output as indicative and reconcile against current Microsoft pricing.
 
@@ -154,14 +168,14 @@ Each gate must pass before the next phase. Use the checklists:
 
 - The client owns authoritative, reasonably structured content suitable for grounding (SharePoint/Dataverse/web/docs).
 - A subject-matter expert is available to validate answer correctness during UAT.
-- The target tenant has — or will procure — sufficient Copilot Studio message capacity and any required premium/Power Automate licensing.
+- The target tenant has — or will procure — sufficient Copilot Studio Copilot Credit capacity and any required premium/Power Automate licensing.
 - One primary channel is in scope per size band; additional channels are change requests.
 
 **Risks:**
 
 - **Grounding quality** — poor or contradictory source content produces wrong/low-confidence answers. Mitigation: content audit in discovery; restrict knowledge sources to curated material.
-- **Consumption cost overrun** — generative + action-heavy conversations consume more messages than forecast. Mitigation: volume modelling, analytics baseline, and per-turn consumption monitoring; treat run cost as a client-owned line item.
-- **Hallucination / trust** — generative answers may invent details. Mitigation: instruction guardrails, citation-required configuration, fallback-to-human, and measured accuracy gating in QA. *(Behaviour of generative features evolves — needs verification against current Microsoft docs.)*
-- **Licensing/preview drift** — message multipliers, pack sizes, and feature availability change. Mitigation: verify against current Microsoft docs before quoting; document the verification date.
+- **Consumption cost overrun** — generative + action-heavy conversations consume more Copilot Credits than forecast (and at 125% of prepaid capacity, custom agents are disabled until capacity is increased). Mitigation: volume modelling, analytics baseline, per-turn consumption monitoring, per-agent monthly caps in the admin center, and pay-as-you-go as overage safety net; treat run cost as a client-owned line item ([Copilot Studio billing rates — overage enforcement](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management)).
+- **Hallucination / trust** — generative answers may invent details. Mitigation: instruction guardrails, citation-required configuration, fallback-to-human, and measured accuracy gating in QA. Generative-feature behaviour evolves; confirm current guidance against [Configure high-quality instructions for generative orchestration](https://learn.microsoft.com/en-us/microsoft-copilot-studio/guidance/generative-mode-guidance).
+- **Licensing/preview drift** — credit consumption rates, pack sizes, and feature availability change (e.g. the 2025 move from "messages" to Copilot Credits and the retirement of AI Builder credits). Mitigation: verify against current Microsoft docs before quoting; document the verification date (this file: verified 2026-06-19, 2026-H1) ([Copilot Studio billing rates](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management)).
 - **Scope creep via topics** — "just one more intent" expands effort. Mitigation: scope validation gate and a defined topic/action count per size band.
 - **Authentication & data exposure** — misconfigured auth can expose grounded data. Mitigation: security-governance review of auth mode, DLP, and grounding-source permissions before publish.

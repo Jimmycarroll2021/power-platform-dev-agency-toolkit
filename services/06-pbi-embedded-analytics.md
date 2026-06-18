@@ -2,6 +2,20 @@
 title: "Service 06 — Power BI Embedded Analytics"
 description: "Reporting and dashboard integration: semantic models, paginated and interactive reports, and embedded analytics surfaced inside Power Apps, Power Pages, and external portals."
 category: service
+verified_as_of: 2026-06-19
+platform_state: 2026-H1
+sources:
+  - https://learn.microsoft.com/en-us/power-bi/developer/embedded/embedded-capacity
+  - https://learn.microsoft.com/en-us/power-bi/developer/embedded/embedded-analytics-power-bi
+  - https://learn.microsoft.com/en-us/power-bi/guidance/powerbi-implementation-planning-usage-scenario-embed-for-your-customers
+  - https://learn.microsoft.com/en-us/fabric/enterprise/licenses
+  - https://learn.microsoft.com/en-us/power-bi/paginated-reports/paginated-reports-faq
+  - https://learn.microsoft.com/en-us/power-bi/collaborate-share/service-publish-to-web
+  - https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-introduction
+  - https://learn.microsoft.com/en-us/power-apps/maker/canvas-apps/controls/control-power-bi-tile
+  - https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq
+  - https://learn.microsoft.com/en-us/power-platform/admin/capacity-storage
+  - https://learn.microsoft.com/en-us/power-bi/connect-data/service-gateway-onprem
 related:
   - ../docs/power-bi-handoff-guide.md
   - ../agents/solution-architect.md
@@ -47,7 +61,7 @@ Concrete artifacts produced by this engagement:
 
 - **Semantic model (dataset)** — a tabular model with a documented star schema, well-named measures (DAX), calculation groups where appropriate, and a clear refresh strategy (Import, DirectQuery, or Composite — selected per requirement).
 - **Interactive reports** — one or more multi-page Power BI reports with consistent theming, bookmarks/navigation, and drill-through.
-- **Paginated reports** *(where pixel-perfect / print output is required)* — invoice-style or operational list outputs. (Needs verification against current Microsoft docs for capacity prerequisites.)
+- **Paginated reports** *(where pixel-perfect / print output is required)* — invoice-style or operational list outputs. Authoring and publishing a paginated report needs a Power BI Pro or PPU license; dedicated Premium/Fabric capacity is **not** mandatory to use them. Premium/Fabric capacity (F64+/P1+) only changes who can *view*: on such capacity free-licensed users can view, otherwise each viewer needs Pro/PPU ([paginated reports FAQ](https://learn.microsoft.com/en-us/power-bi/paginated-reports/paginated-reports-faq)). In an embedded ("App Owns Data") context, paginated reports must be backed by EM, P, or F capacity ([embed paginated reports](https://learn.microsoft.com/en-us/power-bi/developer/embedded/embed-paginated-reports)).
 - **Embedded configurations** — Power BI embedded into:
   - Canvas apps via the native Power BI component or tile.
   - Model-driven apps via embedded Power BI dashboards / charts.
@@ -112,16 +126,16 @@ Indicative envelope (effort only, excludes licences/capacity): S ≈ 5–10 days
 
 Power BI licensing is a frequent source of nasty surprises. Verify every point below against current Microsoft licensing documentation before committing — figures and entitlements change.
 
-- **Pro vs Premium Per User (PPU) vs Premium capacity** — content sharing, paginated reports, and some advanced features require Premium or PPU. **(Needs verification against current Microsoft docs.)**
-- **Embedding into external portals (Power Pages / public web)** generally requires **App Owns Data** with **Power BI Embedded (A-SKU)** capacity or **Premium (P/F-SKU)** capacity — *not* covered by ordinary Pro licences. Budget for capacity as a recurring cost. **(Needs verification against current Microsoft docs.)**
-- **Microsoft Fabric capacity (F-SKUs)** is increasingly the route for Premium-class features; the older P-SKU model is being superseded. Confirm the client's current capacity SKU and whether autoscale/pause is available to manage cost. **(Needs verification against current Microsoft docs.)**
-- **Publish-to-web** is *anonymous public exposure* — never use it for any sensitive, internal, or customer-identifiable data. It bypasses RLS entirely.
-- **Paginated reports** require Premium / PPU / embedded capacity. **(Needs verification against current Microsoft docs.)**
-- **Power BI tiles/components inside Power Apps** still require each viewing user to hold the appropriate Power BI licence (commonly Pro/PPU) unless served via embedded capacity — clarify the per-user vs capacity model early. **(Needs verification against current Microsoft docs.)**
-- **On-premises data gateway** is required for DirectQuery/scheduled refresh against on-prem or VNet-isolated sources; size and host it for availability.
-- **Dataverse capacity** — large fact extracts and frequent refresh increase Dataverse API/storage consumption; check the client's Dataverse capacity allocation. **(Needs verification against current Microsoft docs.)**
-- **AI Builder credits / Copilot in Power BI** — any AI/Copilot analytics features may consume separate credits or require specific SKUs; do not assume they are included. **(Needs verification against current Microsoft docs.)**
-- **Premium connectors** used to source data into the model (e.g., non-standard SaaS connectors via dataflows) require Power Apps/Automate **premium** entitlement for the running identity. **(Needs verification against current Microsoft docs.)**
+- **Pro vs Premium Per User (PPU) vs Premium/Fabric capacity** — Pro is a per-user licence that lets users create, publish, share, and consume content; sharing/collaboration generally requires the other party to also hold Pro (or PPU), unless the content lives in Premium/Fabric capacity. PPU includes all Pro capabilities plus features previously exclusive to Premium capacity. Confirmed against [Power BI service features by license type](https://learn.microsoft.com/en-us/power-bi/fundamentals/service-features-license-type) and the [PPU FAQ](https://learn.microsoft.com/en-us/fabric/enterprise/powerbi/service-premium-per-user-faq).
+- **Embedding into external portals (Power Pages / public web)** uses the **App Owns Data** ("embed for your customers") scenario, which **cannot** run in production on Fabric (free), Power BI Pro, or PPU licences — it requires a capacity: **Power BI Embedded (A-SKU)**, **Premium (P/EM-SKU)**, or **Microsoft Fabric (F-SKU)**. Budget for capacity as a recurring cost. Confirmed against [Embed for your customers usage scenario](https://learn.microsoft.com/en-us/power-bi/guidance/powerbi-implementation-planning-usage-scenario-embed-for-your-customers) and [Capacity and SKUs in Power BI embedded analytics](https://learn.microsoft.com/en-us/power-bi/developer/embedded/embedded-capacity).
+- **Microsoft Fabric capacity (F-SKUs)** is now the route for Premium-class features: P-SKUs are **no longer available for purchase** (renewal only), and buying an F-SKU also includes Power BI Embedded. Confirm the client's current capacity SKU and whether autoscale/pause is available to manage cost. Confirmed against [Understand Microsoft Fabric licenses](https://learn.microsoft.com/en-us/fabric/enterprise/licenses).
+- **Publish-to-web** is *anonymous public exposure* — anyone on the internet can view the report with no authentication, **including the underlying detail-level data in the semantic model**, and it is not available for reports that rely on row-level security. Never use it for any sensitive, internal, or customer-identifiable data. Confirmed against [Publish to web from Power BI](https://learn.microsoft.com/en-us/power-bi/collaborate-share/service-publish-to-web).
+- **Paginated reports** do **not** require Premium/PPU to author or use — a Pro (or PPU) licence is sufficient. Premium/Fabric capacity (F64+/P1+) only lets free-licensed users *view* them; in an embedded context they must be backed by EM/P/F capacity. Confirmed against the [paginated reports FAQ](https://learn.microsoft.com/en-us/power-bi/paginated-reports/paginated-reports-faq).
+- **Power BI tiles/components inside Power Apps** require each viewing user to hold a Power BI Pro (or PPU) licence, **unless** the underlying content is hosted in Premium/Fabric capacity (F64+ allows free-licensed viewers); you must also separately share the source dashboard with app users. Confirmed against [Power BI tile control in Power Apps](https://learn.microsoft.com/en-us/power-apps/maker/canvas-apps/controls/control-power-bi-tile).
+- **On-premises data gateway** is required to securely bridge on-prem (or VNet-isolated, via the virtual network data gateway) sources to Power BI for scheduled refresh and DirectQuery; size and host it for availability. Confirmed against [On-premises data gateway](https://learn.microsoft.com/en-us/power-bi/connect-data/service-gateway-onprem).
+- **Dataverse capacity** — Dataverse storage is metered per tenant across database, file, and log capacity, accrued from a base org allowance plus per-user-licence entitlements, with weekly admin notifications and overage enforcement (e.g., environment creation blocked when in deficit). Large fact extracts and frequent refresh increase consumption, so check the client's Dataverse capacity allocation. Confirmed against [Dataverse capacity-based storage details](https://learn.microsoft.com/en-us/power-platform/admin/capacity-storage).
+- **Copilot in Power BI** requires paid Fabric capacity (F2+) or Power BI Premium capacity (P1+) with the tenant Copilot setting enabled — a Pro or PPU licence alone is **not** sufficient — and it consumes that Fabric capacity, so manage usage to avoid throttling. Confirmed against [Copilot for Power BI overview](https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-introduction) and [Enable Fabric Copilot for Power BI](https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-enable-power-bi). AI Builder is a separate Power Platform capacity (credits/per-app billing) and is not bundled with Power BI — treat any AI Builder use as a distinct line item (unverified specifics as of 2026-06-19 — confirm against Microsoft Learn).
+- **Premium connectors** used to source data into the model (e.g., SQL Server, non-standard SaaS connectors via dataflows) require a Power Apps/Power Automate **premium** entitlement; in an app/flow context **every** user interacting with the app must be licensed via a Power Apps per-user plan, per-app plan, pay-as-you-go, or a qualifying Dynamics 365 licence. Confirmed against [Power Platform licensing FAQs](https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq).
 
 See ../checklists/licensing-and-capacity.md and ../docs/licensing-and-capacity.md for the full verification routine, and engage the [Licensing & Capacity Agent](../agents/licensing-capacity-agent.md).
 
@@ -193,7 +207,7 @@ Run the CLI gate generators as needed: `checklist --type qa`, `checklist --type 
 
 **Risks**
 
-- **Licensing/capacity mismatch** — external embedding or paginated reports may require capacity the client has not budgeted for. Mitigate via early licensing review. **(Needs verification against current Microsoft docs.)**
+- **Licensing/capacity mismatch** — external ("App Owns Data") embedding requires A/EM/P/F capacity the client may not have budgeted for, and free-licensed viewers need F64+/P1+ capacity (otherwise per-user Pro/PPU). Mitigate via early licensing review. Confirmed against [Capacity and SKUs in Power BI embedded analytics](https://learn.microsoft.com/en-us/power-bi/developer/embedded/embedded-capacity).
 - **RLS gaps** — misconfigured roles can leak data across users/tenants. Mitigate with a per-persona RLS test matrix.
 - **Performance** — DirectQuery over large/slow sources can produce sluggish reports; Import + incremental refresh is preferred where freshness allows.
 - **Publish-to-web exposure** — accidental anonymous publication of sensitive data; mitigate by disabling the tenant setting and gating go-live on the governance checklist.

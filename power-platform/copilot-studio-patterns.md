@@ -3,11 +3,33 @@ title: "Copilot Studio Patterns"
 description: "Patterns for building agents in Copilot Studio"
 category: "ai"
 tags: ["copilot-studio", "agents", "conversational-ai", "topics"]
+verified_as_of: 2026-06-19
+platform_state: 2026-H1
+sources:
+  - https://learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-copilot-studio
+  - https://learn.microsoft.com/en-us/microsoft-copilot-studio/nlu-boost-node
+  - https://learn.microsoft.com/en-us/microsoft-copilot-studio/add-tools-custom-agent
+  - https://learn.microsoft.com/en-us/microsoft-copilot-studio/configuration-end-user-authentication
+  - https://learn.microsoft.com/en-us/microsoft-copilot-studio/configuration-authentication-azure-ad
+  - https://learn.microsoft.com/en-us/microsoft-copilot-studio/advanced-entities-slot-filling
 ---
 
 # Copilot Studio Patterns
 
+> **Platform-state note (verified 2026-06-19, baseline 2026-H1):** Copilot Studio
+> features evolve quickly. Capability and limit claims below were checked against
+> Microsoft Learn on the date above; the per-claim citation links point to the
+> primary source. Re-verify before quoting hard limits to a client.
+
 ## 1. Agent with Knowledge Sources
+
+Supported knowledge source types are: **public website**, **file upload / documents**,
+**SharePoint** (and OneDrive), **Dataverse**, and **enterprise data via Microsoft
+Copilot connectors** indexed by Microsoft Search. (Confirmed — [Knowledge sources summary](https://learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-copilot-studio).)
+Documented per-source input limits differ by orchestration mode: e.g. public
+websites allow 25 sites in **generative** mode vs 4 URLs in **classic** mode; SharePoint
+allows 25 URLs (generative) vs 4 (classic); Dataverse is unlimited (generative) vs
+2 sources / 15 tables each (classic). (Confirmed — [Knowledge sources summary](https://learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-copilot-studio).)
 
 ### Configuration
 
@@ -21,8 +43,11 @@ Knowledge Sources:
 │
 ├── Website:
 │   └── https://docs.aluma.example.com
-│   └── Refresh: Daily
-│   └── Max pages: 500
+│   └── Refresh: scheduled sync keeps content fresh (background job)
+│   └── Limit: generative mode allows 25 website sources per agent;
+│       classic mode allows 4 URLs (no documented per-site page cap;
+│       "Max pages: 500" in earlier drafts was unverified — confirm
+│       against Microsoft Learn)
 │
 ├── Uploaded Files:
 │   ├── Product-Manual-v3.pdf
@@ -35,6 +60,13 @@ Knowledge Sources:
 ```
 
 ### Generative Answers Node
+
+The generative answers node grounds responses in knowledge sources via
+retrieval-augmented generation and returns source citations; the documented
+content-moderation default is **High**, with levels from Lowest to Highest, and
+the topic-level setting takes precedence at runtime. Citations are part of the
+built-in safety/transparency layer and there is no toggle to turn them off.
+(Confirmed — [Add a generative answers node](https://learn.microsoft.com/en-us/microsoft-copilot-studio/nlu-boost-node) and [Knowledge sources summary](https://learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-copilot-studio).)
 
 ```
 [Topic trigger: "Any matched intent or fallback"]
@@ -77,11 +109,17 @@ Question:
 
 ### Action Types
 
+Copilot Studio adds capabilities as **tools**. Documented tool types include
+agent flow / Power Automate flow, prebuilt connector, custom connector, REST API
+(OpenAPI), prompt, Model Context Protocol (MCP), and computer use; the table
+below maps the common ones. "HTTP request" here is the **REST API** tool type
+(built from an OpenAPI spec). (Confirmed — [Add tools to custom agents](https://learn.microsoft.com/en-us/microsoft-copilot-studio/add-tools-custom-agent).)
+
 | Action Type | Use Case | Example |
 |-------------|----------|---------|
-| Power Automate flow | Complex logic, external APIs | Check order status |
+| Power Automate / agent flow | Complex logic, external APIs | Check order status |
 | Custom connector | Third-party integration | CRM lookup |
-| HTTP request | Direct API call | REST API query |
+| REST API (HTTP, OpenAPI) | Direct API call | REST API query |
 | Dataverse | Database operations | Create support case |
 
 ### Tool Configuration Pattern
@@ -176,6 +214,13 @@ When escalating, include:
 
 ## 4. Authentication Patterns
 
+Copilot Studio's documented end-user authentication options are **Authenticate
+with Microsoft** (default; Microsoft Entra ID, Teams/M365 only — `User.AccessToken`
+not exposed), **No authentication**, and **Authenticate manually** (Microsoft Entra
+ID V2 with federated credentials or client secrets, or **Generic OAuth2** for
+providers such as Google). The patterns below map onto these modes. (Confirmed —
+[Configure user authentication](https://learn.microsoft.com/en-us/microsoft-copilot-studio/configuration-end-user-authentication) and [Configure user authentication with Microsoft Entra ID](https://learn.microsoft.com/en-us/microsoft-copilot-studio/configuration-authentication-azure-ad).)
+
 ### No Authentication (Public)
 
 ```
@@ -199,12 +244,16 @@ Limitations: No user context, no personalized data
             [After 3 failures: "Please contact support"]
 ```
 
-### SSO/Azure AD Authentication
+### SSO / Microsoft Entra ID Authentication
+
+(Formerly "Azure Active Directory" — Microsoft renamed it to **Microsoft Entra ID**.
+SSO is supported for agents published to Teams 1:1 chats and only with Entra ID.
+Confirmed — [Configure user authentication with Microsoft Entra ID](https://learn.microsoft.com/en-us/microsoft-copilot-studio/configuration-authentication-azure-ad).)
 
 ```
 Configuration:
-  Authentication: Required
-  Identity provider: Azure Active Directory
+  Authentication: Required (Authenticate with Microsoft / Entra ID)
+  Identity provider: Microsoft Entra ID
   Token variable: UserToken
 
 Available context:
@@ -215,6 +264,9 @@ Available context:
 ```
 
 ### OAuth Authentication
+
+(Maps to the **Authenticate manually → Generic OAuth2** service provider, which
+supports any OAuth2 identity provider. Confirmed — [Configure user authentication](https://learn.microsoft.com/en-us/microsoft-copilot-studio/configuration-end-user-authentication).)
 
 ```
 [Agent Settings > Security > Authentication]
@@ -275,13 +327,20 @@ Usage:
 
 ### Built-in Entities
 
+Copilot Studio ships many prebuilt entities (Email, Date and time, Person name,
+Phone number, Color, Country, City, Number, Money, and more). Custom entities are
+of two types: **Closed list** (the "Choice" row below) and **Regular expression**.
+RegEx entities use .NET regex syntax (NLU/CLU); NLU+ uses JavaScript regex syntax.
+(Confirmed — [Use entities and slot filling](https://learn.microsoft.com/en-us/microsoft-copilot-studio/advanced-entities-slot-filling).)
+
 | Entity | Examples | Notes |
 |--------|----------|-------|
 | Number | "123", "forty-five" | Integers and decimals |
-| Date | "tomorrow", "Jan 15" | Relative and absolute |
+| Date and time | "tomorrow", "Jan 15" | Relative and absolute |
+| Money | "$100", "a hundred dollars" | Saved as a number |
 | String | Free text | Use with validation |
-| Choice | Predefined options | Exact or fuzzy match |
-| Regular Expression | Custom patterns | Phone, order numbers |
+| Closed list ("Choice") | Predefined options | Custom entity, list of values |
+| Regular Expression | Custom patterns | Phone, order numbers (.NET regex) |
 
 ### Custom Entity Pattern
 
@@ -347,6 +406,11 @@ Topic: "[CATEGORY] Topic Name"
 ```
 
 ### Fallback Topic
+
+(By default Copilot Studio also creates a **Conversational boosting** system topic
+containing a generative answers node wired to your agent-level knowledge sources;
+it acts as the fallback when authored topics can't answer. Confirmed —
+[Knowledge sources summary](https://learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-copilot-studio).)
 
 ```
 [Fallback topic (system)]
