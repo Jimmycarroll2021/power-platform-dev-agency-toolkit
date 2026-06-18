@@ -28,11 +28,11 @@ Final state: **install ✓ · build ✓ · typecheck ✓ · lint ✓ · structur
 - [`scripts/generate-project.ts`](scripts/generate-project.ts): unnecessary regex escape (`\-` in a character class).
 
 ### Lint / formatting
-- Added [`.eslintrc.json`](.eslintrc.json), [`.prettierrc.json`](.prettierrc.json), and `.prettierignore`. The `lint` CI job (`continue-on-error: false`) had no ESLint config to run.
+- Added [`eslint.config.mjs`](eslint.config.mjs), [`.prettierrc.json`](.prettierrc.json), and `.prettierignore`. The `lint` CI job (`continue-on-error: false`) had no ESLint config to run.
 - Cleared all ESLint errors (`prefer-const`, `no-useless-escape`).
 
 ### Validators
-- Rewrote [`scripts/validate-docs.ts`](scripts/validate-docs.ts) into a meaningful gate: broken relative cross-references, unclosed code fences, and undersized files are **errors**; TODO/FIXME markers are **warnings**. Example links inside code fences and placeholder tokens are skipped, and `.planning/`, `dist/`, and `node_modules/` are ignored.
+- Rewrote [`scripts/validate-docs.ts`](scripts/validate-docs.ts) into a meaningful gate: broken relative cross-references, unclosed code fences, and undersized files are **errors**; stale `TODO`/`FIXME` markers are **warnings**. Example links inside code fences and placeholder tokens are skipped, and `.planning/`, `dist/`, and `node_modules/` are ignored.
 - Created [`projects/`](projects/README.md) so the structure required by both validators is satisfied.
 
 ### CI / scripts

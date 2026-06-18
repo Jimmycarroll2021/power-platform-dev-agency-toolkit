@@ -70,7 +70,6 @@ export function fileExists(filePath: string): boolean {
 /**
  * Read a JSON file and parse it. Returns `null` if the file is missing or invalid.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function loadJson<T = any>(filePath: string): T | null {
   try {
     const raw = fs.readFileSync(filePath, 'utf-8');
