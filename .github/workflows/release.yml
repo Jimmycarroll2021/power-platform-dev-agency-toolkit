@@ -39,6 +39,8 @@ jobs:
     name: Create GitHub Release
     needs: verify
     runs-on: ubuntu-latest
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -72,7 +74,7 @@ jobs:
           prerelease: false
 
       - name: Publish CLI to npm
-        if: ${{ startsWith(github.ref, 'refs/tags/v') && secrets.NPM_TOKEN != '' }}
+        if: ${{ startsWith(github.ref, 'refs/tags/v') && env.NPM_TOKEN != '' }}
         run: |
           cd packages/cli
           npm publish --access public
