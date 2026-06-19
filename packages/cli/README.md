@@ -12,12 +12,14 @@ npm run build
 ## Usage
 
 ```bash
-# Global installation
-npm install -g @power-platform-agency/cli
+# Global installation from a GitHub Release
+npm install -g https://github.com/Jimmycarroll2021/power-platform-dev-agency-toolkit/releases/download/v1.0.0/power-platform-agency-cli-1.0.0.tgz
 
-# Local usage
+# Local usage after cloning the repo
 npx pp-agency --help
 ```
+
+Replace `v1.0.0` with the latest release tag.
 
 ## Commands
 

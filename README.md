@@ -85,19 +85,17 @@ npm link -w packages/cli
 pp-agency --help
 ```
 
-### Option 2: Install from npm (after first release)
+### Option 2: Install from a GitHub Release
 
 ```bash
-npm install -g @power-platform-agency/cli
+npm install -g https://github.com/Jimmycarroll2021/power-platform-dev-agency-toolkit/releases/download/v1.0.0/power-platform-agency-cli-1.0.0.tgz
 pp-agency --help
 ```
 
-> The `@power-platform-agency/cli` package is published automatically by the
-> release workflow once a `v*.*.*` tag is pushed. Until the first release, use
-> Option 1.
+> Replace `v1.0.0` with the latest release tag. Releases are published
+> automatically when a `v*.*.*` tag is pushed.
 
-See [`DEPLOYMENT.md`](DEPLOYMENT.md) for release instructions, CI/CD pipelines,
-and npm publishing setup.
+See [`DEPLOYMENT.md`](DEPLOYMENT.md) for release instructions and CI/CD pipelines.
 
 ---
 

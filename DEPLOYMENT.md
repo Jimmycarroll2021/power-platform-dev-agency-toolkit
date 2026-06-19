@@ -31,15 +31,16 @@ npm link -w packages/cli
 pp-agency --version
 ```
 
-## Deploying the CLI from npm
+## Deploying the CLI from a GitHub Release
 
-The `@power-platform-agency/cli` package is published automatically on every
-GitHub release.
+Each release produces a packaged `.tgz` asset. Install it directly:
 
 ```bash
-npm install -g @power-platform-agency/cli
+npm install -g https://github.com/Jimmycarroll2021/power-platform-dev-agency-toolkit/releases/download/v1.0.0/power-platform-agency-cli-1.0.0.tgz
 pp-agency --help
 ```
+
+Replace `v1.0.0` with the desired release tag.
 
 ## Creating a release
 
@@ -55,7 +56,6 @@ GitHub Actions will:
 1. Run the full `npm run verify` gate.
 2. Build and package the CLI.
 3. Create a GitHub Release with the packaged `.tgz`.
-4. Publish `@power-platform-agency/cli` to npm.
 
 ### Option B: Manual release workflow
 
@@ -63,27 +63,18 @@ GitHub Actions will:
 2. Click **Run workflow**.
 3. Enter the version and start the workflow.
 
-## Required secrets
-
-| Secret | Purpose | Where to set |
-|---|---|---|
-| `NPM_TOKEN` | Publish `@power-platform-agency/cli` to npm | GitHub repo **Settings > Secrets and variables > Actions** |
-
-Generate an npm token at <https://www.npmjs.com/settings/tokens> with
-**Publish** scope.
-
 ## CI/CD pipelines
 
 | Workflow | Triggers | What it does |
 |---|---|---|
-| `.github/workflows/lint.yml` | Push/PR to `main`, `develop` | Full `npm run verify` gate on Node 18/20/22 |
+| `.github/workflows/lint.yml` | Push/PR to `main`, `develop` | Full `npm run verify` gate on Node 22/24 |
 | `.github/workflows/docs-check.yml` | Push/PR to `main`, `develop` when `**.md` changes | Build + docs/structure validation |
 | `.github/workflows/repo-health.yml` | Weekly + manual | Structure check + docs validation + stale-file report |
-| `.github/workflows/release.yml` | Version tag push or manual | Build, package, release, publish to npm |
+| `.github/workflows/release.yml` | Version tag push or manual | Build, package, and create GitHub Release |
 
 ## Pre-requisites for users
 
-- Node.js >= 18
+- Node.js >= 20
 - npm >= 9
 - For `solution`/`env` commands: Microsoft Power Platform CLI (`pac`) installed
   and authenticated. Install from
@@ -103,5 +94,4 @@ pp-agency env --help
 To revert a published release:
 
 1. Delete the GitHub Release.
-2. Run `npm unpublish @power-platform-agency/cli@<version>` within 72 hours of
-   publication (npm policy).
+2. Re-create the previous tag if needed.

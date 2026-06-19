@@ -23,8 +23,14 @@ If you want a cleaner install, the project will migrate to `eslint@9` in a futur
 
 ## `npm install -g @power-platform-agency/cli` returns 404
 
-The CLI package is published automatically on GitHub releases. Until the first
-release is published, install from source:
+The CLI is distributed as a tarball attached to each GitHub Release, not via the
+npm registry. Install it directly from a release asset:
+
+```bash
+npm install -g https://github.com/Jimmycarroll2021/power-platform-dev-agency-toolkit/releases/download/v1.0.0/power-platform-agency-cli-1.0.0.tgz
+```
+
+Or install from source:
 
 ```bash
 git clone git@github.com:Jimmycarroll2021/power-platform-dev-agency-toolkit.git

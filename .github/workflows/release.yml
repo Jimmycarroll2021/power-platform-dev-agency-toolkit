@@ -13,7 +13,6 @@ on:
 
 permissions:
   contents: write
-  id-token: write
 
 jobs:
   verify:
@@ -39,8 +38,6 @@ jobs:
     name: Create GitHub Release
     needs: verify
     runs-on: ubuntu-latest
-    env:
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -50,7 +47,6 @@ jobs:
         with:
           node-version: 22
           cache: "npm"
-          registry-url: "https://registry.npmjs.org"
 
       - name: Install dependencies
         run: npm ci
@@ -72,11 +68,3 @@ jobs:
           files: artifacts/*.tgz
           generate_release_notes: true
           prerelease: false
-
-      - name: Publish CLI to npm
-        if: ${{ startsWith(github.ref, 'refs/tags/v') && env.NPM_TOKEN != '' }}
-        run: |
-          cd packages/cli
-          npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
